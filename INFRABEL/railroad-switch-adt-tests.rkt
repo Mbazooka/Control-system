@@ -23,8 +23,17 @@
 ((switch-1 'change-position!) 'initial)
 (check-eq? ((switch-1 'current-position)) 1 "Incorrect deviate operation")
 
-;; Check if the operation get-all-switches gives back all the switches
+;; Checks if the operation get-all-switches gives back all the switches
 (check-equal? (get-all-switches) (get-switch-ids) "Incorrect implementation of get-all-switches")
+
+;; Checks if an incorrect message triggers the right behaviour
+(check-equal? (switch-1 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message" "Incorrect message behaviour")
+
+;; Checks if an incorrect input symbol given to change-position! triggers the right behaviour
+(check-equal? ((switch-1 'change-position!) 'Rotate) "RAILROAD-SWITCH: Incorrect state in change-position!")
+
+
+
 
 
 
