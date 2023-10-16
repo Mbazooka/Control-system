@@ -4,10 +4,6 @@
 
 #lang racket
 
-(require "../simulator/interface.rkt")
-(provide make-railroad-switch-adt
-         get-all-switches)
-
 (define (make-railroad-switch-adt name)
 
   (define (current-position)
@@ -15,19 +11,19 @@
 
   (define (change-position! state)
     (cond
-      ((eq? state 'initial) (set-switch-position! name 1)) ;; Initial sets the switch on the initial position (1)
-      ((eq? state 'deviate) (set-switch-position! name 2)) ;; Deviation changes the position of the switch (2)
+      ((eq? state 'initial) (set-switch-position! 1)) ;; Initial zet de switch op de initiele positie (1)
+      ((eq? state 'deviate) (set-switch-position! 2)) ;; Deviaite verander de positie van de switch (2)
       (else
        "RAILROAD-SWITCH: Incorrect state in change-position!")))
 
   (define (dispatch msg)
     (cond
       ((eq? msg 'current-position) current-position)
-      ((eq? msg 'change-position!) change-position!)
+      ((eq? msg 'change-position!) change-position)
       (else
        "RAILROAD-SWITCH: Incorrect message")))
   dispatch)
 
-;; TO BE CHECKED IF GOOD OR BAD?????????
+;; TO BE CHECKEN IF GOOD OR BAD?????????
 (define get-all-switches get-switch-ids)
 ;; ?????????????????????????????????????
