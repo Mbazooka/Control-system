@@ -3,10 +3,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+;; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ;; !!Still needs to be made fool-proof (add time)!!
 ;; !!!!!!!!!AND REMOVE THE SLEEP FUNCTIONS!!!!!!!!!
 ;; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-;; !!!!!!!!!!!!!!!CHANGE THE TESTS!!!!!!!!!!!!!!!!!
 ;; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #lang racket
@@ -19,13 +19,13 @@
     
     (define (up!) ;; Opens crossing if not already open
       (cond
-        ((not open?) (open-crossing! name) (sleep 6) (set! open? #t)) ;; sleep is for testing (MUST BE REMOVED)
+        ((not open?) (open-crossing! name) (set! open? #t))
         (else
          "RAILROAD-BARRIER: Crossing already open")))
 
     (define (down!) ;; Closes crossing if not already closed
       (cond
-        (open? (close-crossing! name) (sleep 6) (set! open? #f)) ;; sleep is for testing (MUST BE REMOVED)
+        (open? (close-crossing! name) (set! open? #f)) 
         (else
          "RAILROAD-BARRIER: Crossing already closed")))
 
