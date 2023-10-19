@@ -4,25 +4,18 @@
 
 #lang racket
 
-(require "../simulator/interface.rkt")
-(provide make-railroad-barrier-adt)
-
-(define (make-railroad-barrier-adt name)
+(define (railroad-barrier-adt name)
   (let ((open? #t)) ;; #t is open, #f is closed
     
-    (define (up!) ;; Opens crossing if not already open
+    (define (up!)
       (cond
-        ((not open?) (open-crossing! name) (set! open? #t))
-        (else
-         "RAILROAD-BARRIER: Crossing already open")))
+        ((not open?) (open-crossing! name) (set! open? #t))))
 
-    (define (down!) ;; Closes crossing if not already closed
+    (define (down!)
       (cond
-        (open? (close-crossing! name) (set! open? #f))
-        (else
-         "RAILROAD-BARRIER: Crossing already closed")))
+        (open? (close-crossing! name) (set! open? #f))))
 
-    (define (open?) open?)
+    (define (open?) open)
     (define (closed?) (not open?))
 
     (define (dispatch msg)
@@ -34,3 +27,4 @@
         (else
          "RAILROAD-BARRIER: Incorrect message")))
     dispatch))
+      
