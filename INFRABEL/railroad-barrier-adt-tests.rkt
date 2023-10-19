@@ -11,7 +11,7 @@
 (setup-hardware)
 
 ;; Defining barrier for testing
-(define barrier-1 (make-railroad-barrier-adt 'C-1))
+(define barrier (make-railroad-barrier-adt 'C-1))
 
 ;; Check if close and open respectively work properly 
 (define-check (check-down? barrier)
@@ -25,5 +25,5 @@
   (unless (barrier 'up?)
     (fail-check "Incorrect up! operation")))
 
-(check-down? barrier-1)
-(check-up? barrier-1)
+(check-down? barrier)
+(check-up? barrier)
