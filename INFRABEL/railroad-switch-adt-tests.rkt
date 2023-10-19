@@ -50,9 +50,9 @@
 (check-equal? (get-all-switches) (get-switch-ids) "Incorrect implementation of get-all-switches")
 
 ;; Checks if an incorrect message triggers the right behaviour
-(check-equal? (switch-1 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message" "Incorrect message behaviour")
-(check-equal? (switch-2 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message" "Incorrect message behaviour")
-(check-equal? (switch-3 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message" "Incorrect message behaviour")
+(check-equal? (switch-1 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message Incorrect message behaviour")
+(check-equal? (switch-2 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message Incorrect message behaviour")
+(check-equal? (switch-3 'Incorrect-Message) "RAILROAD-SWITCH: Incorrect message Incorrect message behaviour")
 
 ;; Checks if an incorrect input symbol given to change-position! triggers the right behaviour
 (check-equal? ((switch-1 'change-position!) 'Rotate) "RAILROAD-SWITCH: Incorrect state in change-position!")
