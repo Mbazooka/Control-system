@@ -20,10 +20,15 @@
       (else
        "RAILROAD-SWITCH: Incorrect state in change-position!")))
 
+  (define (initial-position?) (= (current-position) 1))
+  (define (deviate-position?) (= (current-position) 2))
+
   (define (dispatch msg)
     (cond
       ((eq? msg 'current-position) current-position)
       ((eq? msg 'change-position!) change-position!)
+      ((eq? msg 'initial-position?) initial-position?)
+      ((eq? msg 'deviate-position?) deviate-position?)
       (else
        "RAILROAD-SWITCH: Incorrect message")))
   dispatch)

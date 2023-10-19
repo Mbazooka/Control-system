@@ -11,9 +11,14 @@
 (setup-hardware)
 
 (define switch-1 (make-railroad-switch-adt 'S-1))
+(define switch-2 (make-railroad-switch-adt 'S-2))
+(define switch-3 (make-railroad-switch-adt 'S-3))
 
-;; Check if the initial position is indeed the initial position (basically 1 on the hardware)
+;; Checks if the current position just after construction
+;; is the initial position to begin with (basically state 1 on the hardware)
 (check-eq? ((switch-1 'current-position)) 1 "Incorrect initial position")
+(check-eq? ((switch-2 'current-position)) 2 "Incorrect initial position")
+(check-eq? ((switch-3 'current-position)) 3 "Incorrect initial position")
 
 ;; Checks if the change-position with deviate makes the switch change to a deviating position
 ((switch-1 'change-position!) 'deviate)
