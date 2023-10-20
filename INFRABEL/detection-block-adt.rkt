@@ -10,12 +10,9 @@
          get-all-detection-blocks)
 
 (define get-all-detection-blocks get-detection-block-ids)
-
-(define possible-detection-blocks (get-all-detection-blocks))
                                     
-
 (define (make-detection-block-adt name)
-  (unless (member name possible-detection-blocks)
+  (unless (member name (get-detection-block-ids))
     (error "DETECTION-BLOCK: Invalid name"))
 
   (define (occupied?)
