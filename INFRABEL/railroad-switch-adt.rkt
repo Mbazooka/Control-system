@@ -5,6 +5,7 @@
 #lang racket
 
 (require "../simulator/interface.rkt")
+(#%require (only racket/base time error))
 (provide make-railroad-switch-adt
          get-all-switches)
 
@@ -13,6 +14,9 @@
 (define possible-switch-names (get-all-switches))
 
 (define (make-railroad-switch-adt name)
+  (unless (member name possible-switch-names)
+    (error "RAILROAD-SWITCH: Invalid name"))
+  
 
   (define (current-position)
     (get-switch-position name))

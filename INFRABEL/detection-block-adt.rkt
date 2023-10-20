@@ -5,7 +5,7 @@
 #lang racket
 
 (require "../simulator/interface.rkt")
-(require unstable/error)
+(#%require (only racket/base time error))
 (provide make-detection-block-adt
          get-all-detection-blocks)
 
@@ -16,7 +16,7 @@
 
 (define (make-detection-block-adt name)
   (unless (member name possible-detection-blocks)
-    (error 'DETECTION-BLOCK "Invalid name"))
+    (error "DETECTION-BLOCK: Invalid name"))
 
   (define (occupied?)
     (not (false? (member name (get-all-occupied-detection-blocks)))))
