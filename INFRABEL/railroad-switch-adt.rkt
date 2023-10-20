@@ -8,6 +8,10 @@
 (provide make-railroad-switch-adt
          get-all-switches)
 
+(define get-all-switches get-switch-ids)
+
+(define possible-switch-names (get-all-switches))
+
 (define (make-railroad-switch-adt name)
 
   (define (current-position)
@@ -32,7 +36,3 @@
       (else
        "RAILROAD-SWITCH: Incorrect message")))
   dispatch)
-
-;; TO BE CHECKED IF GOOD OR BAD?????????
-(define get-all-switches get-switch-ids)
-;; ?????????????????????????????????????
