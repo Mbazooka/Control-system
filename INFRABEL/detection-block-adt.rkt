@@ -16,7 +16,7 @@
     (error "DETECTION-BLOCK: Invalid name"))
 
   (define (occupied?)
-    (not (false? (member name (get-all-occupied-detection-blocks)))))
+    (not (false? (member name (get-occupied-detection-blocks)))))
 
   (define (dispatch msg)
     (cond
