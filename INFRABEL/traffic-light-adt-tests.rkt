@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;         Railroad switch ADT Test          ;;
+;;          Traffic Light ADT Test           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #lang racket
@@ -30,7 +30,7 @@
 (traffic-light-state 'Sh1)
 (traffic-light-state 'Ks1+Zs3+Zs3v)
 
-;; Wrong input which should not be given as input
+;; Wrong input which should not be given as input 
 (traffic-light-state 'hp0)
 (traffic-light-state 'HP1)
 (traffic-light-state 'hp0+sh0)

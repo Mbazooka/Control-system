@@ -11,12 +11,9 @@
 
 (define get-all-switches get-switch-ids)
 
-(define possible-switch-names (get-all-switches))
-
 (define (make-railroad-switch-adt name)
-  (unless (member name possible-switch-names)
-    (error "RAILROAD-SWITCH: Invalid name"))
-  
+  (unless (member name (get-all-switches)) ;; To avoid invalid names to be used and getting weird error from Hardware 
+    (error "RAILROAD-SWITCH: Invalid name")) 
 
   (define (current-position)
     (get-switch-position name))

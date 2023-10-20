@@ -16,7 +16,7 @@
 ;; Check if close and open respectively work properly 
 (define-check (check-down? barrier)
   ((barrier 'down!))
-  (sleep 6) ;; Om geen problemen te krijgen met opeenvolgende testen (Werkelijke Code is hiervoor voorzien)
+  (sleep 6) ;; To avoid problems with consecutive tests (Actual code has taken this into account)
   (unless (barrier 'down?)
     (fail-check "Incorrect down! operation")))
 

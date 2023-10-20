@@ -12,9 +12,15 @@
 #lang racket
 
 (require "../simulator/interface.rkt")
+(#%require (only racket/base time error))
 (provide make-railroad-barrier-adt)
 
+(define possible-barriers '(C-1 C-2))
+
 (define (make-railroad-barrier-adt name)
+  (unless (member name possible-barriers) ;; To avoid invalid names to be used and getting weird error from Hardware 
+    (error "RAILROAD-BARRIER: Invalid name"))
+  
   (let ((open? #t)) ;; #t is open, #f is closed
     
     (define (up!) ;; Opens crossing if not already open
