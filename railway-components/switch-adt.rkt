@@ -15,7 +15,7 @@
 
   ;; Test to make sure an incorrect switch cannot be made
   (unless (member name possible-switch-names)
-    (error "SWITCH-ADT: Invalid name or orientation"))
+    (error "SWITCH-ADT: Invalid name"))
 
   (unless (or (eq? initial-orientation 'left) (eq? initial-orientation 'right))
     (error "SWITCH-ADT: Invalid orientation given"))

@@ -18,7 +18,7 @@
     (check-not-exn (lambda () make-switch-adt)))
 
    (test-case
-    "Test if constructor does not error"
+    "Test if constructor does not give error"
     (check-not-exn (lambda () (make-switch-adt 'S-1 'left))))
 
    ;; regexp needed for test, to make sure error message conforms to what should be outputed
@@ -38,14 +38,14 @@
    "SWITCH-ADT: CHANGE/CURRENT-POSITION TESTS"
 
    (test-case
-    "Test if current-position works properly"
+    "Test if 'current-position' works properly"
     (check-equal?
        ((test-switch 'current-position))
        'left
-     "Curren-position: Incorrect output"))
+     "Current-position: Incorrect output"))
 
    (test-case
-    "Test if change-position changes the switch state correctly"
+    "Test if 'change-position' changes the switch state correctly"
     (check-equal?
      (begin
        ((test-switch 'change-position!) 'right)
@@ -54,7 +54,7 @@
      "change-position: incorrect change"))
 
    (test-case
-    "Test if change-position can change switch to illegal state"
+    "Test if 'change-position' can change switch to illegal state"
     (check-equal?
      ((test-switch 'change-position!) 'illegal-value)
      "SWITCH-ADT: Incorrect state in change-position!"
