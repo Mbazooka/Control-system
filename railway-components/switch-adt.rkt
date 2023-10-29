@@ -20,14 +20,14 @@
   (unless (or (eq? initial-orientation 'left) (eq? initial-orientation 'right))
     (error "SWITCH-ADT: Invalid orientation given"))
 
-  (let ((state initial-orientation)) ;; 2 states, straight, rotate
+  (let ((state initial-orientation)) ;; 2 states, left, right because they work on railway level
 
     (define (current-position) state)
 
-    (define (change-position! state)
+    (define (change-position! input-state)
       (cond
-        ((eq? state 'left) (set! state 'left))
-        ((eq? state 'right) (set! state 'right))
+        ((eq? input-state 'left) (set! state 'left))
+        ((eq? input-state 'right) (set! state 'right))
         (else
          "SWITCH-ADT: Incorrect state in change-position!")))
 
