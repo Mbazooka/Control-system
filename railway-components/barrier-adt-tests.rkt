@@ -9,6 +9,7 @@
          rackunit/gui
          "barrier-adt.rkt")
 
+;; Tests the constructor
 (define barrier-make-barrier-tests
   (test-suite
    "BARRIER-ADT: MAKE-BARRIER-ADT TESTS"
@@ -29,6 +30,7 @@
 ;; Dummy barrier necessary for testing
 (define test-barrier (make-barrier-adt 'C-1))
 
+;; Tests the operations of the class
 (define barrier-open!/closed!/open-barrier?-tests
   (test-suite
    "BARRIER-ADT: OPEN!/CLOSED!/OPEN-BARRIER? TESTS"
@@ -71,8 +73,12 @@
        ((test-barrier 'open!))
        ((test-barrier 'open-barrier?)))
      #t
-     "Open!: incorrect change of state"))
+     "Open!: incorrect change of state"))))
 
+(define barrier-message-sending-tests
+  (test-suite
+   "BARRIER-ADT: MESSAGE-SENDING TESTS"
+   
    (test-case
     "Test if message-sending is protected against illegal messages"
     (check-equal?
@@ -83,6 +89,7 @@
 ;; Bringing all test-suites together
 (define all-tests (test-suite "Barrier-Module"
                               barrier-make-barrier-tests
-                              barrier-open!/closed!/open-barrier?-tests))
+                              barrier-open!/closed!/open-barrier?-tests
+                              barrier-message-sending-tests))
 
 (test/gui all-tests)

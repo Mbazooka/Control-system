@@ -9,6 +9,7 @@
          rackunit/gui
          "switch-adt.rkt")
 
+;; Tests the constructor
 (define switch-make-switch-tests
   (test-suite
    "SWITCH-ADT: MAKE-SWITCH-ADT TESTS"
@@ -33,6 +34,7 @@
 ;; Dummy switch necessary for testing
 (define test-switch (make-switch-adt 'S-1 'left))
 
+;; Test the operations of the class
 (define switch-current/change-position-tests
   (test-suite
    "SWITCH-ADT: CHANGE/CURRENT-POSITION TESTS"
@@ -42,7 +44,7 @@
     (check-equal?
        ((test-switch 'current-position))
        'left
-     "Current-position: Incorrect output"))
+     "Current-position: incorrect output"))
 
    (test-case
     "Test if 'change-position' changes the switch state correctly"
