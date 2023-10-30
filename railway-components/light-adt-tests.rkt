@@ -20,12 +20,7 @@
 
    (test-case
     "Test if constructor does not give error"
-    (check-not-exn (lambda () (make-light-adt 'L-1))))
-
-   ;; regexp needed for test, to make sure error message conforms to what should be outputed
-   (test-case
-    "Test if constructor gives error with incorrect name"
-    (check-exn (regexp "LIGHT-ADT: Invalid name") (lambda () (make-light-adt 'L-99))))))
+    (check-not-exn (lambda () (make-light-adt 'L-1))))))
 
 ;; Dummy light necessary for testing
 (define test-light (make-light-adt 'L-1))

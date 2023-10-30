@@ -20,12 +20,7 @@
 
    (test-case
     "Test if constructor does not give error"
-    (check-not-exn (lambda () (make-barrier-adt 'C-1))))
-
-   (test-case
-    "Test if cosntructor gives error with incorrect name"
-    (check-exn (regexp "BARRIER-ADT: Invalid name")
-               (lambda () (make-barrier-adt 'illegal-value))))))
+    (check-not-exn (lambda () (make-barrier-adt 'C-1))))))
 
 ;; Dummy barrier necessary for testing
 (define test-barrier (make-barrier-adt 'C-1))

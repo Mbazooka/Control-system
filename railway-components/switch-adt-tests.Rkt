@@ -24,10 +24,6 @@
 
    ;; regexp needed for test, to make sure error message conforms to what should be outputed
    (test-case
-    "Test if constructor gives error with incorrect name"
-    (check-exn (regexp "SWITCH-ADT: Invalid name") (lambda () (make-switch-adt 'S-99 'left))))
-
-   (test-case
     "Test if constructor gives error with incorrect orientation"
     (check-exn (regexp "SWITCH-ADT: Invalid orientation given") (lambda () (make-switch-adt 'S-1 'illegal-value))))))
 
@@ -39,7 +35,7 @@
   (test-suite
    "SWITCH-ADT: GET-NAME TESTS"
    (test-case
-    "Test if 'get-name' get the correct name"
+    "Test if 'get-name' gets the correct name"
     (check-eq? ((test-switch 'get-name)) 'S-1 "Get-name: incorrect name"))))
 
 ;; Test the current/change-position operation of the class

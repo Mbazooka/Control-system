@@ -7,12 +7,7 @@
 (#%require (only racket/base time error)) ;; Library for error messages
 (provide make-barrier-adt)
 
-(define possible-barrier-names '(C-1 C-2))
-
 (define (make-barrier-adt name)
-  (unless (member name possible-barrier-names)
-    (error "BARRIER-ADT: Invalid name"))
-
   (let ((open? #t)) ;; #t means that the barrier is open, #f means not closed
 
     (define (get-name) name)
