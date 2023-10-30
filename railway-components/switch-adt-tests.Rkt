@@ -34,7 +34,15 @@
 ;; Dummy switch necessary for testing
 (define test-switch (make-switch-adt 'S-1 'left))
 
-;; Test the operations of the class
+;; Test the name operation of the class
+(define switch-name-tests
+  (test-suite
+   "SWITCH-ADT: GET-NAME TESTS"
+   (test-case
+    "Test if 'get-name' get the correct name"
+    (check-eq? ((test-switch 'get-name)) 'S-1 "Get-name: incorrect name"))))
+
+;; Test the current/change-position operation of the class
 (define switch-current/change-position-tests
   (test-suite
    "SWITCH-ADT: CHANGE/CURRENT-POSITION TESTS"
@@ -42,8 +50,8 @@
    (test-case
     "Test if 'current-position' works properly"
     (check-equal?
-       ((test-switch 'current-position))
-       'left
+     ((test-switch 'current-position))
+     'left
      "Current-position: incorrect output"))
 
    (test-case
@@ -77,6 +85,7 @@
 ;; Bringing all test-suites together
 (define all-tests (test-suite "Switch-Module"
                               switch-make-switch-tests
+                              switch-name-tests
                               switch-current/change-position-tests
                               switch-message-sending-tests))
 

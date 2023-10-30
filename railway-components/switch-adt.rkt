@@ -22,6 +22,8 @@
 
   (let ((state initial-orientation)) ;; 2 states, left, right because they work on railway level
 
+    (define (get-name) name)
+    
     (define (current-position) state)
 
     (define (change-position! input-state)
@@ -33,6 +35,7 @@
 
     (define (dispatch msg)
       (cond
+        ((eq? msg 'get-name) get-name)
         ((eq? msg 'current-position) current-position)
         ((eq? msg 'change-position!) change-position!)
         (else
