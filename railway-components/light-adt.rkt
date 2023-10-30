@@ -16,6 +16,8 @@
   
   (let ((state 'Hp0))
 
+    (define (get-name) name)
+
     (define (get-state) state)
 
     (define (change-light! code)
@@ -25,6 +27,7 @@
 
     (define (dispatch msg)
       (cond
+        ((eq? msg 'get-name) get-name)
         ((eq? msg 'get-state) get-state)
         ((eq? msg 'change-light!) change-light!)
         (else

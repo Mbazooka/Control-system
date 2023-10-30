@@ -34,7 +34,7 @@
 ;; Dummy switch necessary for testing
 (define test-switch (make-switch-adt 'S-1 'left))
 
-;; Test the name operation of the class
+;; Test the get-name operation of the class
 (define switch-name-tests
   (test-suite
    "SWITCH-ADT: GET-NAME TESTS"
@@ -70,6 +70,7 @@
      "SWITCH-ADT: Incorrect state in change-position!"
      "change-position: incorrect change"))))
 
+;; Test the illegal message sending action
 (define switch-message-sending-tests
   (test-suite
    "SWITCH-ADT: MESSAGE-SENDING TESTS"

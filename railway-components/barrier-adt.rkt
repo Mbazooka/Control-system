@@ -15,6 +15,8 @@
 
   (let ((open? #t)) ;; #t means that the barrier is open, #f means not closed
 
+    (define (get-name) name)
+    
     (define (open!)
       (set! open? #t))
 
@@ -25,6 +27,7 @@
 
     (define (dispatch msg)
       (cond
+        ((eq? msg 'get-name) get-name)
         ((eq? msg 'open!) open!)
         ((eq? msg 'close!) close!)
         ((eq? msg 'open-barrier?) open-barrier?)

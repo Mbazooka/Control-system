@@ -30,6 +30,15 @@
 ;; Dummy barrier necessary for testing
 (define test-barrier (make-barrier-adt 'C-1))
 
+;; Test the get-name operation of the class
+(define barrier-name-tests
+  (test-suite
+   "BARRIER-ADT: GET-NAME TESTS"
+   (test-case
+    "Test if 'get-name' get the correct name"
+    (check-eq? ((test-barrier 'get-name)) 'C-1 "Get-name: incorrect name"))))
+
+
 ;; Tests the operations of the class
 (define barrier-open!/closed!/open-barrier?-tests
   (test-suite
@@ -75,6 +84,7 @@
      #t
      "Open!: incorrect change of state"))))
 
+;; Test the illegal message sending action
 (define barrier-message-sending-tests
   (test-suite
    "BARRIER-ADT: MESSAGE-SENDING TESTS"
@@ -89,6 +99,7 @@
 ;; Bringing all test-suites together
 (define all-tests (test-suite "Barrier-Module"
                               barrier-make-barrier-tests
+                              barrier-name-tests
                               barrier-open!/closed!/open-barrier?-tests
                               barrier-message-sending-tests))
 
