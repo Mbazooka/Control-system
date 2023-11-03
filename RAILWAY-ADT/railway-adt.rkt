@@ -23,15 +23,17 @@
          (railway-graph (unweighted-graph/undirected (HARDWARE-SETUP 'get-railway-connections)))
          (riding-trains (make-hash))) ;; No trains riding initially
 
-    (define (change-switch-state! switch-name)
-      (let ((
+;    (define (change-switch-state! switch-name state) ;; State?
+;      (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name)))
+;        (switch-object 
 
-             (define (dispatch msg)
-               (cond
-                 ((eq? 'hello) 'hello)
-                 (else
-                  "RAILWAY-ADT: Incorrect message")))
-             dispatch))
+
+    (define (dispatch msg)
+      (cond
+        ((eq? 'hello) 'hello)
+        (else
+         "RAILWAY-ADT: Incorrect message")))
+    dispatch))
 
     
 
@@ -43,4 +45,3 @@
 
 
   
-        
