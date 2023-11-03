@@ -20,15 +20,19 @@
 
    (test-case
     "Test if constructor does not give error"
-    (check-not-exn (lambda () (make-track-adt '1-1 'L-1 'S-1 'C-1))))))
+    (check-not-exn (lambda () (make-track-adt 'T-1 '1-1 'L-1 'S-1 'C-1))))))
 
 ;; Dummy track necessary for testing
-(define test-track (make-track-adt '1-1 'L-1 'S-1 'C-1))
+(define test-track (make-track-adt 'T-1 '1-1 'L-1 'S-1 'C-1))
 
 ;; Test the get-name operations of the class
 (define track-get-name-ops-tests
   (test-suite
    "TRACK-ADT: GET-NAME-OPS TESTS"
+
+   (test-case
+    "Test if 'get-name' gets the correct name"
+    (check-eq? ((test-track 'get-name)) 'T-1 "Get-name: incorrect name"))
 
    (test-case
     "Test if 'get-detection-block-name' gets the correct name"

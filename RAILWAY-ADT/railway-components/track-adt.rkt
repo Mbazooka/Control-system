@@ -7,7 +7,9 @@
 (provide make-track-adt)
 
 ;; Track keeps link between different railway components (using names for efficiency, not actual objects)
-(define (make-track-adt detection-block-name light-name switch-name barrier-name)
+(define (make-track-adt name detection-block-name light-name switch-name barrier-name)
+
+  (define (get-name) name)
 
   (define (get-detection-block-name) detection-block-name)
 
@@ -19,6 +21,7 @@
 
   (define (dispatch msg)
     (cond
+      ((eq? msg 'get-name) get-name)
       ((eq? msg 'get-detection-block-name) get-detection-block-name)
       ((eq? msg 'get-light-name) get-light-name)
       ((eq? msg 'get-switch-name) get-switch-name)
