@@ -67,13 +67,21 @@
      "Change-speed!: incorrect output"))
 
    (test-case
-    "Test if 'change-speed!' changes the speed correctly (negative)"
-    (check-eq?
-     (begin
-       ((test-train 'change-speed!) -200)
-       ((test-train 'get-current-speed)))
-     -200
-     "Change-speed!: incorrect output"))))
+    "Test if 'change-speed!' acts properly with negative speeds (negative)"
+    (check-equal?
+     ((test-train 'change-speed!) -200)
+     "TRAIN-ADT: Illegal speed"
+     "Change-speed!: incorrect output"))
+
+   (test-case
+    "Test if 'change-speed!' allows one to go over the speed limit of 300"
+    (check-equal?
+     ((test-train 'change-speed!) 99999)
+     "TRAIN-ADT: Illegal speed"
+     "Change-speed!: incorrect action"))
+       
+
+   ))
 
 ;; Tests the change-orientation! operation
 (define train-change-orientation!-tests

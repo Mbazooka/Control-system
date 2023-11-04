@@ -13,7 +13,7 @@
     (error "TRAIN-ADT: Invalid orientation given"))
   
   (let ((speed 0)
-        (orientation initial-orientation))
+        (orientation initial-orientation)) ;; Orientation indicates direction of train (not negative speed)
 
     (define (get-name) name)
 
@@ -23,9 +23,9 @@
 
     (define (get-orientation) orientation)
 
-    (define (change-speed! input-speed)
-      (if (> input-speed 300)
-          "TRAIN-ADT: Speed to fast"
+    (define (change-speed! input-speed) ;; Made stupidproof to avoid negative speeds
+      (if (or (> input-speed 300) (< input-speed 0)) ;; If not, speed can go too high or be negative
+          "TRAIN-ADT: Illegal speed"
           (set! speed input-speed)))
 
     (define (change-orientation! input-orientation)
