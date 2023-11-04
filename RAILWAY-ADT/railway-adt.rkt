@@ -20,39 +20,26 @@
          (HARDWARE-SWITCHES (HARDWARE-SETUP 'get-possible-switches))
          (HARDWARE-LIGHTS (HARDWARE-SETUP 'possible-lights))
          (HARDWARE-BARRIERS (HARDWARE-SETUP 'possible-barriers))
+         (HARDWARE-DETECTION-BLOCKS (HARDWARE-SETUP 'possible-detection-blocks))
          (HARDWARE-TRACKS (HARDWARE-SETUP 'get-track-map))
          (railway-graph (unweighted-graph/undirected (HARDWARE-SETUP 'get-railway-connections)))
          (riding-trains (make-hash))) ;; No trains riding initially
 
-    ;; The following procedure will determine the name of the track behind given an orientation
-;    (define (get-track-behind track orientation)
-;      (cond
-;        ((eq? orientation '+) (car (get-neighbors railway-graph)))
-
-    ;; To be adjusted 
-    (define (add-train! train-name initial-track initial-orientation) ;; Trains have unique name
-      (let ((new-train (make-train-adt train-name initial-track initial-orientation)))
-        (if (hash-ref riding-trains train-name #f)
-            "RAILWAY-ADT: Train already exists"
+    (define (add-train! train-name initial-track initial-track-behind) ;; Trains have a unique name
+      (if (hash-ref riding-trains train-name #f) ;; Give back false when not in the hash-map
+          "RAILWAY-ADT: Train already exists"
+          (let ((new-train (make-train-adt train-name initial-track initial-track-behind)))
             (hash-set! train-name new-train))))
 
     (define (change-train-speed! train-name speed)
       (let ((train-object (hash-ref riding-trains train-name)))
         ((train-object 'change-speed!) speed)))
 
-    (define (get-train-speed train-name)
+    (define (get-train-speed train-name) ;; ?????Debatable
       (let ((train-object (hash-ref riding-trains train-name)))
         (train-object 'get-current-speed)))
 
-    (define (change-train-orientation! train-name orientation)
-      (let ((train-object (hash-ref riding-trains train-name)))
-        ((train-object 'change-orientation!) orientation)))
-
-    (define (get-train-orientation train-name)
-      (let ((train-object (hash-ref riding-trains train-name)))
-        ((train-object 'get-orientation))))
-
-    (define (get-switch-state switch-name)
+    (define (get-switch-state switch-name) ;; ??????Debatable
       (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name)))
         ((switch-object 'current-position!))))
 
@@ -60,7 +47,7 @@
       (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name))) ;; If no switch with name, you get error
         ((switch-object 'change-position!) state)))
 
-    (define (check-barrier-open? barrier-name)
+    (define (check-barrier-open? barrier-name) ;; ??????Debatable
       (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name)))
         ((barrier-object 'open-barrier?))))
 
@@ -80,14 +67,27 @@
       (let ((light-object (hash-ref HARDWARE-LIGHTS light-name)))
         ((light-object 'change-light!) state)))
 
+    (define (change-detection-block-state! track-name presence?)
+      (let ((detection-block-object (hash-ref HARDWARE-LIGHTS track-name)))
+        ((detection-block-object 'change-presence!) presence?)))
+
+    (define (get-detection-block-state track-name)
+      (let ((detection-block-object (hash-ref HARDWARE-LIGHTS track-name)))
+        ((detection-block-object 'get-presence))))
+
     (define (dispatch msg)
       (cond
-        ((eq? msg 'get-switch-state!) get-switch-state)
-        ((eq? msg 'change-switch-state!) change-switch-state!)
+        ((eq? msg 'add-train!) add-train!)
+        ((eq? msg 'change-train-speed!) change-train-speed!)
+        ((eq? msg 'get-train-speed) get-train-speed) ;;;;;;;
+        ((eq? msg 'get-switch-state!) get-switch-state) ;;;;;;
+        ((eq? msg 'change-switch-state!) change-switch-state!) ;;;;;;
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)
         ((eq? msg 'change-light-state!) change-light-state!)
+        ((eq? msg 'change-detection-block-state!) change-detection-block-state!)
+        ((eq? msg 'get-detection-block-state) get-detection-block-state)
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))
