@@ -24,7 +24,9 @@
     (define (get-orientation) orientation)
 
     (define (change-speed! input-speed)
-      (set! speed input-speed))
+      (if (> input-speed 300)
+          "TRAIN-ADT: Speed to fast"
+          (set! speed input-speed)))
 
     (define (change-orientation! input-orientation)
       (set! orientation input-orientation))
