@@ -22,10 +22,6 @@
     "Test if constructor does not give error"
     (check-not-exn (lambda () (make-switch-adt 'S-1 'left))))
 
-   (test-case
-    "Test if cosntructor does not give error with special switch"
-    (check-not-exn (lambda () (make-switch-adt 'S-1 'left #t))))
-
    ;; regexp needed for test, to make sure error message conforms to what should be outputed
    (test-case
     "Test if constructor gives error with incorrect orientation"
@@ -33,7 +29,6 @@
 
 ;; Dummy switches necessary for testing
 (define test-switch (make-switch-adt 'S-1 'left))
-(define test-switch-special (make-switch-adt 'S-3 'left #t))
 
 ;; Test the get-name operation of the class
 (define switch-name-tests
@@ -65,18 +60,9 @@
      "change-position!: incorrect change"))
 
    (test-case
-    "Test if 'change-position!' changes the switch state correctly with special switches"
-    (check-equal?
-     (begin
-       ((test-switch-special 'change-position!) 'middle)
-       ((test-switch-special 'current-position)))
-     'middle
-     "change-position!: incorrect change"))
-
-   (test-case
     "Test if 'change-position!' can change switch to illegal state"
     (check-equal?
-     ((test-switch 'change-position!) 'middle)
+     ((test-switch 'change-position!) 'illegal-value)
      "SWITCH-ADT: Incorrect state in change-position!"
      "change-position!: incorrect change"))))
 
