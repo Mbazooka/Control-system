@@ -7,13 +7,9 @@
 (#%require (only racket/base time error)) ;; Library for error messages
 (provide make-switch-adt)
 
-(define (make-switch-adt name initial-orientation)
+(define (make-switch-adt name)
 
-  ;; Test to make sure an incorrect switch cannot be made
-  (unless (or (eq? initial-orientation 'left) (eq? initial-orientation 'right))
-    (error "SWITCH-ADT: Invalid orientation given"))
-
-  (let ((state initial-orientation)) ;; In general 2 states, left, right (unless it's the special S-2-3 switch then 3)
+  (let ((state 1))
 
     (define (get-name) name)
     
@@ -21,8 +17,8 @@
 
     (define (change-position! input-state)
       (cond
-        ((eq? input-state 'left) (set! state 'left))       
-        ((eq? input-state 'right) (set! state 'right))
+        ((= input-state 1) (set! state 1))       
+        ((= input-state 2) (set! state 2))
         (else
          "SWITCH-ADT: Incorrect state in change-position!")))
 
