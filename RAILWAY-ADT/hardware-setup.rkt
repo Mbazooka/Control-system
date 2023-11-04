@@ -18,7 +18,7 @@
   
   ;; All the possible switches associated with the actual switch and their initial state  
   (define possible-switches (hash 'S-1  (make-switch-adt 'S-1) ;; The switch name linked with the switch object and initial state
-                                  'S-2  (make-switch-adt 'S-2 'right)
+                                  'S-2  (make-switch-adt 'S-2)
                                   'S-3  (make-switch-adt 'S-3)
                                   'S-4 (make-switch-adt 'S-4)
                                   'S-5 (make-switch-adt 'S-5)
@@ -64,15 +64,6 @@
     (define T-2-7 (make-track-adt 'T-2-7 '2-7 #f #f #f))
     (define T-2-8 (make-track-adt 'T-2-8 '2-8 #f #f #f)) 
 
-    ;; Tracks without detection-blocks and switches
-    (define T-U-1 (make-track-adt 'T-U-1 #f #f #f #f))
-    (define T-U-2 (make-track-adt 'T-U-2 #f #f #f #f))
-    (define T-U-3 (make-track-adt 'T-U-3 #f #f #f #f))
-    (define T-U-4 (make-track-adt 'T-U-4 #f #f #f #f))
-    (define T-U-5 (make-track-adt 'T-U-5 #f #f #f #f))
-    (define T-U-6 (make-track-adt 'T-U-6 #f #f #f #f))
-    (define T-U-7 (make-track-adt 'T-U-7 #f #f #f 'C-1))
-
     ;; Tracks with switches
     (define T-1 (make-track-adt 'T-1 #f #f 'S-1 #f))
     (define T-2 (make-track-adt 'T-2 #f #f 'S-2 #f))
@@ -96,32 +87,32 @@
     (define T-28 (make-track-adt 'T-28 #f #f 'S-28 #f))
 
     ;; The tracks connected with each other in a list
-    (define railway-connections (list (list T-1-1 T-28) (list T-28 T-1-7) (list T-28 T-U-1)
-                                      (list T-U-1 T-26) (list T-26 T-27) (list T-26 T-1-4)
-                                      (list T-27 T-1-3) (list T-27 T-1-2) (list T-1-4 T-1-5)
-                                      (list T-1-7 T-1-6) (list T-1-8 T-25) (list T-25 T-U-5)
-                                      (list T-25 T-1) (list T-1 T-U-6) (list T-1 T-2-1) 
-                                      (list T-U-6 T-2) (list T-5 T-1-6) (list T-2 T-3)
-                                      (list T-2 T-7) (list T-7 T-U-5) (list T-3 T-8)
-                                      (list T-3 T-2-2) (list T-7 T-5) (list T-5 T-6)
-                                      (list T-6 T-2-3) (list T-6 T-20) (list T-8 T-4)
-                                      (list T-8 T-2-5) (list T-4 T-2-7) (list T-4 T-2-6)
-                                      (list T-20 T-1-5) (list T-20 T-2-4) (list T-2-4 T-23)
-                                      (list T-23 T-U-4) (list T-23 T-24) (list T-24 T-U-2)
-                                      (list T-24 T-U-3) (list T-U-3 T-9) (list T-9 T-11)
-                                      (list T-11 T-10) (list T-10 T-1-1) (list T-10 T-16)
-                                      (list T-16 T-2-8) (list T-16 T-U-7) (list T-U-2 T-1-3)
-                                      (list T-12 T-U-4) (list T-12 T-2-3) (list T-1-2 T-9) 
-                                      (list T-11 T-12) 
+    (define railway-connections '((T-1-1 T-28) (T-1-7 T-28) 
+                                      (T-26 T-27) (T-26 T-1-4) (T-28 T-26)
+                                      (T-27 T-1-3) (T-27 T-1-2) (T-1-4 T-1-5)
+                                      (T-1-8 T-25) (T-1-6 T-1-7)
+                                      (T-25 T-1) (T-1 T-2-1) 
+                                      (T-1 T-2) (T-5 T-1-6) (T-2 T-3)
+                                      (T-2 T-7) (T-7 T-25) (T-3 T-8)
+                                      (T-3 T-2-2) (T-7 T-5) (T-5 T-6)
+                                      (T-6 T-2-3) (T-6 T-20) (T-8 T-4)
+                                      (T-8 T-2-5) (T-4 T-2-7) (T-4 T-2-6)
+                                      (T-20 T-2-4) (T-2-4 T-23)
+                                      (T-23 T-12) (T-23 T-24) 
+                                      (T-24 T-9) (T-9 T-11)
+                                      (T-11 T-10) (T-10 T-1-1) (T-10 T-16)
+                                      (T-16 T-2-8) (T-16 NO-TRACK) (T-24 T-1-3)
+                                      (T-12 T-2-3) (T-1-2 T-9) 
+                                      (T-11 T-12) (T-1-8 NO-TRACK) (T-2-1 NO-TRACK)
+                                      (T-2-2 NO-TRACK) (T-2-5 NO-TRACK) (T-2-6 NO-TRACK)
+                                      (T-2-7 NO-TRACK) (T-U-7 NO-TRACK) (T-1-5 T-20)
                                       ))
 
     ;; Hashmap for linking names and tracks
     (define track-map (hash 'T-1-1 T-1-1 'T-1-2 T-1-2 'T-1-3 T-1-3 'T-1-4 T-1-4
                             'T-1-5 T-1-5 'T-1-6 T-1-6 'T-1-7 T-1-7 'T-1-8 T-1-8
                             'T-2-1 T-2-1 'T-2-2 T-2-2 'T-2-3 T-2-3 'T-2-4 T-2-4
-                            'T-2-5 T-2-5 'T-2-6 T-2-6 'T-2-7 T-2-7 'T-2-8 T-2-8
-                            'T-U-1 T-U-1 'T-U-2 T-U-2 'T-U-3 T-U-3 'T-U-4 T-U-4
-                            'T-U-5 T-U-5 'T-U-6 T-U-6 'T-U-7 T-U-7 
+                            'T-2-5 T-2-5 'T-2-6 T-2-6 'T-2-7 T-2-7 'T-2-8 T-2-8           
                             'T-1 T-1 'T-2 T-2 'T-3 T-3 'T-4 T-4 'T-5 T-5 'T-6 T-6
                             'T-7 T-7 'T-8 T-8 'T-9 T-9 'T-10 T-10 'T-11 T-11
                             'T-12 T-12 'T-16 T-16 'T-20 T-20 'T-23 T-23

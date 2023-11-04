@@ -20,15 +20,10 @@
 
    (test-case
     "Test if cosntructor does not give error"
-    (check-not-exn (lambda () (make-train-adt 'TEST '1-1 '+))))
-
-   (test-case
-    "Test if constructor gives error with incorrect orientation"
-    (check-exn (regexp "TRAIN-ADT: Invalid orientation given")
-               (lambda () (make-train-adt 'TEST '1-1 'illegal-value))))))
+    (check-not-exn (lambda () (make-train-adt 'TEST '1-1 'S-10))))))
 
 ;; Dummy train necessary for testing
-(define test-train (make-train-adt 'TEST '1-1 '+))
+(define test-train (make-train-adt 'TEST '1-1 'S-10))
 
 ;; Test the get-name operation
 (define train-name-tests
@@ -47,6 +42,16 @@
    (test-case
     "Test if 'get-initial-track' gets the correct-name"
     (check-eq? ((test-train 'get-initial-track)) '1-1 "Get-initial-track: incorrect track"))))
+
+;; Test the get-initial-track-behind operation
+(define train-initial-track-behind-tests
+  (test-suite
+   "TRAIN-ADT: GET-INITIAL-TRACK-BEHIND TESTS"
+
+   (test-case
+    "Test if 'get-initial-track-behind' gets the correct name"
+    (check-eq? ((test-train 'get-initial-track-behind)) 'S-10
+               "Get-initial-track-behind: incorrect track"))))
 
 ;; Tests the current-speed and change speed operation
 (define train-get-current-speed/change-speed!-tests
@@ -69,8 +74,10 @@
    (test-case
     "Test if 'change-speed!' acts properly with negative speeds (negative)"
     (check-equal?
+     (begin
      ((test-train 'change-speed!) -200)
-     "TRAIN-ADT: Illegal speed"
+     ((test-train 'get-current-speed)))
+     -200
      "Change-speed!: incorrect output"))
 
    (test-case
@@ -79,44 +86,15 @@
      ((test-train 'change-speed!) 99999)
      "TRAIN-ADT: Illegal speed"
      "Change-speed!: incorrect action"))
-   ))
-
-;; Tests the change-orientation! operation
-(define train-change-orientation!-tests
-  (test-suite
-   "TRAIN-ADT: GET-ORIENTATION/CHANGE-ORIENTATION! TESTS"
-
-   (test-case
-    "Test if 'get-orientation' gives back the correct output"
-    (check-eq? ((test-train 'get-orientation)) '+
-               "Get-orientation: incorrect output"))
-
-   (test-case
-    "Test if 'change-orientation!' changes the orientation correctly"
-    (check-eq?
-     (begin
-       ((test-train 'change-orientation!) '-)
-       ((test-train 'get-orientation)))
-     '-
-     "Change-orientation!: incorrect output"))
-
-   (test-case
-    "Test if 'change-orientation!' allows illegal changes"
-    (check-equal?
-     ((test-train 'change-orientation!) 'illegal-value)
-     "TRAIN-ADT: Incorrect orientation"
-     "Change-orientation!: incorrect action"))
-
-   ))
-
-   
+   ))   
    
 
 ;; Bringing all test-suites together
 (define all-tests (test-suite "TRAIN-Module"
                               train-make-train-tests
                               train-name-tests
-                              train-get-current-speed/change-speed!-tests
-                              train-change-orientation!-tests))
+                              train-initial-track-tests
+                              train-initial-track-behind-tests
+                              train-get-current-speed/change-speed!-tests))
 
 (test/gui all-tests)

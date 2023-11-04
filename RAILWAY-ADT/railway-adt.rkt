@@ -24,6 +24,12 @@
          (railway-graph (unweighted-graph/undirected (HARDWARE-SETUP 'get-railway-connections)))
          (riding-trains (make-hash))) ;; No trains riding initially
 
+    ;; The following procedure will determine the name of the track behind given an orientation
+;    (define (get-track-behind track orientation)
+;      (cond
+;        ((eq? orientation '+) (car (get-neighbors railway-graph)))
+
+    ;; To be adjusted 
     (define (add-train! train-name initial-track initial-orientation) ;; Trains have unique name
       (let ((new-train (make-train-adt train-name initial-track initial-orientation)))
         (if (hash-ref riding-trains train-name #f)
@@ -34,7 +40,17 @@
       (let ((train-object (hash-ref riding-trains train-name)))
         ((train-object 'change-speed!) speed)))
 
-    (define (change-train-orientation! train-name
+    (define (get-train-speed train-name)
+      (let ((train-object (hash-ref riding-trains train-name)))
+        (train-object 'get-current-speed)))
+
+    (define (change-train-orientation! train-name orientation)
+      (let ((train-object (hash-ref riding-trains train-name)))
+        ((train-object 'change-orientation!) orientation)))
+
+    (define (get-train-orientation train-name)
+      (let ((train-object (hash-ref riding-trains train-name)))
+        ((train-object 'get-orientation))))
 
     (define (get-switch-state switch-name)
       (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name)))

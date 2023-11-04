@@ -17,12 +17,14 @@
              (set-speed-at train detection-block speed))))
 
 ;; 1-5 => 2-4 => 1-6 => 2-3 => 1-8 => 2-2 => 2-1 => 2-7
-(define (test-route)
+ (define (test-route)
   (define train 'TEST-ROUTE-TRAIN)
-  (add-loco train 'S-26 '1-4)
+  (add-loco train 'S-26 'S-27)
+  (add-loco 'TEST '- '2-7)
+   (set-loco-speed! 'TEST 100)
   
   ;; 1-4 => 1-5
-  (set-loco-speed! train 900)
+  (set-loco-speed! train 200)
   (set-sign-code! 'L-2 'Hp0)
   (set-speed-at train '1-5 0)
   (close-crossing! 'C-2)
