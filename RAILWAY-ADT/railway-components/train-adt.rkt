@@ -29,7 +29,10 @@
           (set! speed input-speed)))
 
     (define (change-orientation! input-orientation)
-      (set! orientation input-orientation))
+      (if (or (eq? input-orientation '+)
+              (eq? input-orientation '-))
+          (set! orientation input-orientation)
+          "TRAIN-ADT: Incorrect orientation"))
 
     (define (dispatch msg)
       (cond

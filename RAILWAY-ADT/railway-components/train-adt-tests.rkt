@@ -79,8 +79,6 @@
      ((test-train 'change-speed!) 99999)
      "TRAIN-ADT: Illegal speed"
      "Change-speed!: incorrect action"))
-       
-
    ))
 
 ;; Tests the change-orientation! operation
@@ -100,7 +98,16 @@
        ((test-train 'change-orientation!) '-)
        ((test-train 'get-orientation)))
      '-
-     "Change-orientation!: incorrect output"))))
+     "Change-orientation!: incorrect output"))
+
+   (test-case
+    "Test if 'change-orientation!' allows illegal changes"
+    (check-equal?
+     ((test-train 'change-orientation!) 'illegal-value)
+     "TRAIN-ADT: Incorrect orientation"
+     "Change-orientation!: incorrect action"))
+
+   ))
 
    
    
