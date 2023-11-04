@@ -34,6 +34,8 @@
       (let ((train-object (hash-ref riding-trains train-name)))
         ((train-object 'change-speed!) speed)))
 
+    (define (change-train-orientation! train-name
+
     (define (get-switch-state switch-name)
       (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name)))
         ((switch-object 'current-position!))))
