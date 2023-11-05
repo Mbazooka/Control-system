@@ -29,28 +29,27 @@
       (if (hash-ref riding-trains train-name #f) ;; Give back false when not in the hash-map
           "RAILWAY-ADT: Train already exists"
           (let ((new-train (make-train-adt train-name initial-track initial-track-behind)))
-            (hash-set! train-name new-train))))
+            (hash-set! riding-trains train-name new-train))))
 
-    (define (change-train-speed! train-name speed)
-      (let ((train-object (hash-ref riding-trains train-name)))
-        ((train-object 'change-speed!) speed)))
+    ;; Abstraction allowing more general code for change operations (avoiding code duplication)
+    (define (change-operation-abstraction HARDWARE operation)
+      (lambda (object-name data)
+        (let ((object (hash-ref HARDWARE object-name)))
+          ((object operation) data))))
 
-    (define (get-train-speed train-name) ;; ?????Debatable
-      (let ((train-object (hash-ref riding-trains train-name)))
-        (train-object 'get-current-speed)))
+    ;; Procedure that changes the train speed to a certain value
+    (define change-train-speed! (change-operation-abstraction riding-trains 'change-speed!))
 
-    (define (get-switch-state switch-name) ;; ??????Debatable
-      (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name)))
-        ((switch-object 'current-position!))))
+    ;; Procedure that changes the switch state to a certain state 
+    (define change-switch-state! (change-operation-abstraction HARDWARE-SWITCHES 'change-position!))
 
-    (define (change-switch-state! switch-name state) ;; STATE IS 1 (INITIAL) OR 2
-      (let ((switch-object (hash-ref HARDWARE-SWITCHES switch-name))) ;; If no switch with name, you get error
-        ((switch-object 'change-position!) state)))
+    ;; Procedure that changes the light state to a certain state
+    (define change-light-state! (change-operation-abstraction HARDWARE-LIGHTS 'change-light!))
 
-    (define (check-barrier-open? barrier-name) ;; ??????Debatable
-      (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name)))
-        ((barrier-object 'open-barrier?))))
+    ;; Procedure that changes the detection-block state to a certain state
+    (define change-detection-block-state! (change-operation-abstraction HARDWARE-LIGHTS 'change-presence!))
 
+    ;; Procedure that changes the barrier state to a certain state (cannot be generalized)
     (define (change-barrier-state! barrier-name state)
       (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name)))
         (cond
@@ -59,29 +58,34 @@
           (else
            "RAILWAY-ADT: Incorrect barrier state change"))))
 
-    (define (get-light-state light-name)
-      (let ((light-object (hash-ref HARDWARE-LIGHTS light-name)))
-        ((light-object 'get-state))))
+    ;; Another abstraction allowing more general code for get-operations
+    (define (get-operation-abstraction HARDWARE operation)
+      (lambda (object-name)
+        (let ((object (hash-ref HARDWARE object-name)))
+          ((object operation)))))
 
-    (define (change-light-state! light-name state)
-      (let ((light-object (hash-ref HARDWARE-LIGHTS light-name)))
-        ((light-object 'change-light!) state)))
+    ;; Procedure that gets the speed of the train
+    (define get-train-speed (get-operation-abstraction riding-trains 'get-current-speed))
 
-    (define (change-detection-block-state! track-name presence?)
-      (let ((detection-block-object (hash-ref HARDWARE-LIGHTS track-name)))
-        ((detection-block-object 'change-presence!) presence?)))
+    ;; Procedure that gets the switch state
+    (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
 
-    (define (get-detection-block-state track-name)
-      (let ((detection-block-object (hash-ref HARDWARE-LIGHTS track-name)))
-        ((detection-block-object 'get-presence))))
+    ;; Procedure that checks if barrier is open
+    (define check-barrier-open? (get-operation-abstraction HARDWARE-BARRIERS 'open-barrier?))
+
+    ;; Procedure that gets the light state
+    (define get-light-state (get-operation-abstraction HARDWARE-LIGHTS 'get-state))
+
+    ;; Procedure that gets the detection-block-state
+    (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence))
 
     (define (dispatch msg)
       (cond
         ((eq? msg 'add-train!) add-train!)
         ((eq? msg 'change-train-speed!) change-train-speed!)
         ((eq? msg 'get-train-speed) get-train-speed) ;;;;;;;
-        ((eq? msg 'get-switch-state!) get-switch-state) ;;;;;;
         ((eq? msg 'change-switch-state!) change-switch-state!) ;;;;;;
+        ((eq? msg 'get-switch-state) get-switch-state) ;;;;;
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)
