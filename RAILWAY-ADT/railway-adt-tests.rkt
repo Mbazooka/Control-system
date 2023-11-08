@@ -150,6 +150,52 @@
      #t
      "change-barrier-state!: Incorrect operation"))
    ))
+
+(define railway-get-light-state/change-light-state!-tests
+  (test-suite
+   "RAILWAY-ADT: GET-LIGHT-STATE/CHANGE-LIGHT-STATE! tests"
+
+   (test-case
+    "Test if 'get-light-state' exists"
+    (check-not-equal?
+     (test-railway 'get-light-state)
+     "RAILWAY-ADT: Incorrect message"
+     "get-light-state: operation does not exist"))
+
+   (test-case
+    "Test if 'change-light-state!' exists"
+    (check-not-equal?
+     (test-railway 'change-light-state!)
+     "RAILWAY-ADT: Incorrect message"
+     "change-light-state!: operation does not exist"))
+
+   (test-case
+    "Test if 'get-light-state' works properly"
+    (check-eq?
+     ((test-railway 'get-light-state) 'L-1)
+     'Hp0
+     "get-light-state: Incorrect operation"))
+
+   (test-case
+    "Test if 'change-light-state!' works properly"
+    (check-equal?
+     (begin
+       ((test-railway 'change-light-state!) 'L-1 'Hp1)
+       ((test-railway 'get-light-state) 'L-1))
+     'Hp1
+     "change-light-state!: Incorrect operation"))
+
+   (test-case
+    "Test if 'change-light-state!' works properly"
+    (check-equal?
+     (begin
+       ((test-railway 'change-light-state!) 'L-1 'Ks1+Zs3+Zs3v)
+       ((test-railway 'get-light-state) 'L-1))
+     'Ks1+Zs3+Zs3v
+     "change-light-state!: Incorrect operation"))
+     
+
+   ))
      
     
 
@@ -159,6 +205,7 @@
                               railway-add-train-tests
                               railway-change-train-speed!/get-train-speed-tests
                               railway-change-switch-state!/get-switch-state-tests
-                              railway-check-barrier-open?/change-barrier-state!-tests))
+                              railway-check-barrier-open?/change-barrier-state!-tests
+                              railway-get-light-state/change-light-state!-tests))
 
 (test/gui all-tests)
