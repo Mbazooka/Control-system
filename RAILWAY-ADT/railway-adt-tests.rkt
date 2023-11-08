@@ -81,35 +81,35 @@
 ;; Test the change-switch-state!/get-switch-state operation of the railway
 (define railway-change-switch-state!/get-switch-state-tests
   (test-suite
-  "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE tests"
+   "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE TESTS"
 
-  (test-case
-   "Test if 'change-switch-state!' exists"
-   (check-not-equal?
-    (test-railway 'change-switch-state!)
-    "RAILWAY-ADT: Incorrect message"
-    "Change-switch-state!: operation does not exist"))
+   (test-case
+    "Test if 'change-switch-state!' exists"
+    (check-not-equal?
+     (test-railway 'change-switch-state!)
+     "RAILWAY-ADT: Incorrect message"
+     "Change-switch-state!: operation does not exist"))
 
-  (test-case
-   "Test if 'get-switch-state' does not exist"
-   (check-not-equal?
-    (test-railway 'get-switch-state)
-    "RAILWAY-ADT: Incorrect message"
-    "Get-switch-state: operation does not exist"))
+   (test-case
+    "Test if 'get-switch-state' does not exist"
+    (check-not-equal?
+     (test-railway 'get-switch-state)
+     "RAILWAY-ADT: Incorrect message"
+     "Get-switch-state: operation does not exist"))
 
-  (test-case
-   "Test if 'change-switch-state!/get-switch-state' works properly"
-   (check-eq?
-    (begin
-      ((test-railway 'change-switch-state!) 'S-1 2)
-      ((test-railway 'get-switch-state) 'S-1))
-    2
-    "change-switch-state!/get-switch-state: Incorrect operation"))))
+   (test-case
+    "Test if 'change-switch-state!/get-switch-state' works properly"
+    (check-eq?
+     (begin
+       ((test-railway 'change-switch-state!) 'S-1 2)
+       ((test-railway 'get-switch-state) 'S-1))
+     2
+     "change-switch-state!/get-switch-state: Incorrect operation"))))
 
 ;; Test the check-barrier-open?/change-barrier-state! operation of the railway
 (define railway-check-barrier-open?/change-barrier-state!-tests
   (test-suite
-   "RAILWAY-ADT: CHECK-BARRIER-OPEN?/CHANGE-BARRRIER-STATE! tests"
+   "RAILWAY-ADT: CHECK-BARRIER-OPEN?/CHANGE-BARRRIER-STATE! TESTS"
 
    (test-case
     "Test if 'check-barrier-open?' exists"
@@ -128,18 +128,18 @@
    (test-case
     "Test if 'check-barrier-open?/change-barrier-state!' works properly"
     (check-eq?
-    ((test-railway 'check-barrier-open?) 'C-1)
-    #t
-    "check-barrier-open?: Incorrect operation"))
+     ((test-railway 'check-barrier-open?) 'C-1)
+     #t
+     "check-barrier-open?: Incorrect operation"))
 
    (test-case
     "Test if 'change-barrier-state!' closes properly"
-   (check-eq?
-    (begin
-    ((test-railway 'change-barrier-state!) 'C-1 'close)
-    ((test-railway 'check-barrier-open?) 'C-1))
-    #f
-    "change-barrier-state!: Incorrect operation"))
+    (check-eq?
+     (begin
+       ((test-railway 'change-barrier-state!) 'C-1 'close)
+       ((test-railway 'check-barrier-open?) 'C-1))
+     #f
+     "change-barrier-state!: Incorrect operation"))
 
    (test-case
     "Test if 'change-barrier-state!' opens properly"
@@ -153,7 +153,7 @@
 
 (define railway-get-light-state/change-light-state!-tests
   (test-suite
-   "RAILWAY-ADT: GET-LIGHT-STATE/CHANGE-LIGHT-STATE! tests"
+   "RAILWAY-ADT: GET-LIGHT-STATE/CHANGE-LIGHT-STATE! TESTS"
 
    (test-case
     "Test if 'get-light-state' exists"
@@ -192,8 +192,44 @@
        ((test-railway 'change-light-state!) 'L-1 'Ks1+Zs3+Zs3v)
        ((test-railway 'get-light-state) 'L-1))
      'Ks1+Zs3+Zs3v
-     "change-light-state!: Incorrect operation"))
-     
+     "change-light-state!: Incorrect operation"))   
+
+   ))
+
+(define railway-change-detection-block-state!/get-detection-block-state-tests
+
+  (test-suite
+   "RAILWAY-ADT: CHANGE-DETECTION-BLOCK-STATE!/GET-DTECTION-BLOCK-STATE TESTS"
+
+
+   (test-case
+    "Test if 'get-detection-block-state' exists"
+    (test-railway 'get-detection-block-state)
+    "RAILWAY-ADT: Incorrect message"
+    "get-detection-block-state: operation does not exist")
+      
+   (test-case
+    "Test if 'change-detection-block-state!' exists"
+    (check-not-equal?
+     (test-railway 'change-detection-block-state!)
+     "RAILWAY-ADT: Incorrect message"
+     "change-detection-block-state: operation does not exist"))
+
+   (test-case
+    "Test if 'get-detection-block-state' works properly"
+    (check-eq?
+     ((test-railway 'get-detection-block-state) 'T-1-1)
+     #f
+     "get-detection-block-state: Incorrect operation"))
+
+   (test-case
+    "Test if 'change-detection-block-state' exists"
+    (check-eq?
+     (begin
+       ((test-railway 'change-detection-block-state!) 'T-1-1 #t)
+       ((test-railway 'get-detection-block-state) 'T-1-1))
+     #t
+     "change-detection-block-state: Incorrect operation"))
 
    ))
      
@@ -206,6 +242,7 @@
                               railway-change-train-speed!/get-train-speed-tests
                               railway-change-switch-state!/get-switch-state-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
-                              railway-get-light-state/change-light-state!-tests))
+                              railway-get-light-state/change-light-state!-tests
+                              railway-change-detection-block-state!/get-detection-block-state-tests))
 
 (test/gui all-tests)

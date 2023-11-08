@@ -18,9 +18,9 @@
 (define (make-railway-adt)
   (let* ((HARDWARE-SETUP (make-hardware-setup-adt))
          (HARDWARE-SWITCHES (HARDWARE-SETUP 'get-possible-switches))
-         (HARDWARE-LIGHTS (HARDWARE-SETUP 'possible-lights))
-         (HARDWARE-BARRIERS (HARDWARE-SETUP 'possible-barriers))
-         (HARDWARE-DETECTION-BLOCKS (HARDWARE-SETUP 'possible-detection-blocks))
+         (HARDWARE-LIGHTS (HARDWARE-SETUP 'get-possible-lights))
+         (HARDWARE-BARRIERS (HARDWARE-SETUP 'get-possible-barriers))
+         (HARDWARE-DETECTION-BLOCKS (HARDWARE-SETUP 'get-possible-detection-blocks))
          (HARDWARE-TRACKS (HARDWARE-SETUP 'get-track-map))
          (railway-graph (unweighted-graph/undirected (HARDWARE-SETUP 'get-railway-connections)))
          (riding-trains (make-hash))) ;; No trains riding initially
@@ -47,7 +47,7 @@
     (define change-light-state! (change-operation-abstraction HARDWARE-LIGHTS 'change-light!))
 
     ;; Procedure that changes the detection-block state to a certain state
-    (define change-detection-block-state! (change-operation-abstraction HARDWARE-LIGHTS 'change-presence!))
+    (define change-detection-block-state! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'change-presence!))
 
     ;; Procedure that changes the barrier state to a certain state (cannot be generalized)
     (define (change-barrier-state! barrier-name state)

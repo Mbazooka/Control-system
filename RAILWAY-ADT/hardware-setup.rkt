@@ -142,9 +142,9 @@
   (define (dispatch msg)
     (cond    
       ((eq? msg 'get-possible-switches) possible-switches)      
-      ((eq? msg 'possible-lights) possible-lights)
+      ((eq? msg 'get-possible-lights) possible-lights)
       ((eq? msg 'get-possible-detection-blocks) possible-detection-blocks)
-      ((eq? msg 'possible-barriers) possible-barriers)
+      ((eq? msg 'get-possible-barriers) possible-barriers)
       ((eq? msg 'get-railway-connections) railway-connections)
       ((eq? msg 'get-track-map) track-map)
       (else
