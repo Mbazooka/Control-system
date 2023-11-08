@@ -105,14 +105,60 @@
       ((test-railway 'get-switch-state) 'S-1))
     2
     "change-switch-state!/get-switch-state: Incorrect operation"))))
-     
 
+;; Test the check-barrier-open?/change-barrier-state! operation of the railway
+(define railway-check-barrier-open?/change-barrier-state!-tests
+  (test-suite
+   "RAILWAY-ADT: CHECK-BARRIER-OPEN?/CHANGE-BARRRIER-STATE! tests"
+
+   (test-case
+    "Test if 'check-barrier-open?' exists"
+    (check-not-equal?
+     (test-railway 'check-barrier-open?)
+     "RAILWAY-ADT: Incorrect message"
+     "Check-barrier-open?: operation does not exist"))
+
+   (test-case
+    "Test if 'change-barrier-state!' exists"
+    (check-not-equal?
+     (test-railway 'change-barrier-state!)
+     "RAILWAY:ADT: Incorrect message"
+     "change-barrier-state!: operation does not exist"))
+
+   (test-case
+    "Test if 'check-barrier-open?/change-barrier-state!' works properly"
+    (check-eq?
+    ((test-railway 'check-barrier-open?) 'C-1)
+    #t
+    "check-barrier-open?: Incorrect operation"))
+
+   (test-case
+    "Test if 'change-barrier-state!' closes properly"
+   (check-eq?
+    (begin
+    ((test-railway 'change-barrier-state!) 'C-1 'close)
+    ((test-railway 'check-barrier-open?) 'C-1))
+    #f
+    "change-barrier-state!: Incorrect operation"))
+
+   (test-case
+    "Test if 'change-barrier-state!' opens properly"
+    (check-eq?
+     (begin
+       ((test-railway 'change-barrier-state!) 'C-1 'open)
+       ((test-railway 'check-barrier-open?) 'C-1))
+     #t
+     "change-barrier-state!: Incorrect operation"))
+   ))
+     
+    
 
 ;; Bringing all test-suites together
 (define all-tests (test-suite "Railway-Module"
                               railway-make-tests
                               railway-add-train-tests
                               railway-change-train-speed!/get-train-speed-tests
-                              railway-change-switch-state!/get-switch-state-tests))
+                              railway-change-switch-state!/get-switch-state-tests
+                              railway-check-barrier-open?/change-barrier-state!-tests))
 
 (test/gui all-tests)

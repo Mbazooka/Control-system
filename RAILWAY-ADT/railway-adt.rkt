@@ -54,7 +54,7 @@
       (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name)))
         (cond
           ((eq? state 'open) ((barrier-object 'open!)))
-          ((eq? state 'closed) ((barrier-object 'closed!)))
+          ((eq? state 'close) ((barrier-object 'close!)))
           (else
            "RAILWAY-ADT: Incorrect barrier state change"))))
 
