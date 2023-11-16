@@ -47,7 +47,7 @@
     (define change-light-state! (change-operation-abstraction HARDWARE-LIGHTS 'change-light!))
 
     ;; Procedure that changes the detection-block state to a certain state
-    (define change-detection-block-state! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'change-presence!))
+    (define change-detection-block-state! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'add-train!))
 
     ;; Procedure that changes the barrier state to a certain state (cannot be generalized)
     (define (change-barrier-state! barrier-name state)
@@ -77,15 +77,17 @@
     (define get-light-state (get-operation-abstraction HARDWARE-LIGHTS 'get-state))
 
     ;; Procedure that gets the detection-block-state
-    (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence))
+    (define (get-detection-block-state detection-block train-name)
+      (let ((detection-block-object (hash-ref HARDWARE-DETECTION-BLOCKS detection-block)))
+        ((detection-block-object 'get-presence) train-name)))
 
     (define (dispatch msg)
       (cond
         ((eq? msg 'add-train!) add-train!)
         ((eq? msg 'change-train-speed!) change-train-speed!)
-        ((eq? msg 'get-train-speed) get-train-speed) ;;;;;;;
-        ((eq? msg 'change-switch-state!) change-switch-state!) ;;;;;;
-        ((eq? msg 'get-switch-state) get-switch-state) ;;;;;
+        ((eq? msg 'get-train-speed) get-train-speed) 
+        ((eq? msg 'change-switch-state!) change-switch-state!) 
+        ((eq? msg 'get-switch-state) get-switch-state) 
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)

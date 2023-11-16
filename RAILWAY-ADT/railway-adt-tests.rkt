@@ -203,7 +203,7 @@
 
 
    (test-case
-    "Test if 'get-detection-block-state' exists"
+    "Test if 'get-detection-block-state!' exists"
     (test-railway 'get-detection-block-state)
     "RAILWAY-ADT: Incorrect message"
     "get-detection-block-state: operation does not exist")
@@ -218,18 +218,18 @@
    (test-case
     "Test if 'get-detection-block-state' works properly"
     (check-eq?
-     ((test-railway 'get-detection-block-state) 'T-1-1)
+     ((test-railway 'get-detection-block-state) 'T-1-1 'TEST)
      #f
      "get-detection-block-state: Incorrect operation"))
 
    (test-case
-    "Test if 'change-detection-block-state' exists"
-    (check-eq?
+    "Test if 'change-detection-block-state!' works properly"
+    (check-equal?
      (begin
-       ((test-railway 'change-detection-block-state!) 'T-1-1 #t)
-       ((test-railway 'get-detection-block-state) 'T-1-1))
+       ((test-railway 'change-detection-block-state!) 'T-1-1 'TEST)
+       ((test-railway 'get-detection-block-state) 'T-1-1 'TEST))
      #t
-     "change-detection-block-state: Incorrect operation"))
+     "change-detection-block-state!: Incorrect operation"))
 
    ))
      
