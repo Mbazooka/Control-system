@@ -17,23 +17,35 @@
     (define (add-train-HARDWARE! train-name initial-track initial-track-behind)
       (cond
         (((railway 'add-train!) train-name)
-         (add-loco! train-name initial-track-behind initial-track))))
+         (add-loco train-name initial-track-behind initial-track))))
 
-    (define (get-speed-train-HARDWARE! train-name)
-      (get-loco-speed train-name))
+    ;(define (get-speed-train-HARDWARE! train-name)
+    ;  (get-loco-speed train-name))
 
-    (define (set-speed-train-HARDWARE! train-name)
-      (change-train-speed!
+    ;; Changing the train speed to a given speed
+    (define (set-speed-train-HARDWARE! train-name speed)
+      (cond
+        (((railway 'change-train-speed!) speed)
+         (set-loco-speed! train-name speed))))
+
+    ;; Changing the switch position to a given state
+    (define (set-switch-position-HARDWARE! switch switch-position)
+      (cond
+        (((railway 'change-switch-state!) switch switch-position)
+         (set-switch-position! switch switch-position))))
+
+    ;; Changing the barriers their state
+    (define (set-barrier-state-HARDWARE! barrier barrier-state)
+      (cond
+        ((
     
 
 
-
-
-       (define (dispatch msg)
-         (cond
-           ((eq? msg 'add-train-HARDWARE!) add-train-HARDWARE!)
-           ((eq? msg 'get-speed-train-HARDWARE!) get-speed-train-HARDWARE!)
-           (else
-            "INFRABEL-ADT: Incorrect message")))
-       dispatch))
-    
+    (define (dispatch msg)
+      (cond
+        ((eq? msg 'add-train-HARDWARE!) add-train-HARDWARE!)
+        ((eq? msg 'get-speed-train-HARDWARE!) get-speed-train-HARDWARE!)
+        ((eq? msg 'set-speed-train-HARDWARE!) set-speed-train-HARDWARE!)
+        (else
+         "INFRABEL-ADT: Incorrect message")))
+    dispatch))

@@ -158,6 +158,13 @@
        ((test-railway 'check-barrier-open?) 'C-1))
      #t
      "change-barrier-state!: Incorrect operation"))
+
+   (test-case
+    "Test if 'change-barrier-state!' gives correct output with invalid names"
+    (check-eq?
+     ((test-railway 'change-barrier-state!) 'Invalid-name 'open)
+     #f
+     "change-barrier-state!: Incorrect output"))
    ))
 
 (define railway-get-light-state/change-light-state!-tests

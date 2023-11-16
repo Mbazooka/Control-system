@@ -54,12 +54,14 @@
 
     ;; Procedure that changes the barrier state to a certain state (cannot be generalized)
     (define (change-barrier-state! barrier-name state)
-      (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name)))
-        (cond
-          ((eq? state 'open) ((barrier-object 'open!)))
-          ((eq? state 'close) ((barrier-object 'close!)))
-          (else
-           "RAILWAY-ADT: Incorrect barrier state change"))))
+      (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name #f)))
+        (if barrier-object
+            (cond
+              ((eq? state 'open) ((barrier-object 'open!)))
+              ((eq? state 'close) ((barrier-object 'close!)))
+              (else
+               "RAILWAY-ADT: Incorrect barrier state change"))
+            #f)))
 
     ;; Another abstraction allowing more general code for get-operations
     (define (get-operation-abstraction HARDWARE operation)
