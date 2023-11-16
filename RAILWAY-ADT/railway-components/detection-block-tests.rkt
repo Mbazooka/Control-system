@@ -30,31 +30,31 @@
     "Test if 'get-name' gets the correct name"
     (check-eq? ((test-detection-block 'get-name)) 'TEST "Get-name: incorrect name"))))
 
-;; Test the get-presence/add-train! operation of the class
-(define detection-block-get-presence/add-train!-tests
+;; Test the get-presence/change-presence! operation of the class
+(define detection-block-get-presence/change-presence!-tests
   (test-suite
-   "DETECTION-BLOCK-ADT: GET-PRESENCE/add-train! TESTS"
+   "DETECTION-BLOCK-ADT: GET-PRESENCE/change-presence! TESTS"
 
    (test-case
     "Test if 'get-presence' works properly"
-    (check-eq? ((test-detection-block 'get-presence) 'TEST) #f
+    (check-eq? ((test-detection-block 'get-presence)) #f
                "Get-presence: Incorrect output"))
 
    (test-case
-    "Test if 'add-train!' works properly with correct input"
+    "Test if 'change-presence!' works properly with correct input"
     (check-eq?
      (begin
-       ((test-detection-block 'add-train!) 'TEST)
-       ((test-detection-block 'get-presence) 'TEST))
+       ((test-detection-block 'change-presence!) #t)
+       ((test-detection-block 'get-presence)))
      #t
-     "add-train!: Incorrect change"))
+     "change-presence!: Incorrect change"))
 
    (test-case
-    "Test if 'add-train!' works properly with illegal input"
+    "Test if 'change-presence!' works properly with illegal input"
     (check-equal?
-     ((test-detection-block 'add-train!) 123)
-     "add-train!: illegal value"
-     "add-train!: Incorrect change"))))
+     ((test-detection-block 'change-presence!) 'Illegal-value)
+     "change-presence!: illegal value"
+     "change-presence!: Incorrect change"))))
 
 ;; Test the illegal message sending action
 (define detection-block-message-sending-tests
@@ -72,7 +72,7 @@
 (define all-tests (test-suite "Detection-Block-Module"
                               detection-block-make-db-tests
                               detection-block-name-tests
-                              detection-block-get-presence/add-train!-tests
+                              detection-block-get-presence/change-presence!-tests
                               detection-block-message-sending-tests))
 
 (test/gui all-tests)

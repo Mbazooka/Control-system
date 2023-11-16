@@ -50,7 +50,7 @@
     (define change-light-state! (change-operation-abstraction HARDWARE-LIGHTS 'change-light!))
 
     ;; Procedure that changes the detection-block state to a certain state
-    (define change-detection-block-state! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'add-train!))
+    (define change-detection-block-state! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'change-presence!))
 
     ;; Procedure that changes the barrier state to a certain state (cannot be generalized)
     (define (change-barrier-state! barrier-name state)

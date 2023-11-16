@@ -7,25 +7,23 @@
 (provide make-detection-block-adt)
 
 (define (make-detection-block-adt name)
-  (let ((trains-present '()))
+  (let ((train-presence? #f))
 
     (define (get-name) name)
 
-    (define (get-presence train-name)
-      (if (member train-name trains-present)
-          #t
-          #f))
+    (define (get-presence)
+      train-presence?)
 
-    (define (add-train! train-name)
-      (if (symbol? train-name)
-          (set! trains-present  (cons train-name trains-present))
-          "add-train!: illegal value"))
+    (define (change-presence! state)
+      (if (boolean? state)
+          (set! train-presence?  state)
+          "change-presence!: illegal value"))
 
     (define (dispatch msg)
       (cond
         ((eq? msg 'get-name) get-name)
         ((eq? msg 'get-presence) get-presence)
-        ((eq? msg 'add-train!) add-train!)
+        ((eq? msg 'change-presence!) change-presence!)
         (else
          "DETECTION-BLOCK-ADT: Incorrect message")))
     dispatch))
