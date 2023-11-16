@@ -234,7 +234,7 @@
    (test-case
     "Test if 'get-detection-block-state' works properly"
     (check-eq?
-     ((test-railway 'get-detection-block-state) 'T-1-1 'TEST)
+     ((test-railway 'get-detection-block-state) 'T-1-1)
      #f
      "get-detection-block-state: Incorrect operation"))
 
@@ -242,8 +242,8 @@
     "Test if 'change-detection-block-state!' works properly"
     (check-equal?
      (begin
-       ((test-railway 'change-detection-block-state!) 'T-1-1 'TEST)
-       ((test-railway 'get-detection-block-state) 'T-1-1 'TEST))
+       ((test-railway 'change-detection-block-state!) 'T-1-1 #t)
+       ((test-railway 'get-detection-block-state) 'T-1-1))
      #t
      "change-detection-block-state!: Incorrect operation"))
 

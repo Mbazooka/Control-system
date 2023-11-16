@@ -82,9 +82,7 @@
     (define get-light-state (get-operation-abstraction HARDWARE-LIGHTS 'get-state))
 
     ;; Procedure that gets the detection-block-state
-    (define (get-detection-block-state detection-block train-name)
-      (let ((detection-block-object (hash-ref HARDWARE-DETECTION-BLOCKS detection-block)))
-        ((detection-block-object 'get-presence) train-name)))
+    (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence)) 
 
     (define (dispatch msg)
       (cond
