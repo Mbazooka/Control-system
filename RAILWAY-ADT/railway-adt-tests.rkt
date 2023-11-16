@@ -10,7 +10,7 @@
          "railway-adt.rkt")
 
 ;; Tests the constructor
-(define railway-make-tests
+(define railway-make-test
   (test-suite
    "RAILWAY-ADT: MAKE-RAILWAY-ADT TESTS"
 
@@ -253,7 +253,7 @@
 
 ;; Bringing all test-suites together
 (define all-tests (test-suite "Railway-Module"
-                              railway-make-tests
+                              railway-make-test
                               railway-add-train-tests
                               railway-change-train-speed!/get-train-speed-tests
                               railway-change-switch-state!/get-switch-state-tests
