@@ -248,6 +248,12 @@
      "change-detection-block-state!: Incorrect operation"))
 
    ))
+
+(define railway-message-sending-tests
+  (test-suite
+   "RAILWAY-ADT: MESSAGE SENDING TESTS"
+
+   (test-case 
      
     
 
@@ -259,6 +265,7 @@
                               railway-change-switch-state!/get-switch-state-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
-                              railway-change-detection-block-state!/get-detection-block-state-tests))
+                              railway-change-detection-block-state!/get-detection-block-state-tests
+                              railway-message-sending-tests))
 
 (test/gui all-tests)
