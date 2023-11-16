@@ -8,24 +8,25 @@
   "../RAILWAY-ADT/railway-adt.rkt"
   "../simulator/interface.rkt")
 
+(provide make-infrabel-adt)
+
 (define (make-infrabel-adt)
   (let ((railway (make-railway-adt)))
+
+    (setup-hardware) ;; Setup the track
 
     (start) ;; To start the simulator 
 
     ;; Adds a train to the hardware if the train-name has not been used
     (define (add-train-HARDWARE! train-name initial-track initial-track-behind)
       (cond
-        (((railway 'add-train!) train-name)
+        (((railway 'add-train!) train-name initial-track initial-track-behind)
          (add-loco train-name initial-track-behind initial-track))))
-
-    ;(define (get-speed-train-HARDWARE! train-name)
-    ;  (get-loco-speed train-name))
 
     ;; Changing the train speed to a given speed
     (define (set-speed-train-HARDWARE! train-name speed)
       (cond
-        (((railway 'change-train-speed!) speed)
+        (((railway 'change-train-speed!) train-name speed)
          (set-loco-speed! train-name speed))))
 
     ;; Changing the switch position to a given state
@@ -49,10 +50,21 @@
       (cond
         (((railway 'change-light-state!) light light-state)
          (set-sign-code! light light-state))))
-
-    ;; Update the 
     
-
+    ;; Update the detection-blocks
+    (define (update-detection-blocks!)
+      (let ((db-oc-ids (get-occupied-detection-blocks)) ;; Occupied detection-block ids
+            (db-ids (get-detection-block-ids)))
+        (for-each (lambda (db-id)
+                    ((railway 'change-detection-block-state!) db-id #t))
+                  db-oc-ids)
+        (for-each (lambda (db-id)
+                  (cond
+                    ((not (member db-id db-oc-ids))
+                     ((railway 'change-detection-block-state!) db-id #f))))
+                  db-ids)))
+    ;; !!!!!!!!!!! MESSAGE MUST BE SENT TO NMBS HERE !!!!!!!!!!!!!!!!!!!!!!
+    
 
     (define (dispatch msg)
       (cond
@@ -61,6 +73,7 @@
         ((eq? msg 'set-switch-position-HARDWARE!) set-switch-position-HARDWARE!)
         ((eq? msg 'set-barrier-state-HARDWARE!) set-barrier-state-HARDWARE!)
         ((eq? msg 'set-light-state-HARDWARE!) set-light-state-HARDWARE!)
+        ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else
          "INFRABEL-ADT: Incorrect message")))
     dispatch))

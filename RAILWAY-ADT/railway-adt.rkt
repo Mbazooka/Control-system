@@ -24,6 +24,7 @@
          (HARDWARE-TRACKS (HARDWARE-SETUP 'get-track-map))
          (railway-graph (unweighted-graph/undirected (HARDWARE-SETUP 'get-railway-connections)))
          (riding-trains (make-hash))) ;; No trains riding initially
+      
 
     (define (add-train! train-name initial-track initial-track-behind) ;; Trains have a unique name
       (if (hash-ref riding-trains train-name #f) ;; Give back false when not in the hash-map
