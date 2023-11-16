@@ -4,9 +4,9 @@
 
 #lang racket
 
-(provide make-detection-block)
+(provide make-detection-block-adt)
 
-(define (make-detection-block name)
+(define (make-detection-block-adt name)
   (let ((train-presence? #f))
 
     (define (get-name) name)
