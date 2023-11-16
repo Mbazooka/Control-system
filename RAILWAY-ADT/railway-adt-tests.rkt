@@ -44,9 +44,9 @@
 
    (test-case
     "Test if 'add-train!' does not allow name overlap"
-    (check-equal?
+    (check-eq?
      ((test-railway 'add-train!) 'TEST-TRAIN-1 '1-2 'S-10)
-     "RAILWAY-ADT: Train already exists"
+     #f
      "Add-train!: Train already exists"))))
 
 ;; Test the change-train-speed!/get-train-speed operation of the railway
@@ -76,7 +76,16 @@
        ((test-railway 'change-train-speed!) 'TEST-TRAIN-1 200)
        ((test-railway 'get-train-speed) 'TEST-TRAIN-1))
      200
-     "Change-train-speed!/get-train-speed: Incorrect operation"))))
+     "Change-train-speed!/get-train-speed: Incorrect operation"))
+
+   (test-case
+    "Test if 'RAILWAY-ADT: OBJECT DOES NOT EXIST' gets triggerd"
+    (check-equal?
+     ((test-railway 'change-train-speed!) 'UNDEFINED-NAME 200)
+     "RAILWAY-ADT: OBJECT DOES NOT EXIST"
+     "change-operation-abstraction: Incorrect output"))
+
+   ))
 
 ;; Test the change-switch-state!/get-switch-state operation of the railway
 (define railway-change-switch-state!/get-switch-state-tests

@@ -27,15 +27,18 @@
 
     (define (add-train! train-name initial-track initial-track-behind) ;; Trains have a unique name
       (if (hash-ref riding-trains train-name #f) ;; Give back false when not in the hash-map
-          "RAILWAY-ADT: Train already exists"
+          #f ;; Giving back a boolean is used for other procedures (c.f. INFRABEL-ADT ADD-TRAIN)
           (let ((new-train (make-train-adt train-name initial-track initial-track-behind)))
-            (hash-set! riding-trains train-name new-train))))
+            (hash-set! riding-trains train-name new-train)
+            #t)))
 
     ;; Abstraction allowing more general code for change operations (avoiding code duplication)
     (define (change-operation-abstraction HARDWARE operation)
       (lambda (object-name data)
-        (let ((object (hash-ref HARDWARE object-name)))
-          ((object operation) data))))
+        (let ((object (hash-ref HARDWARE object-name #f)))
+          (if object
+              ((object operation) data)
+              "RAILWAY-ADT: OBJECT DOES NOT EXIST"))))
 
     ;; Procedure that changes the train speed to a certain value
     (define change-train-speed! (change-operation-abstraction riding-trains 'change-speed!))
