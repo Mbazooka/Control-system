@@ -253,7 +253,12 @@
   (test-suite
    "RAILWAY-ADT: MESSAGE SENDING TESTS"
 
-   (test-case 
+   (test-case
+    "Test if message-sending is protected against illegal messages"
+    (check-equal?
+     (test-railway 'illegal-message)
+     "RAILWAY-ADT: Incorrect message"
+     "module allows illegal message to be sent without warning"))))
      
     
 
