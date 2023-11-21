@@ -130,8 +130,8 @@
        [parent train-tab]
        ))
 
-;; Attempt to abstract
-(define (make-train-tab)
+;; A specific running train tab in the train tab
+(define (make-running-train-tab)
 
   (define display-message (new message%
                              [label current-train-tab-message]
@@ -162,7 +162,7 @@
       ((eq? msg 'show-current-train-elements)
        (show-current-train-elements))
       (else
-       "Current-train-tab: Illegal mesasge")))
+       "Current-running-train-tab: Illegal mesasge")))
   dispatch)
 
 
