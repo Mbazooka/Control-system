@@ -159,6 +159,13 @@
   (send display-message show #f)
   (send slider show #f))
 
+(define (show-current-train-elements)
+  (send display-message show #t)
+  (send slider show #t))
+
+;; Attempt to abstract
+;(define (train-tab 
+
 
 
 
