@@ -41,6 +41,10 @@
 (define current-tab 0)
 (define previous-tab 0)
 
+;; List of possible switch numbers
+(define switch-# (list 1 2 3 4 5 6 7 8 9 10 11 12 16 20 23 24 25 26 27 28))
+(define middle-switch 10)
+
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
 
@@ -65,7 +69,6 @@
                       "Barriers and lights")]))
 
 (define all-train-tabs (make-hash)) ;; The trains currently and their tabs on the railway
-;; TO BE CHANGED !!!!!
 
 (define (get-train-names)
   (map car (hash->list all-train-tabs)))
@@ -99,7 +102,7 @@
          ))
 
   ;; Draws a panel on top of the top-tab-panel, adding in a horizontal manner
-  (define second-panel ;; ADJUSTED (main-tab-panel)
+  (define second-panel 
     (new horizontal-panel%
          [parent train-panel]
          ))
@@ -186,6 +189,61 @@
       (else
        "DRAW-TRAIN-PANEL!: Illegal message")))
   dispatch)
+
+;; Draws the switch tab of the mains tabs
+(define (draw-switch-panel)
+
+  ;; Draw main switch panel
+  (define switch-panel
+    (new horizontal-panel%
+         [parent main-tab-panel]
+         ))
+
+  ;; Draw panel for switch on the leftsize gui
+  (define left-switch-panel-vertical
+    (new vertical-panel%
+         [parent switch-panel]
+         ))
+
+  ;; Draw panel for switch on the rightsize gui
+  (define right-switch-panel-vertical
+    (new vertical-panel%
+         [parent switch-panel]
+         ))
+
+  (define (switch-name-generator nmbr)
+    (format "S-~a" nmbr))
+
+  ;; ABSTRACT THIS AWAY
+  (for-each (lambda (nmbr) ;; Change to reflect previous states
+              (cond ((<= nmbr middle-switch) ;; Until the middle
+                     (new radio-box%
+                          [label (switch-name-generator nmbr)]
+                          [parent left-switch-panel-vertical]
+                          [choices (list "1"
+                                         "2")]))))
+            switch-#)
+
+  (for-each (lambda (nmbr)
+              (cond ((> nmbr middle-switch)
+                     (new radio-box%
+                          [label (switch-name-generator nmbr)]
+                          [parent right-switch-panel-vertical]
+                          [choices (list "1"
+                                         "2")]))))
+            switch-#)
+
+  (define (remove-switch-panel!)
+    (send main-tab-panel delete-child switch-panel))
+
+  (define (dispatch msg)
+    (cond
+      ((eq? msg 'remove-switch-panel!) (remove-switch-panel!))
+      (else
+       "DRAW-SWITCH-PANEL!: Illegal message")))
+  dispatch)
+
+  
 
 
 
