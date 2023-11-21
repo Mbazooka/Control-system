@@ -79,7 +79,12 @@
   (define train-tab
     (new tab-panel%
          [parent top-panel]
-         [choices '()]))
+         [choices '()]
+         [callback (lambda (tab event)
+                   (let* ((name-train (send tab get-item-label (send tab get-selection)))
+                          (value-to-set (hash-ref all-train-tabs name-train)))
+                     (send slider set-value value-to-set)))]))
+                     
 
   ;; Draws a panel on top of the tab, in a vertical manner
   (define top-tab-panel
@@ -92,6 +97,7 @@
     (new horizontal-panel%
          [parent top-panel]
          ))
+    
 
   ;; Button to be added to the train-tab and it's logic
   (define (tab-name-generator) ;; Generates name for a tab
