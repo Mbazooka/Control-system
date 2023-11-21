@@ -64,107 +64,128 @@
                       "Switches"
                       "Barriers and lights")]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;; DONT CHANGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (define all-train-tabs (make-hash)) ;; The trains currently and their tabs on the railway
-  
-;; Draws a panel on top of the mainframe, adding in a vertical manner
-(define top-panel
-  (new vertical-panel%
-       [parent main-tab-panel]
-       ))
+;; TO BE CHANGED !!!!!
 
-;; Draws a tab-panel for the different trains (in the train-tab)
-(define train-tab
-  (new tab-panel%
-       [parent top-panel]
-       [choices '()]
-       [callback (lambda (tab event)
-                   (let* ((name-train (send tab get-item-label (send tab get-selection)))
-                          (value-to-set (hash-ref all-train-tabs name-train)))
-                     (send slider set-value value-to-set)))]))
+(define (get-train-names)
+  (map car (hash->list all-train-tabs)))
+
+;; Draws the train tab of the main tabs
+(define (draw-train-panel)
+
+  ;; Draws a panel on top of the mainframe, adding in a vertical manner
+  (define train-panel
+    (new vertical-panel%
+         [parent main-tab-panel]
+         ))
+
+  (define (train-tab-change-logic! tab event)
+    (let* ((name-train (send tab get-item-label (send tab get-selection)))
+           (value-to-set (hash-ref all-train-tabs name-train)))
+      (send slider set-value value-to-set)))
+
+  ;; Draws a tab-panel for the different trains (in the train-tab)
+  (define train-tab
+    (new tab-panel%
+         [parent train-panel]
+         [choices (get-train-names)]
+         [callback train-tab-change-logic!]))
                      
 
-;; Draws a panel on top of the tab, in a vertical manner
-(define top-tab-panel
-  (new vertical-panel%
-       [parent train-tab]
-       ))
+  ;; Draws a panel on top of the tab, in a vertical manner
+  (define top-tab-panel
+    (new vertical-panel%
+         [parent train-tab]
+         ))
 
-;; Draws a panel on top of the top-panel, adding in a horizontal manner
-(define second-panel ;; ADJUSTED (main-tab-panel)
-  (new horizontal-panel%
-       [parent top-panel]
-       ))
+  ;; Draws a panel on top of the top-tab-panel, adding in a horizontal manner
+  (define second-panel ;; ADJUSTED (main-tab-panel)
+    (new horizontal-panel%
+         [parent train-panel]
+         ))
     
 
-;; Button to be added to the train-tab and it's logic
-(define (tab-name-generator) ;; Generates name for a tab
-  (train-counter 'increment!)
-  (format "Train-~a" (train-counter 'get-value)))
+  ;; Button to be added to the train-tab and it's logic
+  (define (tab-name-generator) ;; Generates name for a tab
+    (train-counter 'increment!)
+    (format "Train-~a" (train-counter 'get-value)))
   
-(define (all-train-tabs-add! train-name) ;; Add an element to all-train-tabs
-  (hash-set! all-train-tabs train-name 0)) ;; Adding a train is always at speed 0
+  (define (all-train-tabs-add! train-name) ;; Add an element to all-train-tabs
+    (hash-set! all-train-tabs train-name 0)) ;; Adding a train is always at speed 0
 
-(define (add-train-button-logic! panel event) ;; Logic behind the button
-  (let ((name (tab-name-generator)))
-    (all-train-tabs-add! name) 
-    (send train-tab append name)
-    (cond ((= (hash-count all-train-tabs) 1) (show-current-train-elements!))))) ;; Might need to be changed because not accessible
+  (define (add-train-button-logic! panel event) ;; Logic behind the button
+    (let ((name (tab-name-generator)))
+      (all-train-tabs-add! name) 
+      (send train-tab append name)
+      (cond ((= (hash-count all-train-tabs) 1) (show-current-train-elements!))))) ;; Might need to be changed because not accessible
 
-(define add-train-button
-  (new button%
-       [label "Add train"]
-       [parent second-panel]
-       [callback add-train-button-logic!]
-       [horiz-margin HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON]
-       ))
+  (define add-train-button
+    (new button%
+         [label "Add train"]
+         [parent second-panel]
+         [callback add-train-button-logic!]
+         [horiz-margin HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON]
+         ))
 
-;; Button to be added to the train-tab and it's logic
-(define (all-train-tabs-delete! train-name) ;; Deletes an element from all-train-tabs (for garbage collection)
-  (hash-remove! all-train-tabs train-name))
+  ;; Button to be added to the train-tab and it's logic
+  (define (all-train-tabs-delete! train-name) ;; Deletes an element from all-train-tabs (for garbage collection)
+    (hash-remove! all-train-tabs train-name))
   
-(define (delete-trian-button-logic! panel event) ;; Deletes a running train tab from the tab list
-  (let ((selected-tab (send train-tab get-selection)))
-    (all-train-tabs-delete! (send train-tab get-item-label selected-tab)) ;; +1 due to tab starting differently
-    (send train-tab delete (send train-tab get-selection))
-    (cond ((= (hash-count all-train-tabs) 0) (remove-current-train-elements!)))))
+  (define (delete-train-button-logic! panel event) ;; Deletes a running train tab from the tab list
+    (let ((selected-tab (send train-tab get-selection)))
+      (all-train-tabs-delete! (send train-tab get-item-label selected-tab)) ;; +1 due to tab starting differently
+      (send train-tab delete (send train-tab get-selection))
+      (cond ((= (hash-count all-train-tabs) 0) (remove-current-train-elements!))
+            (else (train-tab-change-logic! train-tab #f)))))
 
-(define delete-train-button
-  (new button%
-       [label "Delete train"]
-       [parent second-panel]
-       [callback delete-trian-button-logic!]))
+  (define delete-train-button
+    (new button%
+         [label "Delete train"]
+         [parent second-panel]
+         [callback delete-train-button-logic!]))
 
-;; All the elements for the running-train-tab
-(define display-message (new message%
-                             [label current-train-tab-message]
-                             [parent top-tab-panel]))
+  ;; All the elements for the running-train-tab
+  (define display-message (new message%
+                               [label current-train-tab-message]
+                               [parent top-tab-panel]))
 
-(define (slider-logic! slider event)
-  (let ((name (send train-tab get-item-label (send train-tab get-selection))))
-    (hash-set! all-train-tabs name (send slider get-value))))
+  (define (slider-logic! slider event) ;; Logic for slider
+    (let ((name (send train-tab get-item-label (send train-tab get-selection))))
+      (hash-set! all-train-tabs name (send slider get-value))))
     
-(define slider
-  (new slider%
-       [label ""]
-       [parent top-tab-panel]
-       [callback slider-logic!]
-       [min-value min-train-speed]
-       [max-value max-train-speed]
-       [init-value 0]
-       [vert-margin 100]))
+  (define slider ;; Slider itself
+    (new slider%
+         [label ""]
+         [parent top-tab-panel]
+         [callback slider-logic!]
+         [min-value min-train-speed]
+         [max-value max-train-speed]
+         [init-value 0]
+         [vert-margin 100]))
   
-(define (remove-current-train-elements!)
-  (send display-message show #f)
-  (send slider show #f))
+  (define (remove-current-train-elements!) ;; Removes the message and slider from the screen 
+    (send display-message show #f)
+    (send slider show #f))
 
-(define (show-current-train-elements!)
-  (send display-message show #t)
-  (send slider show #t))
+  (define (show-current-train-elements!) ;; Shows the message and slider on the screen
+    (send display-message show #t)
+    (send slider show #t))
 
-(remove-current-train-elements!)
-  
+  (remove-current-train-elements!)
+
+  (cond ((>= (hash-count all-train-tabs) 1)
+         (show-current-train-elements!)
+         (train-tab-change-logic! train-tab #f)))
+
+  (define (remove-train-panel!)
+    (send main-tab-panel delete-child train-panel))
+
+  (define (dispatch msg)
+    (cond
+      ((eq? msg 'remove-train-panel!) (remove-train-panel!))
+      (else
+       "DRAW-TRAIN-PANEL!: Illegal message")))
+  dispatch)
 
 
 
