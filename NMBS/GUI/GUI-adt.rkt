@@ -45,6 +45,9 @@
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
 
+;; Used for the message placed on train tabs
+(define current-train-tab-message "Set train speed")
+
 ;; This is the main frame on which everything is drawn
 (define control-panel (new frame%
                            [label GUI-TITLE]
@@ -123,49 +126,44 @@
 
 ;; Draws a panel on top of the tab, in a vertical manner
 (define top-tab-panel
-    (new vertical-panel%
-         [parent train-tab]
-         ))
-
-;; Message on train-tab
-(define display-message (new message%
-                             [label "Set train speed"]
-                             [parent top-tab-panel]))
-
-;; Slider for train-tab
-(define slider '())
-
-(define (make-slider)
-  (set! slider (new slider%
-                    [label ""]
-                    [parent top-tab-panel]
-                    [min-value min-train-speed]
-                    [max-value max-train-speed]
-                    [init-value 0]
-                    [vert-margin 100])))
-
-(make-slider)
-
-;; Remove the elements
-(define (remove-train-tab-elements)
-  (send train-tab show #f)
-  (send add-train-button show #f)
-  (send delete-train-button show #f)
-  (send display-message show #f)
-  (send slider show #f))
-
-;; Remove current-train elements
-(define (remove-current-train-elements)
-  (send display-message show #f)
-  (send slider show #f))
-
-(define (show-current-train-elements)
-  (send display-message show #t)
-  (send slider show #t))
+  (new vertical-panel%
+       [parent train-tab]
+       ))
 
 ;; Attempt to abstract
-;(define (train-tab 
+(define (make-train-tab)
 
+  (define display-message (new message%
+                             [label current-train-tab-message]
+                             [parent top-tab-panel]))
+
+  (define slider
+    (new slider%
+         [label ""]
+         [parent top-tab-panel]
+         [min-value min-train-speed]
+         [max-value max-train-speed]
+         [init-value 0]
+         [vert-margin 100]))
+  
+  (define (remove-current-train-elements)
+    (send display-message show #f)
+    (send slider show #f))
+
+  (define (show-current-train-elements)
+    (send display-message show #t)
+    (send slider show #t))
+
+
+  (define (dispatch msg)
+    (cond
+      ((eq? msg 'remove-current-train-elements)
+       (remove-current-train-elements))
+      ((eq? msg 'show-current-train-elements)
+       (show-current-train-elements))
+      (else
+       "Current-train-tab: Illegal mesasge")))
+  dispatch)
 
 
 
