@@ -40,6 +40,7 @@
 (define SWITCHES-TAB 2)
 (define BARRIERS/LIGHTS-TAB 3)
 (define current-tab 0)
+(define previous-tab 0)
 
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
@@ -119,7 +120,6 @@
 (draw-train-tabs)
 (make-add-train-button)
 (make-delete-train-button)
-;(sleep 5)
 
 ;; Draws a panel on top of the tab, in a vertical manner
 (define top-tab-panel
@@ -150,9 +150,18 @@
 (define (remove-train-tab-elements)
   (send train-tab show #f)
   (send add-train-button show #f)
-  (send delete-train-button show #f))
+  (send delete-train-button show #f)
+  (send display-message show #f)
+  (send slider show #f))
 
-;(remove-train-tab-elements)
+;; Remove current-train elements
+(define (remove-current-train-elements)
+  (send display-message show #f)
+  (send slider show #f))
+
+
+
+
 
 
 
