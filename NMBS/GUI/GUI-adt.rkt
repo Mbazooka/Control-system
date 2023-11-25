@@ -42,15 +42,26 @@
 (define previous-tab 0)
 
 ;; List of possible switch numbers
-(define switch-name-state (list (cons "S-1" 1) (cons "S-2" 1) (cons "S-3" 1) (cons "S-4" 1) (cons "S-5" 1)
-                                (cons "S-6" 1) (cons "S-7" 1) (cons "S-8" 1) (cons "S-9" 1) (cons "S-10" 1)
-                                (cons "S-11" 1) (cons "S-12" 1) (cons "S-16" 1) (cons "S-20" 1)
-                                (cons "S-23" 1) (cons "S-24" 1) (cons "S-25" 1) (cons "S-26" 1)
-                                (cons "S-27" 1) (cons "S-28" 1)))
+(define switch-name-state (list (mcons "S-1" 1) (mcons "S-2" 1) (mcons "S-3" 1) (mcons "S-4" 1) (mcons "S-5" 1)
+                                (mcons "S-6" 1) (mcons "S-7" 1) (mcons "S-8" 1) (mcons "S-9" 1) (mcons "S-10" 1)
+                                (mcons "S-11" 1) (mcons "S-12" 1) (mcons "S-16" 1) (mcons "S-20" 1)
+                                (mcons "S-23" 1) (mcons "S-24" 1) (mcons "S-25" 1) (mcons "S-26" 1)
+                                (mcons "S-27" 1) (mcons "S-28" 1)))
 (define middle-switch 9)
 
-(define name-switch car) ;; Abstractions
-(define state-switch (lambda (pair) (- (cdr pair) 1))) ;; -1 to convert to radio box data
+(define name-switch mcar) ;; Abstractions
+(define state-switch (lambda (pair) (- (mcdr pair) 1))) ;; -1 to convert to radio box data
+
+(define (adjust-switch-state! switch val)
+  (define (adjust-state-help switch val current)
+    (if (null? current)
+        (error "Switch does not exist")
+        (let ((current-pair (car current)))
+          (if (string=? (name-switch current-pair) switch)
+              (set-mcdr! current-pair val)
+              (adjust-state-help switch val (cdr current))))))
+  (adjust-state-help switch val switch-name-state))
+    
 
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
@@ -81,7 +92,7 @@
   (map car (hash->list all-train-tabs)))
 
 ;; Draws the train tab of the main tabs
-(define (draw-train-panel)
+(define (draw-train-panel!)
 
   ;; Draws a panel on top of the mainframe, adding in a vertical manner
   (define train-panel
@@ -198,7 +209,7 @@
   dispatch)
 
 ;; Draws the switch tab of the mains tabs
-(define (draw-switch-panel)
+(define (draw-switch-panel!)
 
   ;; Draw main switch panel
   (define switch-panel
@@ -217,25 +228,27 @@
     (new vertical-panel%
          [parent switch-panel]
          ))
-
-  ;; radio-box logic
-  
+      
+  ;; Draws all the radio boxes
   (define (draw-all-radio-boxes!) ;; Draws the radio boxes
     (define current-parent left-switch-panel-vertical)
     (define ctr 0) ;; Counter to allow more concise code
     (for-each (lambda (switch-pair) 
-              (if (<= ctr middle-switch)
-                  (set! current-parent left-switch-panel-vertical)
-                  (set! current-parent right-switch-panel-vertical))
+                (if (<= ctr middle-switch)
+                    (set! current-parent left-switch-panel-vertical)
+                    (set! current-parent right-switch-panel-vertical))
                 (set! ctr (+ ctr 1))
-                     (new radio-box%
-                          [label (name-switch switch-pair)]
-                          [parent current-parent]
-                          [choices (list "1"
-                                         "2")]
-                          [selection (state-switch switch-pair)]
-                          ))
-            switch-name-state))
+                (new radio-box%
+                     [label (name-switch switch-pair)]
+                     [parent current-parent]
+                     [callback (lambda (this event)
+                                 (let ((item-selected (send this get-selection)))
+                                   (adjust-switch-state! (name-switch switch-pair) (+ item-selected 1))))]
+                     [choices (list "1"
+                                    "2")]
+                     [selection (state-switch switch-pair)]
+                     ))
+              switch-name-state))
   (draw-all-radio-boxes!)
 
   (define (remove-switch-panel!)
