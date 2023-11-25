@@ -42,8 +42,15 @@
 (define previous-tab 0)
 
 ;; List of possible switch numbers
-(define switch-# (list 1 2 3 4 5 6 7 8 9 10 11 12 16 20 23 24 25 26 27 28))
-(define middle-switch 10)
+(define switch-name-state (list (cons "S-1" 1) (cons "S-2" 1) (cons "S-3" 1) (cons "S-4" 1) (cons "S-5" 1)
+                                (cons "S-6" 1) (cons "S-7" 1) (cons "S-8" 1) (cons "S-9" 1) (cons "S-10" 1)
+                                (cons "S-11" 1) (cons "S-12" 1) (cons "S-16" 1) (cons "S-20" 1)
+                                (cons "S-23" 1) (cons "S-24" 1) (cons "S-25" 1) (cons "S-26" 1)
+                                (cons "S-27" 1) (cons "S-28" 1)))
+(define middle-switch 9)
+
+(define name-switch car) ;; Abstractions
+(define state-switch (lambda (pair) (- (cdr pair) 1))) ;; -1 to convert to radio box data
 
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
@@ -211,27 +218,25 @@
          [parent switch-panel]
          ))
 
-  (define (switch-name-generator nmbr)
-    (format "S-~a" nmbr))
-
-  ;; ABSTRACT THIS AWAY
-  (for-each (lambda (nmbr) ;; Change to reflect previous states
-              (cond ((<= nmbr middle-switch) ;; Until the middle
+  ;; radio-box logic
+  
+  (define (draw-all-radio-boxes!) ;; Draws the radio boxes
+    (define current-parent left-switch-panel-vertical)
+    (define ctr 0) ;; Counter to allow more concise code
+    (for-each (lambda (switch-pair) 
+              (if (<= ctr middle-switch)
+                  (set! current-parent left-switch-panel-vertical)
+                  (set! current-parent right-switch-panel-vertical))
+                (set! ctr (+ ctr 1))
                      (new radio-box%
-                          [label (switch-name-generator nmbr)]
-                          [parent left-switch-panel-vertical]
+                          [label (name-switch switch-pair)]
+                          [parent current-parent]
                           [choices (list "1"
-                                         "2")]))))
-            switch-#)
-
-  (for-each (lambda (nmbr)
-              (cond ((> nmbr middle-switch)
-                     (new radio-box%
-                          [label (switch-name-generator nmbr)]
-                          [parent right-switch-panel-vertical]
-                          [choices (list "1"
-                                         "2")]))))
-            switch-#)
+                                         "2")]
+                          [selection (state-switch switch-pair)]
+                          ))
+            switch-name-state))
+  (draw-all-radio-boxes!)
 
   (define (remove-switch-panel!)
     (send main-tab-panel delete-child switch-panel))
