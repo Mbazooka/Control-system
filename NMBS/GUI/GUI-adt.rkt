@@ -38,8 +38,8 @@
 (define DETECTION-BLOCKS-TAB 1)
 (define SWITCHES-TAB 2)
 (define BARRIERS/LIGHTS-TAB 3)
+(define tab-drawing '()) ;; To be initialized later
 (define current-tab 0)
-(define previous-tab 0)
 
 ;; The trains currently and their tabs on the railway
 (define all-train-tabs (make-hash)) 
@@ -105,10 +105,27 @@
 
 (send control-panel show #t)
 
+;; Adjust tab drawing
+(define (adjust-tab! panel)
+  (tab-drawing 'remove-panel!)
+  (set! tab-drawing (panel)))
+
+;; Do action according to the tab
+(define (tab-action! tab)
+  (cond
+    ((= tab TRAIN-TAB) (adjust-tab! draw-train-panel!))
+    ((= tab DETECTION-BLOCKS-TAB) (adjust-tab! draw-detection-block-panel!))
+    ((= tab SWITCHES-TAB) (adjust-tab! draw-switch-panel!))
+    ((= tab BARRIERS/LIGHTS-TAB) (adjust-tab! draw-barrier/light-panel!))))
+
+
 ;; The main tabs for adjusting the Hardware components
 (define main-tab-panel
   (new tab-panel%
        [parent control-panel]
+       [callback (lambda (this event)
+                   (let ((selected-item (send this get-selection)))
+                     (tab-action! selected-item)))]
        [choices (list "Trains"
                       "Detection blocks"
                       "Switches"
@@ -221,15 +238,17 @@
          (show-current-train-elements!)
          (train-tab-change-logic! train-tab #f)))
 
-  (define (remove-train-panel!)
+  (define (remove-panel!)
     (send main-tab-panel delete-child train-panel))
 
   (define (dispatch msg)
     (cond
-      ((eq? msg 'remove-train-panel!) (remove-train-panel!))
+      ((eq? msg 'remove-panel!) (remove-panel!))
       (else
        "DRAW-TRAIN-PANEL!: Illegal message")))
   dispatch)
+
+(set! tab-drawing (draw-train-panel!))
 
 ;; Draws the switch tab of the mains tabs
 (define (draw-switch-panel!)
@@ -273,12 +292,12 @@
   (draw-all-switches!)
 
   ;; Removes all the drawn elements corresponding to this tab
-  (define (remove-switch-panel!)
+  (define (remove-panel!)
     (send main-tab-panel delete-child switch-panel))
 
   (define (dispatch msg)
     (cond
-      ((eq? msg 'remove-switch-panel!) (remove-switch-panel!))
+      ((eq? msg 'remove-panel!) (remove-panel!))
       (else
        "DRAW-SWITCH-PANEL!: Illegal message")))
   dispatch)
@@ -350,12 +369,12 @@
   (draw-all-lights!)
 
   ;; Removes all the drawn elements corresponding to this tab
-  (define (remove-barrier/light-panel!)
+  (define (remove-panel!)
     (send main-tab-panel delete-child barrier/light-panel))
 
   (define (dispatch msg)
     (cond
-      ((eq? msg 'remove-barrier/light-panel!) (remove-barrier/light-panel!))
+      ((eq? msg 'remove-panel!) (remove-panel!))
       (else
        "DRAW-BARRIER/LIGHT-PANEL!: Illegal message")))
   dispatch)
@@ -391,12 +410,12 @@
   (draw-detection-blocks!)
 
   ;; Removes all the drawn elements corresponding to this tab
-  (define (remove-detection-block-panel!)
+  (define (remove-panel!)
     (send main-tab-panel delete-child detection-block-panel))
 
   (define (dispatch msg)
     (cond
-      ((eq? msg 'remove-detection-block-panel!) (remove-detection-block-panel!))
+      ((eq? msg 'remove-panel!) (remove-panel!))
       (else
        "DRAW-DETECTION-BLOCK-PANEL!: Illegal message")))
   dispatch)
