@@ -41,6 +41,12 @@
 (define current-tab 0)
 (define previous-tab 0)
 
+;; The trains currently and their tabs on the railway
+(define all-train-tabs (make-hash)) 
+
+(define (get-train-names)
+  (map car (hash->list all-train-tabs)))
+
 ;; List of possible switches and their current state
 (define switch-name-state (list (mcons "S-1" 1) (mcons "S-2" 1) (mcons "S-3" 1) (mcons "S-4" 1) (mcons "S-5" 1)
                                 (mcons "S-6" 1) (mcons "S-7" 1) (mcons "S-8" 1) (mcons "S-9" 1) (mcons "S-10" 1)
@@ -48,14 +54,25 @@
                                 (mcons "S-23" 1) (mcons "S-24" 1) (mcons "S-25" 1) (mcons "S-26" 1)
                                 (mcons "S-27" 1) (mcons "S-28" 1)))
 
+(define middle-switch 9)
+
 ;; List of possible barriers and lights and their state
 (define barrier-name-state (list (mcons "C-1" 1) (mcons "C-2" 1)))
 (define light-name-state (list (mcons "L-1" "Hp0") (mcons "L-2" "Hp0")))
-(define middle-switch 9)
+
+;; List of possible detection-blocks and their state
+(define detection-block-name-state (list (mcons "1-1 :" "") (mcons "1-2 :" "") (mcons "1-3 :" "")
+                                         (mcons "1-4 :" "") (mcons "1-5 :" "") (mcons "1-6 :" "")
+                                         (mcons "1-7 :" "") (mcons "1-8 :" "") (mcons "2-1 :" "")
+                                         (mcons "2-2 :" "") (mcons "2-3 :" "") (mcons "2-4 :" "")
+                                         (mcons "2-5 :" "") (mcons "2-6 :" "") (mcons "2-7 :" "")
+                                         (mcons "2-8 :" "")))
+
+(define middle-detection-block 9)
 
 (define name-hardware mcar) ;; Abstractions
 (define state-switch (lambda (pair) (- (mcdr pair) 1))) ;; -1 to convert to radio box data
-(define state-barrier mcdr)
+(define state-hardware mcdr)
 
 ;; Adjusts the state of a hardware component in the given list to the given value
 (define (adjust-state! hardware val components)
@@ -96,11 +113,6 @@
                       "Detection blocks"
                       "Switches"
                       "Barriers and lights")]))
-
-(define all-train-tabs (make-hash)) ;; The trains currently and their tabs on the railway
-
-(define (get-train-names)
-  (map car (hash->list all-train-tabs)))
 
 ;; Draws the train tab of the main tabs
 (define (draw-train-panel!)
@@ -304,7 +316,7 @@
                                                 barrier-pair)]
                      [choices (list "closed"
                                     "open")]
-                     [selection (state-barrier barrier-pair)]))
+                     [selection (state-hardware barrier-pair)]))
               barrier-name-state))
 
   ;; Draws all the dropdown menus for barriers
@@ -348,11 +360,48 @@
        "DRAW-BARRIER/LIGHT-PANEL!: Illegal message")))
   dispatch)
 
-;(define test (new choice%
-;                  (label "Choice")
-;                  (parent main-tab-panel)
-;                  (choices (list "Item 0" "Item 1" "Item 2"))))
+;; Draws the detection-blocks
+(define (draw-detection-block-panel!)
+  
+    ;; Draw main detection-block panel
+  (define detection-block-panel
+    (new horizontal-panel%
+         [parent main-tab-panel]
+         [horiz-margin 0]
+         ))
 
+  (define vertical-db-panel
+    (new vertical-panel%
+         [parent detection-block-panel]
+         ))
 
+  (define second-vertical-db-panel ;; Pannel necessary for nicer allignment
+    (new vertical-panel%
+         [parent detection-block-panel]
+         ))
+  
+  ;; Draw detection-blocks
+  (define (draw-detection-blocks!)
+    (for-each (lambda (det-bl)
+                (new message%
+                     [parent vertical-db-panel] 
+                     [label (string-append (name-hardware det-bl) (state-hardware det-bl))]
+                     ))
+              detection-block-name-state))
+  (draw-detection-blocks!)
 
+  ;; Removes all the drawn elements corresponding to this tab
+  (define (remove-detection-block-panel!)
+    (send main-tab-panel delete-child detection-block-panel))
 
+  (define (dispatch msg)
+    (cond
+      ((eq? msg 'remove-detection-block-panel!) (remove-detection-block-panel!))
+      (else
+       "DRAW-DETECTION-BLOCK-PANEL!: Illegal message")))
+  dispatch)
+
+;; Add update detection-blocks (get other from state)
+
+;; This is the API that the GUI provides
+  
