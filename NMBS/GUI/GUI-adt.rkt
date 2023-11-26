@@ -282,7 +282,7 @@
          ))
 
   ;; Draw panel for barriers
-  (define left-barrier-panel
+  (define left-light-panel
     (new vertical-panel%
          [parent barrier/light-panel]
          ))
@@ -293,8 +293,8 @@
          [parent barrier/light-panel]
          ))
 
-  ;; Draw all the radioboxes
-  (define (draw-barriers!)
+  ;; Draw all the radioboxes for barriers
+  (define (draw-all-barriers!)
     (for-each (lambda (barrier-pair)
                 (new radio-box%
                      [label (name-hardware barrier-pair)]
@@ -306,7 +306,36 @@
                                     "open")]
                      [selection (state-barrier barrier-pair)]))
               barrier-name-state))
-  (draw-barriers!)                                     
+
+  ;; Draws all the dropdown menus for barriers
+  (define (draw-all-lights!)
+    (for-each (lambda (light-pair)
+                (new choice%
+                     [label (name-hardware light-pair)]
+                     [parent left-light-panel]
+                     [callback (lambda (this event)
+                                 (let ((selected-item (send this get-string-selection)))
+                                   (adjust-state! (name-hardware light-pair) selected-item light-name-state)))]                              
+                     [choices (list "Hp0" "Hp1" "Hp0+Sh0"
+                                    "Ks1+Zs3" "Ks2" "Ks2+Zs3"
+                                    "Sh1" "Ks1+Zs3+Zs3v")]
+                     [selection (let ((light-name (state-hardware light-pair)))
+                                  (cond
+                                    ((string=? light-name "Hp0") 0)
+                                    ((string=? light-name "Hp1") 1)
+                                    ((string=? light-name "Hp0+Sh0") 2)
+                                    ((string=? light-name "Ks1+Zs3") 3)
+                                    ((string=? light-name "Ks2") 4)
+                                    ((string=? light-name "Ks2+Zs3") 5)
+                                    ((string=? light-name "Sh1") 6)
+                                    ((string=? light-name "Ks1+Zs3+Zs3v") 7)))]
+                     ))
+              light-name-state))
+
+
+  ;; Calling the functions to draw everything
+  (draw-all-barriers!)
+  (draw-all-lights!)
 
   ;; Removes all the drawn elements corresponding to this tab
   (define (remove-barrier/light-panel!)
