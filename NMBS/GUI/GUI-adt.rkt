@@ -41,26 +41,31 @@
 (define current-tab 0)
 (define previous-tab 0)
 
-;; List of possible switch numbers
+;; List of possible switches and their current state
 (define switch-name-state (list (mcons "S-1" 1) (mcons "S-2" 1) (mcons "S-3" 1) (mcons "S-4" 1) (mcons "S-5" 1)
                                 (mcons "S-6" 1) (mcons "S-7" 1) (mcons "S-8" 1) (mcons "S-9" 1) (mcons "S-10" 1)
                                 (mcons "S-11" 1) (mcons "S-12" 1) (mcons "S-16" 1) (mcons "S-20" 1)
                                 (mcons "S-23" 1) (mcons "S-24" 1) (mcons "S-25" 1) (mcons "S-26" 1)
                                 (mcons "S-27" 1) (mcons "S-28" 1)))
+
+;; List of possible barriers and lights and their state
+(define barrier-name-state (list (mcons "C-1" 1) (mcons "C-2" 1)))
+(define light-name-state (list (mcons "L-1" 'Hp0) (mcons "L-2" 'Hp0)))
 (define middle-switch 9)
 
 (define name-switch mcar) ;; Abstractions
 (define state-switch (lambda (pair) (- (mcdr pair) 1))) ;; -1 to convert to radio box data
 
-(define (adjust-switch-state! switch val)
-  (define (adjust-state-help switch val current)
+;; Adjusts the state of a hardware component in the given list to the given value
+(define (adjust-state! hardware val components)
+  (define (adjust-state-help hardware val current)
     (if (null? current)
-        (error "Switch does not exist")
+        (error "Hardware component does not exist")
         (let ((current-pair (car current)))
-          (if (string=? (name-switch current-pair) switch)
+          (if (string=? (name-switch current-pair) hardware)
               (set-mcdr! current-pair val)
-              (adjust-state-help switch val (cdr current))))))
-  (adjust-state-help switch val switch-name-state))
+              (adjust-state-help hardware val (cdr current))))))
+  (adjust-state-help hardware val components))
     
 
 ;; Used for the right offset of the add-train button
@@ -243,7 +248,7 @@
                      [parent current-parent]
                      [callback (lambda (this event)
                                  (let ((item-selected (send this get-selection)))
-                                   (adjust-switch-state! (name-switch switch-pair) (+ item-selected 1))))]
+                                   (adjust-state! (name-switch switch-pair) (+ item-selected 1) switch-name-state)))]
                      [choices (list "1"
                                     "2")]
                      [selection (state-switch switch-pair)]
@@ -262,7 +267,29 @@
   dispatch)
 
   
-
+;;; Draws the Barriers and light panel
+;(define (draw-barrier/light-panel!)
+;
+;  ;; Draw main barrier/light panel
+;  (define barrier/light-panel
+;    (new horizontal-panel%
+;         [parent main-tab-panel]
+;         ))
+;
+;  ;; Draw panel for barriers
+;  (define left-barrier-panel
+;    (new vertical-panel%
+;         [parent barrier/light-panel]
+;         ))
+;
+;  ;; Draw panel for lights
+;  (define right-barrier-panel
+;    (new vertical-panel%
+;         [parent barrier/light-panel]
+;         ))
+;
+;  ;; Draws
+  
 
 
 
