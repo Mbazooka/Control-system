@@ -50,11 +50,12 @@
 
 ;; List of possible barriers and lights and their state
 (define barrier-name-state (list (mcons "C-1" 1) (mcons "C-2" 1)))
-(define light-name-state (list (mcons "L-1" 'Hp0) (mcons "L-2" 'Hp0)))
+(define light-name-state (list (mcons "L-1" "Hp0") (mcons "L-2" "Hp0")))
 (define middle-switch 9)
 
-(define name-switch mcar) ;; Abstractions
+(define name-hardware mcar) ;; Abstractions
 (define state-switch (lambda (pair) (- (mcdr pair) 1))) ;; -1 to convert to radio box data
+(define state-barrier mcdr)
 
 ;; Adjusts the state of a hardware component in the given list to the given value
 (define (adjust-state! hardware val components)
@@ -62,11 +63,16 @@
     (if (null? current)
         (error "Hardware component does not exist")
         (let ((current-pair (car current)))
-          (if (string=? (name-switch current-pair) hardware)
+          (if (string=? (name-hardware current-pair) hardware)
               (set-mcdr! current-pair val)
               (adjust-state-help hardware val (cdr current))))))
   (adjust-state-help hardware val components))
-    
+
+;; General procedure implementing the logic for all radioboxes
+(define (radiobox-logic! hardware adjustment-proc pair)
+  (lambda (this event)
+    (let ((item-selected (send this get-selection)))
+      (adjust-state! (name-hardware pair) (adjustment-proc item-selected) hardware))))
 
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
@@ -233,9 +239,9 @@
     (new vertical-panel%
          [parent switch-panel]
          ))
-      
+
   ;; Draws all the radio boxes
-  (define (draw-all-radio-boxes!) ;; Draws the radio boxes
+  (define (draw-all-switches!) ;; Draws the radio boxes
     (define current-parent left-switch-panel-vertical)
     (define ctr 0) ;; Counter to allow more concise code
     (for-each (lambda (switch-pair) 
@@ -244,18 +250,17 @@
                     (set! current-parent right-switch-panel-vertical))
                 (set! ctr (+ ctr 1))
                 (new radio-box%
-                     [label (name-switch switch-pair)]
+                     [label (name-hardware switch-pair)]
                      [parent current-parent]
-                     [callback (lambda (this event)
-                                 (let ((item-selected (send this get-selection)))
-                                   (adjust-state! (name-switch switch-pair) (+ item-selected 1) switch-name-state)))]
+                     [callback (radiobox-logic! switch-name-state (lambda (nmbr) (+ nmbr 1)) switch-pair)]
                      [choices (list "1"
                                     "2")]
                      [selection (state-switch switch-pair)]
                      ))
               switch-name-state))
-  (draw-all-radio-boxes!)
+  (draw-all-switches!)
 
+  ;; Removes all the drawn elements corresponding to this tab
   (define (remove-switch-panel!)
     (send main-tab-panel delete-child switch-panel))
 
@@ -267,29 +272,57 @@
   dispatch)
 
   
-;;; Draws the Barriers and light panel
-;(define (draw-barrier/light-panel!)
-;
-;  ;; Draw main barrier/light panel
-;  (define barrier/light-panel
-;    (new horizontal-panel%
-;         [parent main-tab-panel]
-;         ))
-;
-;  ;; Draw panel for barriers
-;  (define left-barrier-panel
-;    (new vertical-panel%
-;         [parent barrier/light-panel]
-;         ))
-;
-;  ;; Draw panel for lights
-;  (define right-barrier-panel
-;    (new vertical-panel%
-;         [parent barrier/light-panel]
-;         ))
-;
-;  ;; Draws
-  
+;; Draws the Barriers and light panel
+(define (draw-barrier/light-panel!)
+
+  ;; Draw main barrier/light panel
+  (define barrier/light-panel
+    (new horizontal-panel%
+         [parent main-tab-panel]
+         ))
+
+  ;; Draw panel for barriers
+  (define left-barrier-panel
+    (new vertical-panel%
+         [parent barrier/light-panel]
+         ))
+
+  ;; Draw panel for lights
+  (define right-barrier-panel
+    (new vertical-panel%
+         [parent barrier/light-panel]
+         ))
+
+  ;; Draw all the radioboxes
+  (define (draw-barriers!)
+    (for-each (lambda (barrier-pair)
+                (new radio-box%
+                     [label (name-hardware barrier-pair)]
+                     [parent right-barrier-panel]
+                     [callback (radiobox-logic! barrier-name-state
+                                                (lambda (x) x)
+                                                barrier-pair)]
+                     [choices (list "closed"
+                                    "open")]
+                     [selection (state-barrier barrier-pair)]))
+              barrier-name-state))
+  (draw-barriers!)                                     
+
+  ;; Removes all the drawn elements corresponding to this tab
+  (define (remove-barrier/light-panel!)
+    (send main-tab-panel delete-child barrier/light-panel))
+
+  (define (dispatch msg)
+    (cond
+      ((eq? msg 'remove-barrier/light-panel!) (remove-barrier/light-panel!))
+      (else
+       "DRAW-BARRIER/LIGHT-PANEL!: Illegal message")))
+  dispatch)
+
+;(define test (new choice%
+;                  (label "Choice")
+;                  (parent main-tab-panel)
+;                  (choices (list "Item 0" "Item 1" "Item 2"))))
 
 
 
