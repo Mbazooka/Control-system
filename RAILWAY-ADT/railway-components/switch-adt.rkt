@@ -17,8 +17,8 @@
 
     (define (change-position! input-state)
       (cond
-        ((= input-state 1) (set! state 1))       
-        ((= input-state 2) (set! state 2))
+        ((= input-state 1) (set! state 'left))       
+        ((= input-state 2) (set! state 'right))
         (else
          "SWITCH-ADT: Incorrect state in change-position!")))
 
