@@ -63,7 +63,22 @@
                     ((not (member db-id db-oc-ids))
                      ((railway 'change-detection-block-state!) db-id #f))))
                   db-ids)))
-    ;; !!!!!!!!!!! MESSAGE MUST BE SENT TO NMBS HERE !!!!!!!!!!!!!!!!!!!!!!
+    
+    ;; !!!!!!!!!!! MESSAGE MUST BE SENT TO NMBS HERE LATER !!!!!!!!!!!!!!!!!!!!!!
+    (define (update-abstraction message operation)
+      (lambda (data)
+        (for-each
+         (lambda (pair)
+           (let ((name (car pair))
+                 (state (cdr pair)))
+             ((railway message) name state)
+             (operation name state)))
+         data)))
+
+    (define update-switches! (update-abstraction 'change-switch-state! set-switch-position-HARDWARE!))
+    (define update-lights! (update-abstraction 'change-light-state! set-light-state-HARDWARE!))
+    (define update-barriers! (update-abstraction 'change-barrier-state! set-barrier-state-HARDWARE!))
+             
     
 
     (define (dispatch msg)
