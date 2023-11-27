@@ -79,7 +79,7 @@
     (define update-lights! (update-abstraction 'change-light-state! set-light-state-HARDWARE!))
     (define update-barriers! (update-abstraction 'change-barrier-state! set-barrier-state-HARDWARE!))
              
-    
+    ;; DB and trains
 
     (define (dispatch msg)
       (cond
