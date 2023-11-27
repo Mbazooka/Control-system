@@ -98,6 +98,7 @@
 
 ;; Used for the right offset of the add-train button
 (define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
+(define VERTICAL-OFFSET-SLIDER 50)
 
 ;; Used for the message placed on train tabs
 (define current-train-tab-message "Set train speed")
@@ -147,7 +148,8 @@
 
   (define (train-tab-change-logic! tab event)
     (let* ((name-train (send tab get-item-label (send tab get-selection)))
-           (value-to-set (hash-ref all-train-tabs name-train)))
+           (train-data  (hash-ref all-train-tabs name-train))
+           (value-to-set (caddr train-data)))
       (send slider set-value value-to-set)))
 
   ;; Draws a tab-panel for the different trains (in the train-tab)
@@ -169,6 +171,21 @@
     (new horizontal-panel%
          [parent train-panel]
          ))
+
+  ;; Data to put in drawdown menu
+  (define display-data (append (map (lambda (pair) (substring (mcar pair) 0 3)) detection-block-name-state)
+                               (map mcar switch-name-state)))
+
+  ;; dropdown menu to determine right place to put train
+  (define initial-track (new choice%
+                             [label "Initial-track:"]
+                             [parent train-panel]
+                             [choices (map (lambda (pair) (substring (mcar pair) 0 3)) detection-block-name-state)]))
+
+  (define track-behind (new choice%
+                            [label "Track-behind:"]
+                            [parent train-panel]
+                            [choices display-data]))
     
 
   ;; Button to be added to the train-tab and it's logic
@@ -176,12 +193,14 @@
     (train-counter 'increment!)
     (format "Train-~a" (train-counter 'get-value)))
   
-  (define (all-train-tabs-add! train-name) ;; Add an element to all-train-tabs
-    (hash-set! all-train-tabs train-name 0)) ;; Adding a train is always at speed 0
+  (define (all-train-tabs-add! train-name data) ;; Add an element to all-train-tabs
+    (hash-set! all-train-tabs train-name data)) ;; Adding a train is always at speed 0
 
   (define (add-train-button-logic! panel event) ;; Logic behind the button
-    (let ((name (tab-name-generator)))
-      (all-train-tabs-add! name) 
+    (let ((name (tab-name-generator))
+          (initial-track-sel (string->symbol (send initial-track get-string-selection)))
+          (track-behind-sel (string->symbol (send track-behind get-string-selection))))
+      (all-train-tabs-add! name (list initial-track-sel track-behind-sel 0)) 
       (send train-tab append name)
       (cond ((= (hash-count all-train-tabs) 1) (show-current-train-elements!))))) ;; Might need to be changed because not accessible
 
@@ -216,8 +235,11 @@
                                [parent top-tab-panel]))
 
   (define (slider-logic! slider event) ;; Logic for slider
-    (let ((name (send train-tab get-item-label (send train-tab get-selection))))
-      (hash-set! all-train-tabs name (send slider get-value))))
+    (let* ((name (send train-tab get-item-label (send train-tab get-selection)))
+          (train-data (hash-ref all-train-tabs name)))
+      (hash-set! all-train-tabs name (list (car train-data)
+                                           (cadr train-data)
+                                           (send slider get-value)))))
     
   (define slider ;; Slider itself
     (new slider%
@@ -227,7 +249,7 @@
          [min-value min-train-speed]
          [max-value max-train-speed]
          [init-value 0]
-         [vert-margin 100]))
+         [vert-margin VERTICAL-OFFSET-SLIDER]))
   
   (define (remove-current-train-elements!) ;; Removes the message and slider from the screen 
     (send display-message show #f)
@@ -436,8 +458,8 @@
 (define (provide-abstraction hardware-components cdr-op) ;; Different operation according to hardware
   (lambda ()
     (map (lambda (hardware-state)
-                (cons (string->symbol (name-hardware hardware-state)) (cdr-op hardware-state)))
-              hardware-components)))
+           (cons (string->symbol (name-hardware hardware-state)) (cdr-op hardware-state)))
+         hardware-components)))
 
 (define provide-switches ;; Gets the switches in list format
   (provide-abstraction switch-name-state mcdr))
@@ -451,15 +473,15 @@
 
 (define (provide-lights) ;; Gets the lights in list format
   (map (lambda (hardware-state)
-                (cons (string->symbol (name-hardware hardware-state)) (string->symbol (state-hardware hardware-state))))
-              light-name-state))
+         (cons (string->symbol (name-hardware hardware-state)) (string->symbol (state-hardware hardware-state))))
+       light-name-state))
 
 
 ;; Helper function to update the detection-blocks
 (define (set-correct-format! db-assoc-list) ;; Converts list to right format
   (map (lambda (block)
          (cons (string-append (symbol->string (car block)) " :") (cdr block)))
-   db-assoc-list))
+       db-assoc-list))
 
 (define (convert-presence presence) ;; To be changed depending on the detection-block
   (if presence
@@ -471,8 +493,9 @@
     (for-each
      (lambda (block)
        (adjust-state! (car block)
-                               (convert-presence (cdr block))
-                               detection-block-name-state))
+                      (convert-presence (cdr block))
+                      detection-block-name-state))
      processed-list)))
+
   
 
