@@ -440,10 +440,14 @@
               hardware-components)))
 
 (define provide-switches ;; Gets the switches in list format
-  (provide-abstraction switch-name-state state-switch))
+  (provide-abstraction switch-name-state mcdr))
+
+(define (convert-barrier-state barrier)
+  (let ((barrier-value (mcdr barrier)))
+    (= barrier-value 1)))
 
 (define provide-barriers ;; Gets the barriers in list format
-  (provide-abstraction barrier-name-state state-hardware))
+  (provide-abstraction barrier-name-state convert-barrier-state))
 
 (define (provide-lights) ;; Gets the lights in list format
   (map (lambda (hardware-state)
@@ -457,7 +461,7 @@
          (cons (string-append (symbol->string (car block)) " :") (cdr block)))
    db-assoc-list))
 
-(define (convert-presence presence)
+(define (convert-presence presence) ;; To be changed depending on the detection-block
   (if presence
       "Presence"
       "No presence"))
