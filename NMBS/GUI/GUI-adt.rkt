@@ -1,10 +1,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;               GUI ADT Test                ;;
+;;                  GUI ADT                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #lang racket
 
 (require racket/gui/base)
+(provide provide-trains
+         provide-switches
+         provide-barriers
+         provide-lights
+         update-detection-blocks!) ;; API of GUI
 
 ;; Counter class
 (define (make-counter)
@@ -41,10 +46,10 @@
 (define tab-drawing '()) ;; To be initialized later
 (define current-tab 0)
 
-;; The trains currently and their tabs on the railway
+;; The trains on the railway
 (define all-train-tabs (make-hash)) 
 
-(define (get-train-names)
+(define (get-train-names-with-speed)
   (map car (hash->list all-train-tabs)))
 
 ;; List of possible switches and their current state
@@ -61,12 +66,12 @@
 (define light-name-state (list (mcons "L-1" "Hp0") (mcons "L-2" "Hp0")))
 
 ;; List of possible detection-blocks and their state
-(define detection-block-name-state (list (mcons "1-1 :" "") (mcons "1-2 :" "") (mcons "1-3 :" "")
-                                         (mcons "1-4 :" "") (mcons "1-5 :" "") (mcons "1-6 :" "")
-                                         (mcons "1-7 :" "") (mcons "1-8 :" "") (mcons "2-1 :" "")
-                                         (mcons "2-2 :" "") (mcons "2-3 :" "") (mcons "2-4 :" "")
-                                         (mcons "2-5 :" "") (mcons "2-6 :" "") (mcons "2-7 :" "")
-                                         (mcons "2-8 :" "")))
+(define detection-block-name-state (list (mcons "1-1 :" "No presence") (mcons "1-2 :" "No presence") (mcons "1-3 :" "No presence")
+                                         (mcons "1-4 :" "No presence") (mcons "1-5 :" "No presence") (mcons "1-6 :" "No presence")
+                                         (mcons "1-7 :" "No presence") (mcons "1-8 :" "No presence") (mcons "2-1 :" "No presence")
+                                         (mcons "2-2 :" "No presence") (mcons "2-3 :" "No presence") (mcons "2-4 :" "No presence")
+                                         (mcons "2-5 :" "No presence") (mcons "2-6 :" "No presence") (mcons "2-7 :" "No presence")
+                                         (mcons "2-8 :" "No presence")))
 
 (define middle-detection-block 9)
 
@@ -149,7 +154,7 @@
   (define train-tab
     (new tab-panel%
          [parent train-panel]
-         [choices (get-train-names)]
+         [choices (get-train-names-with-speed)]
          [callback train-tab-change-logic!]))
                      
 
@@ -382,7 +387,7 @@
 ;; Draws the detection-blocks
 (define (draw-detection-block-panel!)
   
-    ;; Draw main detection-block panel
+  ;; Draw main detection-block panel
   (define detection-block-panel
     (new horizontal-panel%
          [parent main-tab-panel]
@@ -422,5 +427,48 @@
 
 ;; Add update detection-blocks (get other from state)
 
-;; This is the API that the GUI provides
+;;;;;;;;;;;;;;;;;;;;;;;;; API GUI ;;;;;;;;;;;;;;;;;;;;;;;;; 
+(define (provide-trains) ;; Gets the trains in list format
+  (map (lambda (hardware-state)
+         (cons (string->symbol (car hardware-state)) (cdr hardware-state)))
+       (hash->list all-train-tabs)))
+
+(define (provide-abstraction hardware-components cdr-op) ;; Different operation according to hardware
+  (lambda ()
+    (map (lambda (hardware-state)
+                (cons (string->symbol (name-hardware hardware-state)) (cdr-op hardware-state)))
+              hardware-components)))
+
+(define provide-switches ;; Gets the switches in list format
+  (provide-abstraction switch-name-state state-switch))
+
+(define provide-barriers ;; Gets the barriers in list format
+  (provide-abstraction barrier-name-state state-hardware))
+
+(define (provide-lights) ;; Gets the lights in list format
+  (map (lambda (hardware-state)
+                (cons (string->symbol (name-hardware hardware-state)) (string->symbol (state-hardware hardware-state))))
+              light-name-state))
+
+
+;; Helper function to update the detection-blocks
+(define (set-correct-format! db-assoc-list) ;; Converts list to right format
+  (map (lambda (block)
+         (cons (string-append (symbol->string (car block)) " :") (cdr block)))
+   db-assoc-list))
+
+(define (convert-presence presence)
+  (if presence
+      "Presence"
+      "No presence"))
+
+(define (update-detection-blocks! db-assoc-list)
+  (let ((processed-list (set-correct-format! db-assoc-list)))
+    (for-each
+     (lambda (block)
+       (adjust-state! (car block)
+                               (convert-presence (cdr block))
+                               detection-block-name-state))
+     processed-list)))
   
+
