@@ -55,14 +55,7 @@
     (define (update-detection-blocks!)
       (let ((db-oc-ids (get-occupied-detection-blocks)) ;; Occupied detection-block ids
             (db-ids (get-detection-block-ids)))
-        (for-each (lambda (db-id)
-                    ((railway 'change-detection-block-state!) db-id #t))
-                  db-oc-ids)
-        (for-each (lambda (db-id)
-                    (cond
-                      ((not (member db-id db-oc-ids))
-                       ((railway 'change-detection-block-state!) db-id #f))))
-                  db-ids)
+        ((railway 'update-detection-blocks!) db-oc-ids db-ids)
         (cons db-oc-ids db-ids)))
 
     ;; The following is an abstraction of a reoccuring pattern for updating Hardware
