@@ -212,10 +212,10 @@
 
    ))
 
-(define railway-change-detection-block-state!/get-detection-block-state-tests
+(define railway-update-detection-blocks!/get-detection-block-state-tests
 
   (test-suite
-   "RAILWAY-ADT: CHANGE-DETECTION-BLOCK-STATE!/GET-DTECTION-BLOCK-STATE TESTS"
+   "RAILWAY-ADT: UPDATE-DETECTION-BLOCKS!/GET-DTECTION-BLOCK-STATE TESTS"
 
 
    (test-case
@@ -225,11 +225,11 @@
     "get-detection-block-state: operation does not exist")
       
    (test-case
-    "Test if 'change-detection-block-state!' exists"
+    "Test if 'update-detection-blocks!' exists"
     (check-not-equal?
-     (test-railway 'change-detection-block-state!)
+     (test-railway 'update-detection-blocks!)
      "RAILWAY-ADT: Incorrect message"
-     "change-detection-block-state: operation does not exist"))
+     "update-detection-blocks!: operation does not exist"))
 
    (test-case
     "Test if 'get-detection-block-state' works properly"
@@ -239,13 +239,13 @@
      "get-detection-block-state: Incorrect operation"))
 
    (test-case
-    "Test if 'change-detection-block-state!' works properly"
+    "Test if 'update-detection-blocks!' works properly"
     (check-equal?
      (begin
-       ((test-railway 'change-detection-block-state!) '1-1 #t)
+       ((test-railway 'update-detection-blocks!) '(1-1) '(1-1 1-2 1-3 1-4 1-5 1-6 1-7 1-8 2-1 2-2 2-3 2-4 2-5 2-6 2-7 2-8))
        ((test-railway 'get-detection-block-state) '1-1))
      #t
-     "change-detection-block-state!: Incorrect operation"))
+     "update-detection-blocks!: Incorrect operation"))
 
    ))
 
@@ -270,7 +270,7 @@
                               railway-change-switch-state!/get-switch-state-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
-                              railway-change-detection-block-state!/get-detection-block-state-tests
+                              railway-update-detection-blocks!/get-detection-block-state-tests
                               railway-message-sending-tests))
 
 (test/gui all-tests)

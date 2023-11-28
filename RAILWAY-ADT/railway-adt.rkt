@@ -64,6 +64,17 @@
                "RAILWAY-ADT: Incorrect barrier state change"))
             #f)))
 
+    ;; Updates the detection block (only that can be put here to make sure the dependency diagram does not become a mess)
+    (define (update-detection-blocks! occupied-dbs all-dbs)
+      (for-each (lambda (db-id)
+                  (change-detection-block-state! db-id #t))
+                occupied-dbs)
+      (for-each (lambda (db-id)
+                  (cond
+                    ((not (member db-id occupied-dbs))
+                     (change-detection-block-state! db-id #f))))
+                all-dbs))
+    
     ;; Another abstraction allowing more general code for get-operations
     (define (get-operation-abstraction HARDWARE operation)
       (lambda (object-name)
@@ -96,7 +107,7 @@
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)
         ((eq? msg 'change-light-state!) change-light-state!)
-        ((eq? msg 'change-detection-block-state!) change-detection-block-state!)
+        ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
         (else
          "RAILWAY-ADT: Incorrect message")))
