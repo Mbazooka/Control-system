@@ -236,7 +236,7 @@
 
   (define (slider-logic! slider event) ;; Logic for slider
     (let* ((name (send train-tab get-item-label (send train-tab get-selection)))
-          (train-data (hash-ref all-train-tabs name)))
+           (train-data (hash-ref all-train-tabs name)))
       (hash-set! all-train-tabs name (list (car train-data)
                                            (cadr train-data)
                                            (send slider get-value)))))
@@ -425,12 +425,17 @@
     (new vertical-panel%
          [parent detection-block-panel]
          ))
+
+  (define message-panel '())
   
   ;; Draw detection-blocks
   (define (draw-detection-blocks!)
+    (set! message-panel
+          (new vertical-panel%
+               [parent vertical-db-panel]))
     (for-each (lambda (det-bl)
                 (new message%
-                     [parent vertical-db-panel] 
+                     [parent message-panel] 
                      [label (string-append (name-hardware det-bl) (state-hardware det-bl))]
                      ))
               detection-block-name-state))
@@ -440,14 +445,26 @@
   (define (remove-panel!)
     (send main-tab-panel delete-child detection-block-panel))
 
+  (define (remove-blocks!) ;; Remove messages from the screen
+    (send vertical-db-panel delete-child message-panel))
+
+  (define (draw-update-button!)
+    (new button%
+         [label "Update"]
+         [parent message-panel]
+         [callback (lambda (this event)
+                     (remove-blocks!)
+                     (draw-detection-blocks!)
+                     (draw-update-button!))]
+         ))
+  (draw-update-button!)
+
   (define (dispatch msg)
     (cond
       ((eq? msg 'remove-panel!) (remove-panel!))
       (else
        "DRAW-DETECTION-BLOCK-PANEL!: Illegal message")))
   dispatch)
-
-;; Add update detection-blocks (get other from state)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; API GUI ;;;;;;;;;;;;;;;;;;;;;;;;; 
 (define (provide-trains) ;; Gets the trains in list format
