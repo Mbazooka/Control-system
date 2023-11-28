@@ -247,6 +247,28 @@
      #t
      "update-detection-blocks!: Incorrect operation"))
 
+   (test-case
+    "Test if 'get-all-db-states' works properly"
+    (check-equal?
+     ((test-railway 'get-all-db-states))
+     (list (cons '2-8 #f)
+           (cons '1-4  #f)
+           (cons '1-3  #f)
+           (cons '1-6  #f)
+           (cons '1-5  #f)
+           (cons '1-2  #f)
+           (cons '2-3  #f)
+           (cons '2-2  #f)
+           (cons '2-5  #f)
+           (cons '2-4  #f)
+           (cons '2-7  #f)
+           (cons '1-8  #f)
+           (cons '2-6  #f)
+           (cons '1-7  #f)
+           (cons '1-1  #t)
+           (cons '2-1 #f))
+     "get-all-db-states: incorrect operation"))
+
    ))
 
 (define railway-message-sending-tests

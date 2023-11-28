@@ -39,12 +39,10 @@
     (define (set-barrier-state-HARDWARE! barrier barrier-state)
       (cond
         (((railway 'change-barrier-state!) barrier barrier-state)
-         (cond
-           ((eq? barrier-state 'open) (open-crossing! barrier))
-           ((eq? barrier-state 'close) (close-crossing! barrier))
-           (else
-            "INFRABEL-ADT: Incorrect barrier-state ADT")))))
-
+         (if barrier-state
+             (open-crossing! barrier)
+             (close-crossing! barrier)))))
+    
     ;; Changing the light their state
     (define (set-light-state-HARDWARE! light light-state)
       (cond
@@ -85,18 +83,16 @@
                (init-track (cadr train))
                (beh-track (caddr train))
                (speed (cadddr train)))
-           (if ((railway 'add-train!) train-name init-track beh-track)
-               (add-train-HARDWARE! train-name init-track beh-track)
-               (change-speed! train-name speed))))
+           (add-train-HARDWARE! train-name init-track beh-track)
+           (change-speed! train-name speed)))
        trains))            
 
     (define (dispatch msg)
       (cond
-        ((eq? msg 'add-train-HARDWARE!) add-train-HARDWARE!)
-        ((eq? msg 'set-speed-train-HARDWARE!) set-speed-train-HARDWARE!)
-        ((eq? msg 'set-switch-position-HARDWARE!) set-switch-position-HARDWARE!)
-        ((eq? msg 'set-barrier-state-HARDWARE!) set-barrier-state-HARDWARE!)
-        ((eq? msg 'set-light-state-HARDWARE!) set-light-state-HARDWARE!)
+        ((eq? msg 'update-switches!) update-switches!)
+        ((eq? msg 'update-lights!) update-lights!)
+        ((eq? msg 'update-barriers!) update-barriers!)
+        ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else
          "INFRABEL-ADT: Incorrect message")))

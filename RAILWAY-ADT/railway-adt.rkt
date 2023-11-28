@@ -15,7 +15,7 @@
 
 (provide make-railway-adt)
 
-(define (make-railway-adt)
+(define (make-railway-adt) 
   (let* ((HARDWARE-SETUP (make-hardware-setup-adt))
          (HARDWARE-SWITCHES (HARDWARE-SETUP 'get-possible-switches))
          (HARDWARE-LIGHTS (HARDWARE-SETUP 'get-possible-lights))
@@ -94,7 +94,15 @@
     (define get-light-state (get-operation-abstraction HARDWARE-LIGHTS 'get-state))
 
     ;; Procedure that gets the detection-block-state
-    (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence)) 
+    (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence))
+
+    ;; Procedure that gets the detection-block states for all detection-blocks
+    (define (get-all-db-states)
+      (map
+       (lambda (key)
+         (cons key (get-detection-block-state key)))
+       (hash-keys HARDWARE-DETECTION-BLOCKS)))
+      
 
     (define (dispatch msg)
       (cond
@@ -109,6 +117,7 @@
         ((eq? msg 'change-light-state!) change-light-state!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
+        ((eq? msg 'get-all-db-states) get-all-db-states) 
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))

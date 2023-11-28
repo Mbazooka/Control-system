@@ -29,7 +29,7 @@
   (add-loco train-5 'D1 'D2)
   (define train-6 'TEST-6)
   (add-loco train-6 'D8 'D1)
-  (set-loco-speed! train 200)
+  (set-loco-speed! train 0)
   (set-loco-speed! train-2 200)
   (set-loco-speed! train-3 200)
   (set-loco-speed! train-4 200)
