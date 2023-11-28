@@ -49,6 +49,7 @@
      #f
      "Add-train!: Train already exists"))))
 
+
 ;; Test the change-train-speed!/get-train-speed operation of the railway
 (define railway-change-train-speed!/get-train-speed-tests
   (test-suite
@@ -288,6 +289,7 @@
 (define all-tests (test-suite "Railway-Module"
                               railway-make-test
                               railway-add-train-tests
+                              railway-remove-train-tests
                               railway-change-train-speed!/get-train-speed-tests
                               railway-change-switch-state!/get-switch-state-tests
                               railway-check-barrier-open?/change-barrier-state!-tests

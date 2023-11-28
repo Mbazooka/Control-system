@@ -97,7 +97,7 @@
       (adjust-state! (name-hardware pair) (adjustment-proc item-selected) hardware))))
 
 ;; Used for the right offset of the add-train button
-(define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 190)
+(define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 330)
 (define VERTICAL-OFFSET-SLIDER 50)
 
 ;; Used for the message placed on train tabs
@@ -211,23 +211,6 @@
          [callback add-train-button-logic!]
          [horiz-margin HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON]
          ))
-
-  ;; Button to be added to the train-tab and it's logic
-  (define (all-train-tabs-delete! train-name) ;; Deletes an element from all-train-tabs (for garbage collection)
-    (hash-remove! all-train-tabs train-name))
-  
-  (define (delete-train-button-logic! panel event) ;; Deletes a running train tab from the tab list
-    (let ((selected-tab (send train-tab get-selection)))
-      (all-train-tabs-delete! (send train-tab get-item-label selected-tab)) ;; +1 due to tab starting differently
-      (send train-tab delete (send train-tab get-selection))
-      (cond ((= (hash-count all-train-tabs) 0) (remove-current-train-elements!))
-            (else (train-tab-change-logic! train-tab #f)))))
-
-  (define delete-train-button
-    (new button%
-         [label "Delete train"]
-         [parent second-panel]
-         [callback delete-train-button-logic!]))
 
   ;; All the elements for the running-train-tab
   (define display-message (new message%
