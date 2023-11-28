@@ -51,7 +51,7 @@
         (((railway 'change-light-state!) light light-state)
          (set-sign-code! light light-state))))
     
-    ;; Update the detection-blocks
+    ;; Update the detection-blocks 
     (define (update-detection-blocks!)
       (let ((db-oc-ids (get-occupied-detection-blocks)) ;; Occupied detection-block ids
             (db-ids (get-detection-block-ids)))
@@ -59,12 +59,13 @@
                     ((railway 'change-detection-block-state!) db-id #t))
                   db-oc-ids)
         (for-each (lambda (db-id)
-                  (cond
-                    ((not (member db-id db-oc-ids))
-                     ((railway 'change-detection-block-state!) db-id #f))))
-                  db-ids)))
-    
-    ;; !!!!!!!!!!! MESSAGE MUST BE SENT TO NMBS HERE LATER !!!!!!!!!!!!!!!!!!!!!!
+                    (cond
+                      ((not (member db-id db-oc-ids))
+                       ((railway 'change-detection-block-state!) db-id #f))))
+                  db-ids)
+        (cons db-oc-ids db-ids)))
+
+    ;; The following is an abstraction of a reoccuring pattern for updating Hardware
     (define (update-abstraction message operation)
       (lambda (data)
         (for-each
@@ -78,8 +79,23 @@
     (define update-switches! (update-abstraction 'change-switch-state! set-switch-position-HARDWARE!))
     (define update-lights! (update-abstraction 'change-light-state! set-light-state-HARDWARE!))
     (define update-barriers! (update-abstraction 'change-barrier-state! set-barrier-state-HARDWARE!))
-             
-    ;; DB and trains
+
+    ;; Abstraction for synchronous speed changing
+    (define (change-speed! train-name speed)
+      ((railway 'change-train-speed!)  train-name speed)
+      (set-speed-train-HARDWARE! train-name speed))
+
+    (define (update-trains! trains) ;; Updates the trains
+      (for-each
+       (lambda (train)
+         (let ((train-name (car train))
+               (init-track (cadr train))
+               (beh-track (caddr train))
+               (speed (cadddr train)))
+           (if ((railway 'add-train!) train-name init-track beh-track)
+               (add-train-HARDWARE! train-name init-track beh-track)
+               (change-speed! train-name speed))))
+       trains))            
 
     (define (dispatch msg)
       (cond
