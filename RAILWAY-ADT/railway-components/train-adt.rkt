@@ -20,7 +20,7 @@
     (define (change-speed! input-speed) ;; Made stupidproof to avoid high speeds
       (if (> (abs input-speed) 200) ;; If not, speed can go too high
           "TRAIN-ADT: Illegal speed"
-          (set! speed input-speed)))
+            (set! speed input-speed)))
 
     (define (dispatch msg)
       (cond

@@ -4,7 +4,6 @@
 
 #lang racket
 
-(#%require (only racket/base time error)) ;; Library for error messages
 (provide make-train-adt)
 
 (define (make-train-adt name initial-track initial-track-behind)  
@@ -19,7 +18,7 @@
     (define (get-current-speed) speed)
 
     (define (change-speed! input-speed) ;; Made stupidproof to avoid high speeds
-      (if (> (abs input-speed) 300) ;; If not, speed can go too high
+      (if (> (abs input-speed) 200) ;; If not, speed can go too high
           "TRAIN-ADT: Illegal speed"
           (set! speed input-speed)))
 
