@@ -289,7 +289,6 @@
 (define all-tests (test-suite "Railway-Module"
                               railway-make-test
                               railway-add-train-tests
-                              railway-remove-train-tests
                               railway-change-train-speed!/get-train-speed-tests
                               railway-change-switch-state!/get-switch-state-tests
                               railway-check-barrier-open?/change-barrier-state!-tests

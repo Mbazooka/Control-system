@@ -97,8 +97,11 @@
       (adjust-state! (name-hardware pair) (adjustment-proc item-selected) hardware))))
 
 ;; Used for the right offset of the add-train button
-(define HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON 330)
-(define VERTICAL-OFFSET-SLIDER 50)
+(define ADD-TRAIN-BUTTON-HOR-MARGIN 330)
+(define SLIDER-VERT-MARGIN 50)
+(define DETECTION-BLOCK-DATA-VERT-MARGIN 50)
+(define GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN 100)
+(define BARRIER/LIGHT-WIDGET-VERT-MARGIN 30)
 
 ;; Used for the message placed on train tabs
 (define current-train-tab-message "Set train speed")
@@ -209,7 +212,7 @@
          [label "Add train"]
          [parent second-panel]
          [callback add-train-button-logic!]
-         [horiz-margin HORIZONTAL-OFFSET-ADD-TRAIN-BUTTON]
+         [horiz-margin ADD-TRAIN-BUTTON-HOR-MARGIN]
          ))
 
   ;; All the elements for the running-train-tab
@@ -232,7 +235,7 @@
          [min-value min-train-speed]
          [max-value max-train-speed]
          [init-value 0]
-         [vert-margin VERTICAL-OFFSET-SLIDER]))
+         [vert-margin SLIDER-VERT-MARGIN]))
   
   (define (remove-current-train-elements!) ;; Removes the message and slider from the screen 
     (send display-message show #f)
@@ -318,21 +321,33 @@
 
   ;; Draw main barrier/light panel
   (define barrier/light-panel
-    (new horizontal-panel%
+    (new group-box-panel%
          [parent main-tab-panel]
+         [label "Barrier and lights overview"]
          ))
+
+    ;; Panel on which the group boxes must be drawn
+  (define draw-group-panel
+    (new horizontal-panel%
+         [parent barrier/light-panel]
+         [vert-margin GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN]
+         ))
+         
 
   ;; Draw panel for barriers
   (define left-light-panel
-    (new vertical-panel%
-         [parent barrier/light-panel]
+    (new group-box-panel%
+         [parent draw-group-panel]
+         [label "Adjust barriers"]
          ))
 
   ;; Draw panel for lights
   (define right-barrier-panel
-    (new vertical-panel%
-         [parent barrier/light-panel]
+    (new group-box-panel%
+         [parent draw-group-panel]
+         [label "Adjust lights"]
          ))
+
 
   ;; Draw all the radioboxes for barriers
   (define (draw-all-barriers!)
@@ -345,6 +360,7 @@
                                                 barrier-pair)]
                      [choices (list "closed"
                                     "open")]
+                     [vert-margin BARRIER/LIGHT-WIDGET-VERT-MARGIN]
                      [selection (state-hardware barrier-pair)]))
               barrier-name-state))
 
@@ -360,6 +376,7 @@
                      [choices (list "Hp0" "Hp1" "Hp0+Sh0"
                                     "Ks1+Zs3" "Ks2" "Ks2+Zs3"
                                     "Sh1" "Ks1+Zs3+Zs3v")]
+                     [vert-margin BARRIER/LIGHT-WIDGET-VERT-MARGIN]
                      [selection (let ((light-name (state-hardware light-pair)))
                                   (cond
                                     ((string=? light-name "Hp0") 0)
@@ -394,20 +411,17 @@
   
   ;; Draw main detection-block panel
   (define detection-block-panel
-    (new horizontal-panel%
+    (new group-box-panel%
          [parent main-tab-panel]
-         [horiz-margin 0]
+         [label "Detection block overview"]
          ))
 
   (define vertical-db-panel
     (new vertical-panel%
          [parent detection-block-panel]
+         [vert-margin DETECTION-BLOCK-DATA-VERT-MARGIN]
          ))
 
-  (define second-vertical-db-panel ;; Pannel necessary for nicer allignment
-    (new vertical-panel%
-         [parent detection-block-panel]
-         ))
 
   (define message-panel '())
   
@@ -448,8 +462,10 @@
       (else
        "DRAW-DETECTION-BLOCK-PANEL!: Illegal message")))
   dispatch)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;; API GUI ;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;; API GUI ;;;;;;;;;;;;;;;;;;;;;;;;; 
 (define (provide-trains) ;; Gets the trains in list format
   (map (lambda (hardware-state)
          (cons (string->symbol (car hardware-state)) (cdr hardware-state)))
