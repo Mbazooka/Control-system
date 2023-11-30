@@ -124,7 +124,7 @@
     "Test if 'get-all-switches' exists"
     (check-not-equal?
      (test-railway 'get-all-switches)
-          "RAILWAY-ADT: Incorrect message"
+     "RAILWAY-ADT: Incorrect message"
      "get-all-switches: operation does not exist"))
 
    (test-case
@@ -233,17 +233,38 @@
 
    ))
 
-(define railway-update-detection-blocks!/get-detection-block-state-tests
+(define railway-get-all-lights-tests
+  (test-suite
+   "RAILWAY-ADT: GET-AL-LIGHTS TESTS"
+
+   (test-case
+    "Test if 'get-all-lights' exists"
+    (check-not-equal?
+     (test-railway 'get-all-lights)
+     "RAILWAY-ADT: Incorrect message"
+     "get-all-lights: operation does not exist"))
+
+   (test-case
+    "Test if 'get-all-lights' works properly"
+    (check-eq?
+     (length ((test-railway 'get-all-lights)))
+     2
+     "get-all-lights: operation does not work properly"))
+
+   ))
+
+(define railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks-tests
 
   (test-suite
-   "RAILWAY-ADT: UPDATE-DETECTION-BLOCKS!/GET-DTECTION-BLOCK-STATE TESTS"
+   "RAILWAY-ADT: UPDATE-DETECTION-BLOCKS!/GET-DTECTION-BLOCK-STATE/GET-ALL-DETECTION-BLOCKS TESTS"
 
 
    (test-case
     "Test if 'get-detection-block-state!' exists"
-    (test-railway 'get-detection-block-state)
-    "RAILWAY-ADT: Incorrect message"
-    "get-detection-block-state: operation does not exist")
+    (check-not-equal?
+     (test-railway 'get-detection-block-state)
+     "RAILWAY-ADT: Incorrect message"
+     "get-detection-block-state: operation does not exist"))
       
    (test-case
     "Test if 'update-detection-blocks!' exists"
@@ -269,11 +290,11 @@
      "update-detection-blocks!: Incorrect operation"))
 
    (test-case
-    "Test if 'get-all-db-states' works properly"
+    "Test if 'get-all-detection-blocks' works properly"
     (check-equal?
-     (length ((test-railway 'get-all-db-states)))
+     (length ((test-railway 'get-all-detection-blocks)))
      16
-     "get-all-db-states: incorrect operation"))
+     "get-all-detection-blocks: incorrect operation"))
 
    ))
 
@@ -299,7 +320,8 @@
                               railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
-                              railway-update-detection-blocks!/get-detection-block-state-tests
+                              railway-get-all-lights-tests
+                              railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks-tests
                               railway-message-sending-tests))
 
 (test/gui all-tests)

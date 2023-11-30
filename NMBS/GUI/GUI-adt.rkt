@@ -50,41 +50,11 @@
 
 (define middle-switch 9) ;; Necessary for nice printing of switches
 
-;; List of possible barriers and lights and their state
-(define light-name-state (list (mcons "L-1" "Hp0") (mcons "L-2" "Hp0")))
-
-;; List of possible detection-blocks and their state
-(define detection-block-name-state (list (mcons "1-1 :" "No presence") (mcons "1-2 :" "No presence") (mcons "1-3 :" "No presence")
-                                         (mcons "1-4 :" "No presence") (mcons "1-5 :" "No presence") (mcons "1-6 :" "No presence")
-                                         (mcons "1-7 :" "No presence") (mcons "1-8 :" "No presence") (mcons "2-1 :" "No presence")
-                                         (mcons "2-2 :" "No presence") (mcons "2-3 :" "No presence") (mcons "2-4 :" "No presence")
-                                         (mcons "2-5 :" "No presence") (mcons "2-6 :" "No presence") (mcons "2-7 :" "No presence")
-                                         (mcons "2-8 :" "No presence")))
-
 (define middle-detection-block 9)
 
 
 (define hardware-name car)
 (define hardware-data cdr)
-(define name-hardware mcar) ;; ADJABS
-(define state-hardware mcdr)
-
-;; Adjusts the state of a hardware component in the given list to the given value
-(define (adjust-state! hardware val components)
-  (define (adjust-state-help hardware val current)
-    (if (null? current)
-        (error "Hardware component does not exist")
-        (let ((current-pair (car current)))
-          (if (string=? (name-hardware current-pair) hardware)
-              (set-mcdr! current-pair val)
-              (adjust-state-help hardware val (cdr current))))))
-  (adjust-state-help hardware val components))
-
-;; General procedure implementing the logic for all radioboxes
-(define (radiobox-logic! hardware adjustment-proc pair)
-  (lambda (this event)
-    (let ((item-selected (send this get-selection)))
-      (adjust-state! (name-hardware pair) (adjustment-proc item-selected) hardware))))
 
 ;; Used for the right offset of the add-train button
 (define ADD-TRAIN-BUTTON-HOR-MARGIN 330)
@@ -93,7 +63,10 @@
 (define GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN 100)
 (define BARRIER/LIGHT-WIDGET-VERT-MARGIN 30)
 
-(define (make-gui-adt switch-adjust-cb switch-retrieve-cb barrier-adjust-cb barrier-retrieve-cb)
+(define (make-gui-adt switch-adjust-cb switch-retrieve-cb
+                      barrier-adjust-cb barrier-retrieve-cb
+                      light-adjust-cb light-retrieve-cb
+                      db-retrieve-cb)
 
   ;; Used for the message placed on train tabs
   (define current-train-tab-message "Set train speed")
@@ -169,7 +142,7 @@
 
     ;; Data to put in drawdown menu
     ;(define display-data (append (map (lambda (pair) (substring (mcar pair) 0 3)) detection-block-name-state)
-     ;                            (map mcar switch-name-state)))
+    ;                            (map mcar switch-name-state)))
 
     ;; dropdown menu to determine right place to put train
     (define initial-track (new choice%
@@ -290,7 +263,7 @@
                        [parent current-parent]
                        [callback (lambda (this event)
                                    (switch-adjust-cb (hardware-name switch-pair) (+ (send this get-selection) 1)))
-                                   ]
+                                 ]
                        [choices (list "1"
                                       "2")]
                        [selection (- (hardware-data switch-pair) 1)]
@@ -351,7 +324,7 @@
                        [parent right-barrier-panel]
                        [callback (lambda (this event)
                                    (barrier-adjust-cb (hardware-name barrier-pair) (send this get-selection)))
-                                   ]
+                                 ]
                        [choices (list "open"
                                       "closed")]
                        [vert-margin BARRIER/LIGHT-WIDGET-VERT-MARGIN]
@@ -362,27 +335,27 @@
     (define (draw-all-lights!)
       (for-each (lambda (light-pair)
                   (new choice%
-                       [label (name-hardware light-pair)]
+                       [label (symbol->string (hardware-name light-pair))]
                        [parent left-light-panel]
                        [callback (lambda (this event)
                                    (let ((selected-item (send this get-string-selection)))
-                                     (adjust-state! (name-hardware light-pair) selected-item light-name-state)))]                              
+                                     (light-adjust-cb (hardware-name light-pair) (string->symbol selected-item))))]                            
                        [choices (list "Hp0" "Hp1" "Hp0+Sh0"
                                       "Ks1+Zs3" "Ks2" "Ks2+Zs3"
                                       "Sh1" "Ks1+Zs3+Zs3v")]
                        [vert-margin BARRIER/LIGHT-WIDGET-VERT-MARGIN]
-                       [selection (let ((light-name (state-hardware light-pair)))
+                       [selection (let ((light-name (hardware-data light-pair)))
                                     (cond
-                                      ((string=? light-name "Hp0") 0)
-                                      ((string=? light-name "Hp1") 1)
-                                      ((string=? light-name "Hp0+Sh0") 2)
-                                      ((string=? light-name "Ks1+Zs3") 3)
-                                      ((string=? light-name "Ks2") 4)
-                                      ((string=? light-name "Ks2+Zs3") 5)
-                                      ((string=? light-name "Sh1") 6)
-                                      ((string=? light-name "Ks1+Zs3+Zs3v") 7)))]
+                                      ((eq? light-name 'Hp0) 0)
+                                      ((eq? light-name 'Hp1) 1)
+                                      ((eq? light-name 'Hp0+Sh0) 2)
+                                      ((eq? light-name 'Ks1+Zs3) 3)
+                                      ((eq? light-name 'Ks2) 4)
+                                      ((eq? light-name 'Ks2+Zs3) 5)
+                                      ((eq? light-name 'Sh1) 6)
+                                      ((eq? light-name 'Ks1+Zs3+Zs3v) 7)))]
                        ))
-                light-name-state))
+                (light-retrieve-cb)))
 
 
     ;; Calling the functions to draw everything
@@ -417,7 +390,14 @@
            ))
 
 
+    ;; Panel on which messages will be written
     (define message-panel '())
+
+    ;; Helper procedure for conversion of data
+    (define (convert-presence presence) 
+      (if presence
+          "Presence"
+          "No presence"))
   
     ;; Draw detection-blocks
     (define (draw-detection-blocks!)
@@ -427,9 +407,11 @@
       (for-each (lambda (det-bl)
                   (new message%
                        [parent message-panel] 
-                       [label (string-append (name-hardware det-bl) (state-hardware det-bl))]
+                       [label (string-append (symbol->string (hardware-name det-bl))
+                                             ": "
+                                             (convert-presence (hardware-data det-bl)))]
                        ))
-                detection-block-name-state))
+                (db-retrieve-cb)))
     (draw-detection-blocks!)
 
     ;; Removes all the drawn elements corresponding to this tab
@@ -468,43 +450,16 @@
   (define (provide-abstraction hardware-components cdr-op) ;; Different operation according to hardware
     (lambda ()
       (map (lambda (hardware-state)
-             (cons (string->symbol (name-hardware hardware-state)) (cdr-op hardware-state)))
+             (cons (string->symbol (hardware-name hardware-state)) (cdr-op hardware-state)))
            hardware-components)))
 
   (define (convert-barrier-state barrier)
     (let ((barrier-value (mcdr barrier)))
       (= barrier-value 1)))
 
-  (define (provide-lights) ;; Gets the lights in list format
-    (map (lambda (hardware-state)
-           (cons (string->symbol (name-hardware hardware-state)) (string->symbol (state-hardware hardware-state))))
-         light-name-state))
-
-
-  ;; Helper function to update the detection-blocks
-  (define (set-correct-format! db-assoc-list) ;; Converts list to right format
-    (map (lambda (block)
-           (cons (string-append (symbol->string (car block)) " :") (cdr block)))
-         db-assoc-list))
-
-  (define (convert-presence presence) ;; To be changed depending on the detection-block
-    (if presence
-        "Presence"
-        "No presence"))
-
-  (define (update-detection-blocks! db-assoc-list)
-    (let ((processed-list (set-correct-format! db-assoc-list)))
-      (for-each
-       (lambda (block)
-         (adjust-state! (car block)
-                        (convert-presence (cdr block))
-                        detection-block-name-state))
-       processed-list)))
-
   (define (dispatch msg)
-    (cond ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
+    (cond 
           ((eq? msg 'provide-trains) provide-trains)
-          ((eq? msg 'provide-lights) provide-lights)
           (else
            "GUI-ADT: Illegal message")))
   dispatch)

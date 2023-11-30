@@ -14,33 +14,30 @@
   (let ((railway (make-railway-adt))
         (gui '()))
 
-    (define (update-abstraction GUI-op op) ;; Abstraction for certain reoccuring operations
-      (lambda ()
-        (let ((data ((gui GUI-op))))
-          (for-each
-           (lambda (hardware-state)
-             ((railway op) (car hardware-state) (cdr hardware-state)))
-           data)
-          data))) ;; Give back the data for now (to be replaced by TCP connection)
+    (define (update-component-abstraction operation) ;; Abstraction for reoccuring update operation
+      (lambda (component state)
+        ((railway operation) component state)))
 
-    (define (update-switch! switch state) 
-      ((railway 'change-switch-state!) switch state))
+    (define (retrieve-all-abstraction operation) ;; abstraction for reoccuring retrieve-all operation
+      (lambda () ((railway operation))))
+
+    (define update-switch! (update-component-abstraction 'change-switch-state!))
     
-    (define (retrieve-all-switches)
-      ((railway 'get-all-switches)))
+    (define retrieve-all-switches (retrieve-all-abstraction 'get-all-switches))
 
-    ;; TEST FOR BARRIERS
-    (define (update-barrier! barrier state)
+    (define (update-barrier! barrier state) 
       (let ((processed-data (if (= state 0) 'open 'close)))
         ((railway 'change-barrier-state!) barrier processed-data)))
 
-    (define (retrieve-all-barriers)
-      ((railway 'get-all-barriers)))
-    ;;;;;;;;;
+    (define retrieve-all-barriers (retrieve-all-abstraction 'get-all-barriers))
 
-    (define update-barriers! (update-abstraction 'provide-barriers 'change-barrier-state!))
+    (define update-light! (update-component-abstraction 'change-light-state!))
 
-    (define update-lights! (update-abstraction 'provide-lights 'change-light-state!))
+    (define retrieve-all-lights (retrieve-all-abstraction 'get-all-lights))
+
+    (define (retrieve-all-detection-blocks)
+      ((railway 'get-all-detection-blocks)))
+      ;(retrieve-all-abstraction 'get-all-detection-blocks))
 
     (define update-trains! ;; Updates the trains on the track together with their speed
       (lambda () 
@@ -60,17 +57,19 @@
       (lambda (data-pair)
         (let ((oc-db (car data-pair))
               (all-db (cdr data-pair)))
-          ((railway 'update-detection-blocks!) oc-db all-db) ;; To be changed
-          ((gui 'update-detection-blocks!) ((railway 'get-all-db-states))))))
+          ((railway 'update-detection-blocks!) oc-db all-db))))
 
-    (set! gui (make-gui-adt update-switch! retrieve-all-switches update-barrier! retrieve-all-barriers))
+    (set! gui (make-gui-adt update-switch! retrieve-all-switches
+                            update-barrier! retrieve-all-barriers
+                            update-light! retrieve-all-lights
+                            retrieve-all-detection-blocks))
       
 
     (define (dispatch msg)
       (cond
         ((eq? msg 'retrieve-all-switches) retrieve-all-switches)
         ((eq? msg 'retrieve-all-barriers) retrieve-all-barriers)
-        ((eq? msg 'update-lights!) update-lights!)
+        ((eq? msg 'retrieve-all-lights) retrieve-all-lights)
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else

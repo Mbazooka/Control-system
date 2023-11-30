@@ -234,7 +234,7 @@
     (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence))
 
     ;; Procedure that gets the detection-block states for all detection-blocks
-    (define (get-all-db-states)
+    (define (get-all-detection-blocks)
       (map
        (lambda (key)
          (cons key (get-detection-block-state key)))
@@ -253,10 +253,11 @@
         ((eq? msg 'get-all-barriers) get-all-barriers)
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)
+        ((eq? msg 'get-all-lights) get-all-lights)
         ((eq? msg 'change-light-state!) change-light-state!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
-        ((eq? msg 'get-all-db-states) get-all-db-states) 
+        ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks) 
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))
