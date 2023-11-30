@@ -14,7 +14,7 @@
 (define INFRABEL (infrabel:make-infrabel-adt))
 
 (define (main-loop)
-  ((INFRABEL 'update-switches!) ((NMBS 'update-switches!)))
+  ((INFRABEL 'update-switches!) ((NMBS 'retrieve-all-switches)))
   ((INFRABEL 'update-lights!) ((NMBS 'update-lights!)))
   ((INFRABEL 'update-barriers!) ((NMBS 'update-barriers!)))
   ((INFRABEL 'update-trains!) ((NMBS 'update-trains!)))

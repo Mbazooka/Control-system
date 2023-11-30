@@ -208,6 +208,12 @@
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
 
+    (define (get-all-switches)
+      (map
+       (lambda (switch)
+         (cons switch (get-switch-state switch)))
+       (hash-keys possible-switches)))
+
     ;; Procedure that checks if barrier is open
     (define check-barrier-open? (get-operation-abstraction HARDWARE-BARRIERS 'open-barrier?))
 
@@ -231,7 +237,8 @@
         ((eq? msg 'change-train-speed!) change-train-speed!)
         ((eq? msg 'get-train-speed) get-train-speed) 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
-        ((eq? msg 'get-switch-state) get-switch-state) 
+        ((eq? msg 'get-switch-state) get-switch-state) ;;;;; TO BE 'REMOVED'/ TESTS ASWELL
+        ((eq? msg 'get-all-switches) get-all-switches)
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)
