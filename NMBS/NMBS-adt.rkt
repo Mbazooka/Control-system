@@ -23,17 +23,20 @@
            data)
           data))) ;; Give back the data for now (to be replaced by TCP connection)
 
-    ;(define update-switches! (update-abstraction 'provide-switches 'change-switch-state!))
-
-    ;;;;;;; TEST
     (define (update-switch! switch state) 
-        ((railway 'change-switch-state!) switch state))
+      ((railway 'change-switch-state!) switch state))
     
-        
     (define (retrieve-all-switches)
       ((railway 'get-all-switches)))
-    ;;;;;;;;;;;;;
-      
+
+    ;; TEST FOR BARRIERS
+    (define (update-barrier! barrier state)
+      (let ((processed-data (if (= state 0) 'open 'close)))
+        ((railway 'change-barrier-state!) barrier processed-data)))
+
+    (define (retrieve-all-barriers)
+      ((railway 'get-all-barriers)))
+    ;;;;;;;;;
 
     (define update-barriers! (update-abstraction 'provide-barriers 'change-barrier-state!))
 
@@ -60,14 +63,13 @@
           ((railway 'update-detection-blocks!) oc-db all-db) ;; To be changed
           ((gui 'update-detection-blocks!) ((railway 'get-all-db-states))))))
 
-    (set! gui (make-gui-adt update-switch! retrieve-all-switches))
+    (set! gui (make-gui-adt update-switch! retrieve-all-switches update-barrier! retrieve-all-barriers))
       
 
     (define (dispatch msg)
       (cond
         ((eq? msg 'retrieve-all-switches) retrieve-all-switches)
-        ;((eq? msg 'retrieve-all-switches) retrieve-all-switches)
-        ((eq? msg 'update-barriers!) update-barriers!)
+        ((eq? msg 'retrieve-all-barriers) retrieve-all-barriers)
         ((eq? msg 'update-lights!) update-lights!)
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)

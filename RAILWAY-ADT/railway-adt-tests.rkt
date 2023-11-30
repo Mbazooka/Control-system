@@ -116,6 +116,24 @@
      2
      "change-switch-state!/get-switch-state: Incorrect operation"))))
 
+(define railway-get-all-switches-tests
+  (test-suite
+   "RAILWAY-ADT: GET-ALL-SWITCHES TESTS"
+
+   (test-case
+    "Test if 'get-all-switches' exists"
+    (check-not-equal?
+     (test-railway 'get-all-switches)
+          "RAILWAY-ADT: Incorrect message"
+     "get-all-switches: operation does not exist"))
+
+   (test-case
+    "Test if 'get-all-switches' works properly"
+    (check-eq?
+     (length ((test-railway 'get-all-switches)))
+     20
+     "get-all-switches: Incorrect-operation"))))
+
 ;; Test the check-barrier-open?/change-barrier-state! operation of the railway
 (define railway-check-barrier-open?/change-barrier-state!-tests
   (test-suite
@@ -167,6 +185,8 @@
      #f
      "change-barrier-state!: Incorrect output"))
    ))
+
+;(define railway-get-all-barriers-tests
 
 (define railway-get-light-state/change-light-state!-tests
   (test-suite
@@ -276,6 +296,7 @@
                               railway-add-train-tests
                               railway-change-train-speed!/get-train-speed-tests
                               railway-change-switch-state!/get-switch-state-tests
+                              railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
                               railway-update-detection-blocks!/get-detection-block-state-tests

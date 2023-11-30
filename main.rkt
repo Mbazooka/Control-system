@@ -16,7 +16,7 @@
 (define (main-loop)
   ((INFRABEL 'update-switches!) ((NMBS 'retrieve-all-switches)))
   ((INFRABEL 'update-lights!) ((NMBS 'update-lights!)))
-  ((INFRABEL 'update-barriers!) ((NMBS 'update-barriers!)))
+  ((INFRABEL 'update-barriers!) ((NMBS 'retrieve-all-barriers)))
   ((INFRABEL 'update-trains!) ((NMBS 'update-trains!)))
   ((NMBS 'update-detection-blocks!) ((INFRABEL 'update-detection-blocks!)))
   (sleep 0.5)

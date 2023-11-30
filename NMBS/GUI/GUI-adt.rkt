@@ -51,7 +51,6 @@
 (define middle-switch 9) ;; Necessary for nice printing of switches
 
 ;; List of possible barriers and lights and their state
-(define barrier-name-state (list (mcons "C-1" 1) (mcons "C-2" 1)))
 (define light-name-state (list (mcons "L-1" "Hp0") (mcons "L-2" "Hp0")))
 
 ;; List of possible detection-blocks and their state
@@ -64,8 +63,10 @@
 
 (define middle-detection-block 9)
 
-(define name-hardware mcar) ;; Abstractions
-(define state-switch (lambda (pair) (- (mcdr pair) 1))) ;; -1 to convert to radio box data
+
+(define hardware-name car)
+(define hardware-data cdr)
+(define name-hardware mcar) ;; ADJABS
 (define state-hardware mcdr)
 
 ;; Adjusts the state of a hardware component in the given list to the given value
@@ -92,7 +93,7 @@
 (define GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN 100)
 (define BARRIER/LIGHT-WIDGET-VERT-MARGIN 30)
 
-(define (make-gui-adt switch-adjust-cb switch-retrieve-cb)
+(define (make-gui-adt switch-adjust-cb switch-retrieve-cb barrier-adjust-cb barrier-retrieve-cb)
 
   ;; Used for the message placed on train tabs
   (define current-train-tab-message "Set train speed")
@@ -179,7 +180,7 @@
     (define track-behind (new choice%  ;; ADJABS
                               [label "Track-behind:"]
                               [parent train-panel]
-                              [choices (list "TEST")]))
+                              [choices (list "1-1")]))
     
 
     ;; Button to be added to the train-tab and it's logic
@@ -285,14 +286,14 @@
                       (set! current-parent right-switch-panel-vertical))
                   (set! ctr (+ ctr 1))
                   (new radio-box%
-                       [label (symbol->string (car switch-pair))] ;; ADJABS
+                       [label (symbol->string (hardware-name switch-pair))]
                        [parent current-parent]
                        [callback (lambda (this event)
-                                   (switch-adjust-cb (car switch-pair) (+ (send this get-selection) 1)))
+                                   (switch-adjust-cb (hardware-name switch-pair) (+ (send this get-selection) 1)))
                                    ]
                        [choices (list "1"
                                       "2")]
-                       [selection (- (cdr switch-pair) 1)] ;; ADJABS
+                       [selection (- (hardware-data switch-pair) 1)]
                        ))
                 (switch-retrieve-cb)))
     (draw-all-switches!)
@@ -346,16 +347,16 @@
     (define (draw-all-barriers!)
       (for-each (lambda (barrier-pair)
                   (new radio-box%
-                       [label (name-hardware barrier-pair)]
+                       [label (symbol->string (hardware-name barrier-pair))]
                        [parent right-barrier-panel]
-                       [callback (radiobox-logic! barrier-name-state
-                                                  (lambda (x) x)
-                                                  barrier-pair)]
-                       [choices (list "closed"
-                                      "open")]
+                       [callback (lambda (this event)
+                                   (barrier-adjust-cb (hardware-name barrier-pair) (send this get-selection)))
+                                   ]
+                       [choices (list "open"
+                                      "closed")]
                        [vert-margin BARRIER/LIGHT-WIDGET-VERT-MARGIN]
-                       [selection (state-hardware barrier-pair)]))
-                barrier-name-state))
+                       [selection (if (hardware-data barrier-pair) 0 1)]))
+                (barrier-retrieve-cb)))
 
     ;; Draws all the dropdown menus for barriers
     (define (draw-all-lights!)
@@ -474,9 +475,6 @@
     (let ((barrier-value (mcdr barrier)))
       (= barrier-value 1)))
 
-  (define provide-barriers ;; Gets the barriers in list format
-    (provide-abstraction barrier-name-state convert-barrier-state))
-
   (define (provide-lights) ;; Gets the lights in list format
     (map (lambda (hardware-state)
            (cons (string->symbol (name-hardware hardware-state)) (string->symbol (state-hardware hardware-state))))
@@ -506,7 +504,6 @@
   (define (dispatch msg)
     (cond ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
           ((eq? msg 'provide-trains) provide-trains)
-          ((eq? msg 'provide-barriers) provide-barriers)
           ((eq? msg 'provide-lights) provide-lights)
           (else
            "GUI-ADT: Illegal message")))

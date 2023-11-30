@@ -202,23 +202,33 @@
         (let ((object (hash-ref HARDWARE object-name)))
           ((object operation)))))
 
+    ;; Another abstraction allowing more general get-all-operations
+    (define (get-all-abstraction HARDWARE operation)
+      (lambda ()
+          (map (lambda (hardware-component)
+                 (cons hardware-component (operation hardware-component)))
+               (hash-keys HARDWARE))))
+
     ;; Procedure that gets the speed of the train
     (define get-train-speed (get-operation-abstraction riding-trains 'get-current-speed))
 
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
 
-    (define (get-all-switches)
-      (map
-       (lambda (switch)
-         (cons switch (get-switch-state switch)))
-       (hash-keys possible-switches)))
+    ;; Gets all the hardware switches with their states
+    (define get-all-switches (get-all-abstraction HARDWARE-SWITCHES get-switch-state))
 
     ;; Procedure that checks if barrier is open
     (define check-barrier-open? (get-operation-abstraction HARDWARE-BARRIERS 'open-barrier?))
 
+    ;; Gets all barrier with their states
+    (define get-all-barriers (get-all-abstraction HARDWARE-BARRIERS check-barrier-open?))
+
     ;; Procedure that gets the light state
     (define get-light-state (get-operation-abstraction HARDWARE-LIGHTS 'get-state))
+
+    ;; Gets all lights with their states
+    (define get-all-lights (get-all-abstraction HARDWARE-LIGHTS get-light-state))
 
     ;; Procedure that gets the detection-block-state
     (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence))
@@ -237,9 +247,10 @@
         ((eq? msg 'change-train-speed!) change-train-speed!)
         ((eq? msg 'get-train-speed) get-train-speed) 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
-        ((eq? msg 'get-switch-state) get-switch-state) ;;;;; TO BE 'REMOVED'/ TESTS ASWELL
+        ((eq? msg 'get-switch-state) get-switch-state)
         ((eq? msg 'get-all-switches) get-all-switches)
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
+        ((eq? msg 'get-all-barriers) get-all-barriers)
         ((eq? msg 'change-barrier-state!) change-barrier-state!)
         ((eq? msg 'get-light-state) get-light-state)
         ((eq? msg 'change-light-state!) change-light-state!)
