@@ -5,11 +5,7 @@
 #lang racket
 
 (require racket/gui/base)
-(provide provide-trains
-         provide-switches
-         provide-barriers
-         provide-lights
-         update-detection-blocks!) ;; API of GUI
+(provide make-gui-adt) ;; API of GUI
 
 ;; Counter class
 (define (make-counter)
@@ -102,6 +98,8 @@
 (define DETECTION-BLOCK-DATA-VERT-MARGIN 50)
 (define GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN 100)
 (define BARRIER/LIGHT-WIDGET-VERT-MARGIN 30)
+
+(define (make-gui-adt)
 
 ;; Used for the message placed on train tabs
 (define current-train-tab-message "Set train speed")
@@ -338,14 +336,14 @@
   (define left-light-panel
     (new group-box-panel%
          [parent draw-group-panel]
-         [label "Adjust barriers"]
+         [label "Adjust lights"]
          ))
 
   ;; Draw panel for lights
   (define right-barrier-panel
     (new group-box-panel%
          [parent draw-group-panel]
-         [label "Adjust lights"]
+         [label "Adjust barriers"]
          ))
 
 
@@ -512,6 +510,16 @@
                       (convert-presence (cdr block))
                       detection-block-name-state))
      processed-list)))
+
+  (define (dispatch msg)
+    (cond ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
+          ((eq? msg 'provide-trains) provide-trains)
+          ((eq? msg 'provide-switches) provide-switches)
+          ((eq? msg 'provide-barriers) provide-barriers)
+          ((eq? msg 'provide-lights) provide-lights)
+          (else
+           "GUI-ADT: Illegal message")))
+  dispatch)
 
   
 
