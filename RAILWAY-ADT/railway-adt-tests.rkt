@@ -51,9 +51,9 @@
 
 
 ;; Test the change-train-speed!/get-train-speed operation of the railway
-(define railway-change-train-speed!/get-train-speed-tests
+(define railway-change-train-speed!/get-train-speed/get-all-trains-tests
   (test-suite
-   "RAILWAY-ADT: CHANGE-TRAIN-SPEED! TESTS"
+   "RAILWAY-ADT: CHANGE-TRAIN-SPEED!/GET-TRAIN-SPEED/GET-ALL-TRAINS TESTS"
 
    (test-case
     "Test if 'change-train-speed!' exists"
@@ -85,6 +85,13 @@
      ((test-railway 'change-train-speed!) 'UNDEFINED-NAME 200)
      "RAILWAY-ADT: OBJECT DOES NOT EXIST"
      "change-operation-abstraction: Incorrect output"))
+
+   (test-case
+    "Test if 'get-all-trains' works properly"
+    (check-eq?
+     (length ((test-railway 'get-all-trains)))
+     1
+     "get-all-trains: incorrect output"))
 
    ))
 
@@ -315,7 +322,7 @@
 (define all-tests (test-suite "Railway-Module"
                               railway-make-test
                               railway-add-train-tests
-                              railway-change-train-speed!/get-train-speed-tests
+                              railway-change-train-speed!/get-train-speed/get-all-trains-tests
                               railway-change-switch-state!/get-switch-state-tests
                               railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests

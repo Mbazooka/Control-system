@@ -205,12 +205,20 @@
     ;; Another abstraction allowing more general get-all-operations
     (define (get-all-abstraction HARDWARE operation)
       (lambda ()
-          (map (lambda (hardware-component)
-                 (cons hardware-component (operation hardware-component)))
-               (hash-keys HARDWARE))))
+        (map (lambda (hardware-component)
+               (cons hardware-component (operation hardware-component)))
+             (hash-keys HARDWARE))))
 
     ;; Procedure that gets the speed of the train
     (define get-train-speed (get-operation-abstraction riding-trains 'get-current-speed))
+
+    (define (get-all-trains)
+      (map (lambda (train-name)
+             (let ((actual-train (hash-ref riding-trains train-name)))
+               (cons train-name (list ((actual-train 'get-initial-track))
+                                      ((actual-train 'get-initial-track-behind))
+                                      ((actual-train 'get-current-speed))))))
+           (hash-keys riding-trains)))
 
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
@@ -245,6 +253,7 @@
       (cond
         ((eq? msg 'add-train!) add-train!)
         ((eq? msg 'change-train-speed!) change-train-speed!)
+        ((eq? msg 'get-all-trains) get-all-trains)
         ((eq? msg 'get-train-speed) get-train-speed) 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
@@ -262,13 +271,3 @@
          "RAILWAY-ADT: Incorrect message")))
     dispatch))
 
-    
-
-    
-
-    
-
-
-
-
-  

@@ -17,7 +17,7 @@
   ((INFRABEL 'update-switches!) ((NMBS 'retrieve-all-switches)))
   ((INFRABEL 'update-lights!) ((NMBS 'retrieve-all-lights)))
   ((INFRABEL 'update-barriers!) ((NMBS 'retrieve-all-barriers)))
-  ((INFRABEL 'update-trains!) ((NMBS 'update-trains!)))
+  ((INFRABEL 'update-trains!) ((NMBS 'retrieve-all-trains)))
   ((NMBS 'update-detection-blocks!) ((INFRABEL 'update-detection-blocks!)))
   (sleep 0.5)
   (main-loop))

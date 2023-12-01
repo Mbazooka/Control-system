@@ -35,23 +35,16 @@
 
     (define retrieve-all-lights (retrieve-all-abstraction 'get-all-lights))
 
-    (define (retrieve-all-detection-blocks)
-      ((railway 'get-all-detection-blocks)))
-      ;(retrieve-all-abstraction 'get-all-detection-blocks))
+    (define retrieve-all-detection-blocks (retrieve-all-abstraction 'get-all-detection-blocks))
 
-    (define update-trains! ;; Updates the trains on the track together with their speed
-      (lambda () 
-        (let ((data ((gui 'provide-trains))))
-          (for-each
-           (lambda (train)
-             (let ((train-name (car train))
-                   (train-initial (cadr train))
-                   (train-behind (caddr train))
-                   (speed (cadddr train)))
-               ((railway 'add-train!) train-name train-initial train-behind)
-               ((railway 'change-train-speed!) train-name speed)))
-           data)
-          data)))
+    ;;;; TEST
+    (define update-train! (update-component-abstraction 'change-train-speed!))
+
+    (define retrieve-all-trains (retrieve-all-abstraction 'get-all-trains))
+
+    (define (apply-train! train-name track track-behind)
+      ((railway 'add-train!) train-name track track-behind))     
+    ;;;;;;;;;
 
     (define update-detection-blocks!
       (lambda (data-pair)
@@ -62,15 +55,17 @@
     (set! gui (make-gui-adt update-switch! retrieve-all-switches
                             update-barrier! retrieve-all-barriers
                             update-light! retrieve-all-lights
-                            retrieve-all-detection-blocks))
+                            retrieve-all-detection-blocks update-train!
+                            apply-train! retrieve-all-trains))
       
 
     (define (dispatch msg)
       (cond
         ((eq? msg 'retrieve-all-switches) retrieve-all-switches)
+        ((eq? msg 'apply-train!) apply-train!)
         ((eq? msg 'retrieve-all-barriers) retrieve-all-barriers)
         ((eq? msg 'retrieve-all-lights) retrieve-all-lights)
-        ((eq? msg 'update-trains!) update-trains!)
+        ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else
          "NMBS-ADT: Illegal message")))

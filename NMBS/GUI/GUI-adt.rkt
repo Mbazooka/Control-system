@@ -66,7 +66,8 @@
 (define (make-gui-adt switch-adjust-cb switch-retrieve-cb
                       barrier-adjust-cb barrier-retrieve-cb
                       light-adjust-cb light-retrieve-cb
-                      db-retrieve-cb)
+                      db-retrieve-cb train-adjust-cb
+                      train-make-cb train-retrieve-cb)
 
   ;; Used for the message placed on train tabs
   (define current-train-tab-message "Set train speed")
@@ -105,6 +106,9 @@
                         "Switches"
                         "Barriers and lights")]))
 
+  (define (data-converter data)
+      (map (lambda (pair) (symbol->string (hardware-name pair))) data))
+
   ;; Draws the train tab of the main tabs
   (define (draw-train-panel!)
 
@@ -115,16 +119,16 @@
            ))
 
     (define (train-tab-change-logic! tab event)
-      (let* ((name-train (send tab get-item-label (send tab get-selection)))
-             (train-data  (hash-ref all-train-tabs name-train))
-             (value-to-set (caddr train-data)))
+      (let* ((name-train (string->symbol (send tab get-item-label (send tab get-selection))))
+             (train-data  (assoc name-train (train-retrieve-cb)))
+             (value-to-set (cadddr train-data)))
         (send slider set-value value-to-set)))
 
     ;; Draws a tab-panel for the different trains (in the train-tab)
     (define train-tab
       (new tab-panel%
            [parent train-panel]
-           [choices (get-train-names-with-speed)]
+           [choices (data-converter (train-retrieve-cb))]
            [callback train-tab-change-logic!]))
                      
 
@@ -140,37 +144,31 @@
            [parent train-panel]
            ))
 
-    ;; Data to put in drawdown menu
-    ;(define display-data (append (map (lambda (pair) (substring (mcar pair) 0 3)) detection-block-name-state)
-    ;                            (map mcar switch-name-state)))
-
     ;; dropdown menu to determine right place to put train
     (define initial-track (new choice%
                                [label "Initial-track:"]
                                [parent train-panel]
-                               [choices (map (lambda (pair) (symbol->string (car pair))) (switch-retrieve-cb))])) ;; ADJABS
+                               [choices (data-converter (db-retrieve-cb))]))
 
-    (define track-behind (new choice%  ;; ADJABS
+    (define track-behind (new choice% 
                               [label "Track-behind:"]
                               [parent train-panel]
-                              [choices (list "1-1")]))
+                              [choices (append (data-converter (db-retrieve-cb))
+                                               (data-converter (switch-retrieve-cb)))]))
     
 
     ;; Button to be added to the train-tab and it's logic
     (define (tab-name-generator) ;; Generates name for a tab
       (train-counter 'increment!)
       (format "Train-~a" (train-counter 'get-value)))
-  
-    (define (all-train-tabs-add! train-name data) ;; Add an element to all-train-tabs
-      (hash-set! all-train-tabs train-name data)) ;; Adding a train is always at speed 0
 
     (define (add-train-button-logic! panel event) ;; Logic behind the button
       (let ((name (tab-name-generator))
             (initial-track-sel (string->symbol (send initial-track get-string-selection)))
             (track-behind-sel (string->symbol (send track-behind get-string-selection))))
-        (all-train-tabs-add! name (list initial-track-sel track-behind-sel 0)) 
+        (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
         (send train-tab append name)
-        (cond ((= (hash-count all-train-tabs) 1) (show-current-train-elements!))))) ;; Might need to be changed because not accessible
+        (cond ((= (length (train-retrieve-cb)) 1) (show-current-train-elements!))))) ;; Might need to be changed because not accessible
 
     (define add-train-button
       (new button%
@@ -186,12 +184,10 @@
                                  [parent top-tab-panel]))
 
     (define (slider-logic! slider event) ;; Logic for slider
-      (let* ((name (send train-tab get-item-label (send train-tab get-selection)))
-             (train-data (hash-ref all-train-tabs name)))
-        (hash-set! all-train-tabs name (list (car train-data)
-                                             (cadr train-data)
-                                             (send slider get-value)))))
-    
+      (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
+        (train-adjust-cb name (send slider get-value))))
+        
+        
     (define slider ;; Slider itself
       (new slider%
            [label ""]
@@ -212,7 +208,7 @@
 
     (remove-current-train-elements!)
 
-    (cond ((>= (hash-count all-train-tabs) 1)
+    (cond ((>= (length (train-retrieve-cb)) 1)
            (show-current-train-elements!)
            (train-tab-change-logic! train-tab #f)))
 
@@ -438,30 +434,11 @@
         (else
          "DRAW-DETECTION-BLOCK-PANEL!: Illegal message")))
     dispatch)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;; API GUI ;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  (define (provide-trains) ;; Gets the trains in list format
-    (map (lambda (hardware-state)
-           (cons (string->symbol (car hardware-state)) (cdr hardware-state)))
-         (hash->list all-train-tabs)))
-
-  (define (provide-abstraction hardware-components cdr-op) ;; Different operation according to hardware
-    (lambda ()
-      (map (lambda (hardware-state)
-             (cons (string->symbol (hardware-name hardware-state)) (cdr-op hardware-state)))
-           hardware-components)))
-
-  (define (convert-barrier-state barrier)
-    (let ((barrier-value (mcdr barrier)))
-      (= barrier-value 1)))
 
   (define (dispatch msg)
     (cond 
-          ((eq? msg 'provide-trains) provide-trains)
-          (else
-           "GUI-ADT: Illegal message")))
+      (else
+       "GUI-ADT: Illegal message")))
   dispatch)
 
   
