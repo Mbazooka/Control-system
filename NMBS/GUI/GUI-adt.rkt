@@ -62,6 +62,9 @@
 (define DETECTION-BLOCK-DATA-VERT-MARGIN 50)
 (define GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN 100)
 (define BARRIER/LIGHT-WIDGET-VERT-MARGIN 30)
+(define SWITCH-DATA-VERT-MARGIN 100)
+(define SWITCH-CHOICE-WIDGET-VERT-MARGIN 60)
+(define SWITCH-MESSAGE-WIDGET-VERT-MARGIN 100)
 
 (define (make-gui-adt switch-adjust-cb switch-retrieve-cb
                       barrier-adjust-cb barrier-retrieve-cb
@@ -106,8 +109,9 @@
                         "Switches"
                         "Barriers and lights")]))
 
+  ;; Takes the names of the data and converts it to a string
   (define (data-converter data)
-      (map (lambda (pair) (symbol->string (hardware-name pair))) data))
+    (map (lambda (pair) (symbol->string (hardware-name pair))) data))
 
   ;; Draws the train tab of the main tabs
   (define (draw-train-panel!)
@@ -229,44 +233,64 @@
 
     ;; Draw main switch panel
     (define switch-panel
-      (new horizontal-panel%
+      (new group-box-panel%
            [parent main-tab-panel]
+           [label "Switch overview"]
            ))
 
-    ;; Draw panel for switch on the leftsize gui
-    (define left-switch-panel-vertical
-      (new vertical-panel%
+    ;; Horizontal grouping
+    (define horizontal-grouping-panel
+      (new horizontal-panel%
            [parent switch-panel]
+           [vert-margin SWITCH-DATA-VERT-MARGIN]
            ))
 
-    ;; Draw panel for switch on the rightsize gui
-    (define right-switch-panel-vertical
-      (new vertical-panel%
-           [parent switch-panel]
+    (define draw-adjust-panel
+      (new group-box-panel%
+           [parent horizontal-grouping-panel]
+           [label "Adjust switch"]
            ))
 
-    ;; Draws all the radio boxes
-    (define (draw-all-switches!) ;; Draws the radio boxes
-      (define current-parent left-switch-panel-vertical)
-      (define ctr 0) ;; Counter to allow more concise code
-      (for-each (lambda (switch-pair) 
-                  (if (<= ctr middle-switch)
-                      (set! current-parent left-switch-panel-vertical)
-                      (set! current-parent right-switch-panel-vertical))
-                  (set! ctr (+ ctr 1))
-                  (new radio-box%
-                       [label (symbol->string (hardware-name switch-pair))]
-                       [parent current-parent]
-                       [callback (lambda (this event)
-                                   (switch-adjust-cb (hardware-name switch-pair) (+ (send this get-selection) 1)))
-                                 ]
-                       [choices (list "1"
-                                      "2")]
-                       [selection (- (hardware-data switch-pair) 1)]
-                       ))
-                (switch-retrieve-cb)))
-    (draw-all-switches!)
+    (define draw-get-panel
+      (new group-box-panel%
+           [parent horizontal-grouping-panel]
+           [label "Get switch state"]
+           ))
 
+    
+    ;; Draws the switch data related to the switch tab in the GUI
+    (define (draw-switch-data!)
+      (let ((switch-menu (new choice%
+                              [label "Choose switch"]
+                              [parent draw-adjust-panel]
+                              [choices (data-converter (switch-retrieve-cb))]
+                              [vert-margin SWITCH-CHOICE-WIDGET-VERT-MARGIN]
+                              ))
+            (message         (new message%
+                                  [parent draw-get-panel]
+                                  [vert-margin SWITCH-MESSAGE-WIDGET-VERT-MARGIN]
+                                  [label "<State switch>"]
+                                  )))
+        (new radio-box%
+             [label "Adjust current state"]
+             [parent draw-adjust-panel]
+             [callback (lambda (this event) (switch-adjust-cb (string->symbol (send switch-menu get-string-selection))
+                                                              (+ (send this get-selection) 1)))]
+             [choices (list "1" "2")]
+             [selection #f]
+             )
+
+        (new button%
+             [parent draw-get-panel]
+             [label "Get state"]
+             [callback (lambda (this event)
+                         (let* ((switch-name (string->symbol (send switch-menu get-string-selection)))
+                                (state-switch (cdr (assoc switch-name (switch-retrieve-cb)))))
+                           (send message set-label (string-append "Switch state: " (number->string state-switch)))))]
+             )
+        ))
+    (draw-switch-data!)
+    
     ;; Removes all the drawn elements corresponding to this tab
     (define (remove-panel!)
       (send main-tab-panel delete-child switch-panel))
@@ -436,9 +460,7 @@
     dispatch)
 
   (define (dispatch msg)
-    (cond 
-      (else
-       "GUI-ADT: Illegal message")))
+    "MAKE-GUI-ADT: Illegal message")
   dispatch)
 
   
