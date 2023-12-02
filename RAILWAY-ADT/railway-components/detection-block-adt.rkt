@@ -15,7 +15,7 @@
       train-presence?)
 
     (define (change-presence! state)
-      (if (boolean? state)
+      (if (boolean? state) ;; Changes the state only if input is boolean
           (set! train-presence?  state)
           "change-presence!: illegal value"))
 

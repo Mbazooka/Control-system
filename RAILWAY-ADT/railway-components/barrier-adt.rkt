@@ -4,7 +4,6 @@
 
 #lang racket
 
-(#%require (only racket/base time error)) ;; Library for error messages
 (provide make-barrier-adt)
 
 (define (make-barrier-adt name)

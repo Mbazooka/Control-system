@@ -4,7 +4,6 @@
 
 #lang racket
 
-(#%require (only racket/base time error)) ;; Library for error messages
 (provide make-switch-adt)
 
 (define (make-switch-adt name)

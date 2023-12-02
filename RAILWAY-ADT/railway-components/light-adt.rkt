@@ -4,7 +4,6 @@
 
 #lang racket
 
-(#%require (only racket/base time error)) ;; Library for error messages
 (provide make-light-adt)
 
 (define possible-states '(Hp0 Hp1 Hp0+Sh0 Ks1+Zs3 Ks2 Ks2+Zs3 Sh1 Ks1+Zs3+Zs3v))
@@ -16,7 +15,7 @@
 
     (define (get-state) state)
 
-    (define (change-light! code)
+    (define (change-light! code) ;; Changes the state if valid state
       (if (member code possible-states)
           (set! state code)
           "LIGHT-ADT: Incorect code given"))
