@@ -37,16 +37,14 @@
 
     (define retrieve-all-detection-blocks (retrieve-all-abstraction 'get-all-detection-blocks))
 
-    ;;;; TEST
     (define update-train! (update-component-abstraction 'change-train-speed!))
 
     (define retrieve-all-trains (retrieve-all-abstraction 'get-all-trains))
 
-    (define (apply-train! train-name track track-behind)
+    (define (apply-train! train-name track track-behind) ;; Adds a train to the track
       ((railway 'add-train!) train-name track track-behind))     
-    ;;;;;;;;;
 
-    (define update-detection-blocks!
+    (define update-detection-blocks! ;; Updates the detection-blocks their states
       (lambda (data-pair)
         (let ((oc-db (car data-pair))
               (all-db (cdr data-pair)))

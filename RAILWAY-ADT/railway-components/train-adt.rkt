@@ -18,7 +18,7 @@
     (define (get-current-speed) speed)
 
     (define (change-speed! input-speed) ;; Made stupidproof to avoid high speeds
-      (if (> (abs input-speed) 200) ;; If not, speed can go too high
+      (if (> (abs input-speed) 200) ;; If not, speed can go too high which allows for bugs
           "TRAIN-ADT: Illegal speed"
             (set! speed input-speed)))
 

@@ -15,7 +15,7 @@
     (define (current-position) state)
 
     (define (change-position! input-state)
-      (cond
+      (cond ;; Only allows valid input states
         ((= input-state 1) (set! state 1))       
         ((= input-state 2) (set! state 2))
         (else
