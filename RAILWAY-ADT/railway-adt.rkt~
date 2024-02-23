@@ -120,19 +120,12 @@
                                          (T-23 T-12) (T-23 T-24) 
                                          (T-24 T-9) (T-9 T-11)
                                          (T-11 T-10) (T-10 1-1) (T-10 T-16)
-                                         (T-16 2-8) (T-24 1-3)
+                                         (T-16 2-8) (T-16 NO-TRACK) (T-24 1-3)
                                          (T-12 2-3) (1-2 T-9) 
-                                         (T-11 T-12) (1-5 T-20)
+                                         (T-11 T-12) (1-8 NO-TRACK) (2-1 NO-TRACK)
+                                         (2-2 NO-TRACK) (2-5 NO-TRACK) (2-6 NO-TRACK)
+                                         (2-7 NO-TRACK) (1-5 T-20)
                                          ))
-
-;; The detection blocks connected with each other in a list (simplified version of before)
-(define simplified-railway-connections '((1-3 1-4) (1-4 1-2) (1-4 1-1) (1-4 1-5) (1-5 2-4)
-                                                     (2-4 1-1) (2-4 1-2) (2-4 1-3) (2-4 1-6) (2-4 2-1) (2-4 1-8)
-                                                     (2-3 1-1) (2-3 1-2) (2-3 1-6) (2-3 2-1) (2-3 1-8)
-                                                     (2-1 2-2) (2-1 2-5) (2-1 2-6) (2-1 2-7)
-                                                     (1-8 2-2) (1-8 2-5) (1-8 2-6) (2-1 2-7)
-                                                     (1-1 1-7) 
-                                                     (1-6 2-3) (1-6 2-4) (1-6 1-7)))
 
 ;; Hashmap for linking names and tracks
 (define track-map (hash '1-1 1-1 '1-2 1-2 '1-3 1-3 '1-4 1-4
