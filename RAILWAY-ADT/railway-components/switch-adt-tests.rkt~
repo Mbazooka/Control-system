@@ -20,10 +20,10 @@
 
    (test-case
     "Test if constructor does not give error"
-    (check-not-exn (lambda () (make-switch-adt 'S-1 '2-1 'S-25))))))
+    (check-not-exn (lambda () (make-switch-adt 'S-1))))))
 
 ;; Dummy switches necessary for testing
-(define test-switch (make-switch-adt 'S-1 '2-1 'S-25))
+(define test-switch (make-switch-adt 'S-1))
 
 ;; Test the get-name operation of the class
 (define switch-name-tests
@@ -33,8 +33,8 @@
     "Test if 'get-name' gets the correct name"
     (check-eq? ((test-switch 'get-name)) 'S-1 "Get-name: incorrect name"))))
 
-;; Test the current/change-position/current-comp operation of the class
-(define switch-current/current-comp/change-position/-tests
+;; Test the current/change-position operation of the class
+(define switch-current/change-position-tests
   (test-suite
    "SWITCH-ADT: CHANGE/CURRENT-POSITION TESTS"
 
@@ -46,20 +46,12 @@
      "Current-position: incorrect output"))
 
    (test-case
-    "Test if 'current-comp' works properly"
-    (check-eq?
-     ((test-switch 'current-comp))
-     '2-1
-     "Current-comp: incorrect output"))
-
-   (test-case
     "Test if 'change-position!' changes the switch state correctly"
-    (check-eq?
+    (check-equal?
      (begin
        ((test-switch 'change-position!) 2)
-       (and (eq? ((test-switch 'current-position)) 2)
-            (eq? ((test-switch 'current-comp)) 'S-25)))
-     #t
+       ((test-switch 'current-position)))
+     2
      "change-position!: incorrect change"))
 
    (test-case
@@ -86,7 +78,7 @@
 (define all-tests (test-suite "Switch-Module"
                               switch-make-switch-tests
                               switch-name-tests
-                              switch-current/current-comp/change-position/-tests
+                              switch-current/change-position-tests
                               switch-message-sending-tests))
 
 (test/gui all-tests)
