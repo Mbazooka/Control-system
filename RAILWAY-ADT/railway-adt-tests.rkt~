@@ -96,9 +96,9 @@
    ))
 
 ;; Test the change-switch-state!/get-switch-state operation of the railway
-(define railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
+(define railway-change-switch-state!/get-switch-state-tests
   (test-suite
-   "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE/GET-SWITCH-COMP-STATE TESTS"
+   "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE TESTS"
 
    (test-case
     "Test if 'change-switch-state!' exists"
@@ -108,28 +108,20 @@
      "Change-switch-state!: operation does not exist"))
 
    (test-case
-    "Test if 'get-switch-state' exists"
+    "Test if 'get-switch-state' does not exist"
     (check-not-equal?
      (test-railway 'get-switch-state)
      "RAILWAY-ADT: Incorrect message"
      "Get-switch-state: operation does not exist"))
 
    (test-case
-    "Test if 'get-switch-comp-state' exists"
-    (check-not-equal?
-     (test-railway 'get-switch-comp-state)
-     "RAILWAY-ADT: Incorrect message"
-     "Get-switch-comp-state; operation does not exist"))
-
-   (test-case
-    "Test if 'change-switch-state!/get-switch-state/get-comp-state' works properly"
+    "Test if 'change-switch-state!/get-switch-state' works properly"
     (check-eq?
      (begin
        ((test-railway 'change-switch-state!) 'S-1 2)
-       (and (eq? ((test-railway 'get-switch-state) 'S-1) 2)
-            (eq? ((test-railway 'get-switch-comp-state) 'S-1) 'S-25)))
-     #t
-     "change-switch-state!/get-switch-state/get-switch-comp-state: Incorrect operation"))))
+       ((test-railway 'get-switch-state) 'S-1))
+     2
+     "change-switch-state!/get-switch-state: Incorrect operation"))))
 
 (define railway-get-all-switches-tests
   (test-suite
@@ -313,39 +305,6 @@
 
    ))
 
-(define railway-compute-path-complex/compute-path-simplified-tests
-
-  (test-suite
-   "RAILWAY-ADT: COMPUTE-PATH-COMPLEX/COMPUTE-PATH-SIMPLIFIED TESTS"
-
-   (test-case
-    "Test if 'compute-path-complex' exists"
-    (check-not-equal?
-     (test-railway 'compute-path-complex)
-     "RAILWAY-ADT: Incorrect message"
-     "Compute-path-complex: operation does not exist"))
-
-   (test-case
-    "Test if 'compute-path-simplified' exists"
-    (check-not-equal?
-     (test-railway 'compute-path-simplified)
-     "RAILWAY-ADT: Incorrect message"
-     "Compute-path-simplified: operation does not exist"))
-
-   (test-case
-    "Test if 'compute-path-complex' works properly"
-    (check-equal?
-     ((test-railway 'compute-path-complex) '1-3 '1-2)
-     '(S-27 1-2)
-     "Compute-path-complex: incorrect operation"))
-
-   (test-case
-    "Test if 'compute-path-simplified' works properly"
-    (check-equal?
-     ((test-railway 'compute-path-simplified) '1-3 '1-2)
-     '(1-4 1-2)
-     "Compute-path-simplified: incorrect operation"))))
-
 (define railway-message-sending-tests
   (test-suite
    "RAILWAY-ADT: MESSAGE SENDING TESTS"
@@ -356,6 +315,7 @@
      (test-railway 'illegal-message)
      "RAILWAY-ADT: Incorrect message"
      "module allows illegal message to be sent without warning"))))
+     
     
 
 ;; Bringing all test-suites together
@@ -363,7 +323,7 @@
                               railway-make-test
                               railway-add-train-tests
                               railway-change-train-speed!/get-train-speed/get-all-trains-tests
-                              railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
+                              railway-change-switch-state!/get-switch-state-tests
                               railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests

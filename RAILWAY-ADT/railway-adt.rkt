@@ -130,9 +130,10 @@
                                                      (2-4 1-1) (2-4 1-2) (2-4 1-3) (2-4 1-6) (2-4 2-1) (2-4 1-8)
                                                      (2-3 1-1) (2-3 1-2) (2-3 1-6) (2-3 2-1) (2-3 1-8)
                                                      (2-1 2-2) (2-1 2-5) (2-1 2-6) (2-1 2-7)
-                                                     (1-8 2-2) (1-8 2-5) (1-8 2-6) (2-1 2-7)
+                                                     (1-8 2-2) (1-8 2-5) (1-8 2-6)
                                                      (1-1 1-7) 
-                                                     (1-6 2-3) (1-6 2-4) (1-6 1-7)))
+                                                     (1-6 2-3) (1-6 2-4) (1-6 1-7)
+                                                     (1-8 2-4)))
 
 ;; Hashmap for linking names and tracks
 (define track-map (hash '1-1 1-1 '1-2 1-2 '1-3 1-3 '1-4 1-4
@@ -151,6 +152,7 @@
          (HARDWARE-DETECTION-BLOCKS possible-detection-blocks)
          (HARDWARE-TRACKS track-map)
          (railway-graph (unweighted-graph/undirected railway-connections))
+         (railway-DB-graph (unweighted-graph/undirected simplified-railway-connections))
          (riding-trains (make-hash))) ;; No trains riding initially
       
 
@@ -230,6 +232,9 @@
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
 
+    ;; Procedure that gets the switch component state
+    (define get-switch-comp-state (get-operation-abstraction HARDWARE-SWITCHES 'current-comp))
+
     ;; Gets all the hardware switches with their states
     (define get-all-switches (get-all-abstraction HARDWARE-SWITCHES get-switch-state))
 
@@ -254,8 +259,16 @@
        (lambda (key)
          (cons key (get-detection-block-state key)))
        (hash-keys HARDWARE-DETECTION-BLOCKS)))
-      
 
+    ;; Procedures to compute paths in complex (with switches) and simplified (without switches)
+    (define (compute-path-complex start destination)
+      (fewest-vertices-path railway-graph start destination))
+
+    (define rest-of-path cdr) ;; Abstraction
+
+    (define (compute-path-simplified start destination)
+      (rest-of-path (fewest-vertices-path railway-DB-graph start destination)))
+      
     (define (dispatch msg)
       (cond
         ((eq? msg 'add-train!) add-train!)
@@ -264,6 +277,7 @@
         ((eq? msg 'get-train-speed) get-train-speed) 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
+        ((eq? msg 'get-switch-comp-state) get-switch-comp-state) ;; ADDED
         ((eq? msg 'get-all-switches) get-all-switches)
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
         ((eq? msg 'get-all-barriers) get-all-barriers)
@@ -273,7 +287,9 @@
         ((eq? msg 'change-light-state!) change-light-state!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
-        ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks) 
+        ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks)
+        ((eq? msg 'compute-path-complex) compute-path-complex) ;; ADDED
+        ((eq? msg 'compute-path-simplified) compute-path-simplified) ;; ADDED
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))
