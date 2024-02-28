@@ -70,7 +70,7 @@
                       barrier-adjust-cb barrier-retrieve-cb
                       light-adjust-cb light-retrieve-cb
                       db-retrieve-cb train-adjust-cb
-                      train-make-cb train-retrieve-cb add-trajectory-cb)
+                      train-make-cb train-retrieve-cb)
 
   ;; Used for the message placed on train tabs
   (define current-train-tab-message "Set train speed")
@@ -152,30 +152,13 @@
     (define initial-track (new choice%
                                [label "Initial-track:"]
                                [parent train-panel]
-                               [choices (data-converter (filter (lambda (element) (not (eq? element '2-8)))
-                                                              (db-retrieve-cb)))]))
+                               [choices (data-converter (db-retrieve-cb))]))
 
     (define track-behind (new choice% 
-                              [label "Component-behind:"]
+                              [label "Track-behind:"]
                               [parent train-panel]
                               [choices (append (data-converter (db-retrieve-cb))
                                                (data-converter (switch-retrieve-cb)))]))
-    
-    ;; Dropdown menu to go to a certain destination
-    (define destination (new choice%
-                             [label "Destination:"]
-                             [parent train-panel]
-                             [choices (data-converter (filter (lambda (element) (not (eq? element '2-8)))
-                                                              (db-retrieve-cb)))]))
-
-    ;; Button to go to destination
-    (define (destination-button-logic! button event) 
-      (add-trajectory-cb (string->symbol (send train-tab get-item-label (send train-tab get-selection))) (string->symbol (send destination get-string-selection))))
-    
-    (define destination-button (new button%
-                             [label "Go to destination"]
-                             [parent train-panel]
-                             [callback destination-button-logic!]))
     
 
     ;; Button to be added to the train-tab and it's logic

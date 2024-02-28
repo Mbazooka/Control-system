@@ -149,6 +149,18 @@
      20
      "get-all-switches: Incorrect-operation"))))
 
+(define railway-get-switch-possible-comp-states-tests
+  (test-suite
+   "RAILWAY-ADT: GET-SWITCH-POSSIBLE-COMP-STATES TESTS"
+
+   (test-case
+    "Test if 'get-switch-possible-comp-states' works properly"
+    (check-eq?
+     (let ((states ((test-railway 'get-switch-possible-comp-states))))
+       (and (eq? (car states) '2-1) (eq? (cadr states) 'S-25)))
+     #t
+     "get-switch-possible-comp-states: incorrect output"))))
+
 ;; Test the check-barrier-open?/change-barrier-state! operation of the railway
 (define railway-check-barrier-open?/change-barrier-state!-tests
   (test-suite

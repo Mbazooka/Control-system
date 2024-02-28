@@ -36,7 +36,7 @@
 ;; Test the current/change-position/current-comp operation of the class
 (define switch-current/current-comp/change-position/-tests
   (test-suite
-   "SWITCH-ADT: CHANGE/CURRENT-POSITION TESTS"
+   "SWITCH-ADT: CHANGE/CURRENT-POSITION/CURRENT-COMP TESTS"
 
    (test-case
     "Test if 'current-position' works properly"
@@ -69,6 +69,20 @@
      "SWITCH-ADT: Incorrect state in change-position!"
      "change-position!: incorrect change"))))
 
+;; Test the possible-comp-states operation of the class
+(define switch-possible-comp-states-tests
+  (test-suite
+   "SWITCH-ADT: POSSIBLE-COMP-STATES TESTS"
+
+   (test-case
+    "Test if 'possible-comp-states' works properly"
+    (check-eq?
+     (let ((states ((test-switch 'possible-comp-states))))
+       (and (eq? (car states) '2-1) (eq? (cadr states) 'S-25)))
+     #t
+     "possible-comp-states: incorrect output"))))
+   
+
 ;; Test the illegal message sending action
 (define switch-message-sending-tests
   (test-suite
@@ -87,6 +101,7 @@
                               switch-make-switch-tests
                               switch-name-tests
                               switch-current/current-comp/change-position/-tests
+                              switch-possible-comp-states-tests
                               switch-message-sending-tests))
 
 (test/gui all-tests)

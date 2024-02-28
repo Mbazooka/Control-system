@@ -17,6 +17,8 @@
 
     (define (current-comp) state-comp-name)
 
+    (define (possible-comp-states) (list initial-comp-name other-comp-name))
+
     (define (change-position! input-state)
       (cond ;; Only allows valid input states
         ((= input-state 1) (set! state 1) (set! state-comp-name initial-comp-name))       
@@ -29,6 +31,7 @@
         ((eq? msg 'get-name) get-name)
         ((eq? msg 'current-position) current-position)
         ((eq? msg 'current-comp) current-comp) ;; ADDED
+        ((eq? msg 'possible-comp-states) possible-comp-states) ;; ADDED
         ((eq? msg 'change-position!) change-position!)
         (else
          "SWITCH-ADT: Incorrect message")))
