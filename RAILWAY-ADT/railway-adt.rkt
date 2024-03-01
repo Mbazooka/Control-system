@@ -121,6 +121,9 @@
     ;; Procedure that changes the train speed to a certain value
     (define change-train-speed! (change-operation-abstraction riding-trains 'change-speed!))
 
+    ;; Procedure that changes the trajectory state
+    (define change-train-trajectory-state! (change-operation-abstraction riding-trains 'change-trajectory-state!))
+
     ;; Procedure that changes the switch state to a certain state 
     (define change-switch-state! (change-operation-abstraction HARDWARE-SWITCHES 'change-position!))
 
@@ -176,6 +179,9 @@
                                       ((actual-train 'get-current-speed))))))
            (hash-keys riding-trains)))
 
+    ;; Procedure that gets the train trajectory state
+    (define get-train-trajectory-state (get-operation-abstraction riding-trains 'get-trajectory-state))
+
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
 
@@ -224,7 +230,9 @@
         ((eq? msg 'add-train!) add-train!)
         ((eq? msg 'change-train-speed!) change-train-speed!)
         ((eq? msg 'get-all-trains) get-all-trains)
-        ((eq? msg 'get-train-speed) get-train-speed) 
+        ((eq? msg 'get-train-speed) get-train-speed)
+        ((eq? msg 'change-train-trajectory-state!) change-train-trajectory-state!) ;; ADDED
+        ((eq? msg 'get-train-trajectory-state) get-train-trajectory-state) ;; ADDED
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
         ((eq? msg 'get-switch-comp-state) get-switch-comp-state) ;; ADDED

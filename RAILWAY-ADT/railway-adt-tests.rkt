@@ -358,6 +358,42 @@
      '(1-4 1-2)
      "Compute-path-simplified: incorrect operation"))))
 
+(define railway-change-train-trajectory-state!/get-train-trajectory-state-tests
+  (test-suite
+   "RAILWAY-ADT: CHANGE-TRAIN-TRAJECTORY-STATE!/GET-TRAIN-TRAJECTORY TESTS"
+
+   (test-case
+    "Test if 'change-train-trajectory-state!' exists"
+    (check-not-equal?
+     (test-railway 'change-train-trajectory-state!)
+     "RAILWAY-ADT: Incorrect message"
+     "change-train-trajectory-state!: operation does not exist"))
+
+   (test-case
+    "Test if 'get-train-trajectory-state' exists"
+    (check-not-equal?
+     (test-railway 'get-train-trajectory-state)
+     "RAILWAY-ADT: Incorrect message"
+     "get-train-trajectory-state: operation does not exist"))
+
+   (test-case
+    "Test if 'get-train-trajectory-state' works properply"
+    (check-equal?
+     ((test-railway 'get-train-trajectory-state) 'TEST-TRAIN-1)
+     #f
+     "get-train-trajectory-state: incorrect output"))
+
+   (test-case
+    "Test if 'change-train-trajectory-state!' works properly"
+    (check-equal?
+     (begin
+     ((test-railway 'change-train-trajectory-state!) 'TEST-TRAIN-1 #t)
+     ((test-railway 'get-train-trajectory) 'TEST-TRAIN-1))
+     #t
+     "change-trajectory-state!: incorrect action"))
+
+   ))
+
 (define railway-message-sending-tests
   (test-suite
    "RAILWAY-ADT: MESSAGE SENDING TESTS"

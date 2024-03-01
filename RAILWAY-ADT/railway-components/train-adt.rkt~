@@ -7,8 +7,7 @@
 (provide make-train-adt)
 
 (define (make-train-adt name initial-track initial-track-behind)  
-  (let ((speed 0)
-        (trajectory #f))
+  (let ((speed 0))
 
     (define (get-name) name)
 
@@ -23,13 +22,6 @@
           "TRAIN-ADT: Illegal speed"
             (set! speed input-speed)))
 
-    (define (get-trajectory-state) trajectory)
-
-    (define (change-trajectory-state! state)
-      (if (boolean? state)
-          (set! trajectory state)
-          "Train-ADT: change-trajectory-state incorrect input"))
-
     (define (dispatch msg)
       (cond
         ((eq? msg 'get-name) get-name)
@@ -37,8 +29,6 @@
         ((eq? msg 'get-initial-track-behind) get-initial-track-behind)
         ((eq? msg 'get-current-speed) get-current-speed)
         ((eq? msg 'change-speed!) change-speed!)
-        ((eq? msg 'get-trajectory-state) get-trajectory-state) ;; ADDED
-        ((eq? msg 'change-trajectory-state!) change-trajectory-state!) ;; ADDED
         (else
          "TRAIN-ADT: Incorrect message")))
     dispatch))

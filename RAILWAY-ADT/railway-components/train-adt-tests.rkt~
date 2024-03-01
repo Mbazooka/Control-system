@@ -75,8 +75,8 @@
     "Test if 'change-speed!' acts properly with negative speeds (negative)"
     (check-equal?
      (begin
-       ((test-train 'change-speed!) -200)
-       ((test-train 'get-current-speed)))
+     ((test-train 'change-speed!) -200)
+     ((test-train 'get-current-speed)))
      -200
      "Change-speed!: incorrect output"))
 
@@ -86,37 +86,8 @@
      ((test-train 'change-speed!) 99999)
      "TRAIN-ADT: Illegal speed"
      "Change-speed!: incorrect action"))
-   ))
-
-;; Tests the get-trajectory-state and change-trajectory-state!
-(define train-get-trajectory-state/change-trajectory-state!-tests
-  (test-suite
-   "TRAIN-ADT: GET-TRAJECTORY-STATE/CHANGE-TRAJECTORY-STATE! TESTS"
-
-   (test-case
-    "Test if 'get-trajectory-state' gets the correct state"
-    (check-eq?
-     ((test-train 'get-trajectory-state))
-     #f
-     "get-trajectory-state: incorrect output"))
-
-   (test-case
-    "Test if 'change-trajectory-state' changes the states properly"
-    (check-eq?
-     (begin
-       ((test-train 'change-trajectory-state!) #t)
-       ((test-train 'get-trajectory-state)))
-     #t
-     "change-trajectory-state!: incorect action"))
-
-   (test-case
-    "Test if 'change-trajectory-state' can't accept bogus input"
-    (check-equal?
-     ((test-train 'change-trajectory-state!) 'bogus)
-     "Train-ADT: change-trajectory-state incorrect input"
-     "change-trajectory-state!: incorrect input"))
-
-   ))
+   ))   
+   
 
 ;; Bringing all test-suites together
 (define all-tests (test-suite "TRAIN-Module"
@@ -124,8 +95,6 @@
                               train-name-tests
                               train-initial-track-tests
                               train-initial-track-behind-tests
-                              train-get-current-speed/change-speed!-tests
-                              train-get-trajectory-state/change-trajectory-state!-tests
-                              ))
+                              train-get-current-speed/change-speed!-tests))
 
 (test/gui all-tests)

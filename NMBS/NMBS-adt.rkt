@@ -12,7 +12,8 @@
 
 (define (make-nmbs-adt)
   (let ((railway (make-railway-adt))
-        (trains-trajectory (make-hash)) 
+        (trains-trajectory (make-hash))
+        (new-trajectories (make-hash))
         (gui '()))
 
     (define (update-component-abstraction operation) ;; Abstraction for reoccuring update operation
@@ -41,6 +42,30 @@
     (define update-train! (update-component-abstraction 'change-train-speed!))
 
     (define retrieve-all-trains (retrieve-all-abstraction 'get-all-trains))
+
+    ;; The following is an abstraction of a reoccuring pattern for updating Hardware
+    (define (update-all-abstraction message)
+      (lambda (data)
+        (for-each
+         (lambda (pair)
+           (let ((name (car pair))
+                 (state (cdr pair)))
+             ((railway message) name state)))
+         data)))
+
+    (define update-switches! (update-all-abstraction 'change-switch-state!))
+
+    ;; Procedure to update the trains
+    (define (update-trains! trains) ;; Updates the trains
+      (for-each
+       (lambda (train)
+         (let ((train-name (car train))
+               (init-track (cadr train))
+               (beh-track (caddr train))
+               (speed (cadddr train)))
+           ((railway 'add-train!) train-name init-track beh-track)
+           ((railway 'change-train-speed!) train-name speed)))
+       trains))
 
     ;; Helper procedure to determine the destination a trajectory
     (define (get-destination trajectory)
@@ -108,78 +133,44 @@
               (let ((individual-path ((railway 'compute-path-complex) start (car current-path))))
                 (cons individual-path
                       (compute-individual-trajectory (get-destination individual-path) (cdr current-path))))))
-        (optimize-trajectory (adjust-full-trajectory (compute-individual-trajectory start path)))))
-
-    ;; Helper procedures to process trajectory
-    (define (switch? element)
-      (eq? (string-ref (symbol->string element) 0) #\S))
-
-    (define (get-switch-surrounding lst)
-      (cons (car lst) (caddr lst)))
-
-    (define get-switch cadr)
-
-    (define (adjust-switch-traj switch switch-state comp-state supposed-state)
-      (if (eq? comp-state supposed-state)
-          '()
-          ((railway 'change-switch-state!) switch (if (eq? switch-state 1) 2 1))))
-
-    ;; Procedure to process the trajectory and adjust elements
-    (define (process-trajectory trajectory)
-      (define (process-trajectory-iter current-component)
-        (display current-component)
-        (newline)
-        (cond
-          ((null? (cdr current-component)) '())
-          ((null? (cddr current-component)) '())
-          ((not (switch? (cadr current-component))) (newline) (process-trajectory-iter (cdr current-component))) 
-          (else
-           (let ((components (get-switch-surrounding current-component))
-                 (possible-states ((railway 'get-switch-possible-comp-states) (get-switch current-component)))
-                 (current-state ((railway 'get-switch-state) (get-switch current-component)))
-                 (current-comp-state ((railway 'get-switch-comp-state) (get-switch current-component))))
-             (cond
-               ((member (car components) possible-states)
-                (adjust-switch-traj (get-switch current-component) current-state  current-comp-state (car components))
-                (process-trajectory-iter (cdr current-component)))
-               ((member (cdr components) possible-states)
-                (adjust-switch-traj (get-switch current-component) current-state  current-comp-state (cdr components))
-                (process-trajectory-iter (cdr current-component))))))))
-      (process-trajectory-iter trajectory))
-
-    (define (apply-train! train-name track track-behind) ;; Adds a train to the track
-      (if ((railway 'add-train!) train-name track track-behind)
-          (hash-set! trains-trajectory train-name (cons track '()))
-          '()))
+        (optimize-trajectory (adjust-full-trajectory (compute-individual-trajectory start path))))) ;; Sticker to make sure it is the first
 
     ;; Abstractions
     (define first-traj car)
     (define rest-traj cdr)
     (define destination car)
-    (define actual-traj cdr)
+
+    ;; Procedure to adjust trajectory to be followed
+    (define (adjust-trajectory! train-name trajectory)
+      (hash-set! new-trajectories train-name (cons (get-destination (first-traj trajectory)) trajectory)))
     
     ;; Procedure that will add a trajectory for a specific train (to be changed later (current destination), ADDED)
     (define (add-trajectory! train-name destination)
-      (define trajectory (compute-trajectory (car (hash-ref trains-trajectory train-name)) destination))
-      (hash-set! trains-trajectory train-name (cons (get-destination (first-traj trajectory)) (rest-traj trajectory)))
-      (process-trajectory (first-traj trajectory))
-      ((railway 'change-train-speed!) train-name 200)) ;; TO BE CHANGED
+      (cond
+        ((hash-ref new-trajectories train-name #f)
+         (adjust-trajectory! train-name (compute-trajectory (car (hash-ref new-trajectories train-name)) destination))) ;; CHANGE HERE TO SPECIFIC START
+        ((hash-ref trains-trajectory train-name #f)
+         (adjust-trajectory! train-name (compute-trajectory (car (hash-ref trains-trajectory train-name)) destination)))))
 
-    ;; Procedure that will update the trains their trajectories
-    (define (update-trajectories!)
-      (hash-for-each trains-trajectory
-                     (lambda (train cc)
-                       (cond
-                         ((and (not (null? (actual-traj cc))) ;; Something left to do
-                                ((railway 'get-detection-block-state) (destination cc))) ;; Reached destination
-                             (process-trajectory (first-traj (actual-traj cc)))
-                             ((railway 'change-train-speed!) train (* -1 ((railway 'get-train-speed) train)))
-                             (hash-set! trains-trajectory train
-                                        (cons (get-destination (first-traj (actual-traj cc)))
-                                        (rest-traj (actual-traj cc)))))
-                         (((railway 'get-detection-block-state) (destination cc)) ;; TO BE CHANGED WITH SPECIFIC TRAIN
-                          ((railway 'change-train-speed!) train 0))))
-                     ))
+    ;; Helper procedure to get destination of trajectory
+    (define (get-final-destination trajectories)
+      (if (null? (cdr trajectories))
+          (get-destination (car trajectories))
+          (get-final-destination (cdr trajectories))))
+
+    ;; Procedure that will retrieve the trajectories
+    (define (retrieve-trajectories)
+      (let ((return-val (hash->list new-trajectories)))
+        (hash-for-each new-trajectories
+                       (lambda (train data)
+                         (hash-set! trains-trajectory train data)))
+        (hash-clear! new-trajectories)
+        return-val))
+
+    (define (apply-train! train-name track track-behind) ;; Adds a train to the track
+      (if ((railway 'add-train!) train-name track track-behind)
+          (hash-set! new-trajectories train-name (cons track '()))
+          '())) 
 
     (define update-detection-blocks! ;; Updates the detection-blocks their states
       (lambda (data-pair)
@@ -191,7 +182,7 @@
                             update-barrier! retrieve-all-barriers
                             update-light! retrieve-all-lights
                             retrieve-all-detection-blocks update-train!
-                            apply-train! retrieve-all-trains add-trajectory!))
+                            apply-train! retrieve-all-trains add-trajectory!)) 
       
     (define (dispatch msg)
       (cond
@@ -202,8 +193,9 @@
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
         ((eq? msg 'compute-trajectory) compute-trajectory)
         ((eq? msg 'add-trajectory!) add-trajectory!) ;; ADDED
-        ((eq? msg 'update-trajectories!) update-trajectories!) ;; ADDED
-        ((eq? msg 'process-trajectory) process-trajectory)
+        ((eq? msg 'retrieve-trajectories) retrieve-trajectories) ;; ADDED
+        ((eq? msg 'update-trains!) update-trains!)
+        ((eq? msg 'update-switches!) update-switches!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else
          "NMBS-ADT: Illegal message")))

@@ -169,7 +169,7 @@
                                                               (db-retrieve-cb)))]))
 
     ;; Button to go to destination
-    (define (destination-button-logic! button event) 
+    (define (destination-button-logic! button event)
       (add-trajectory-cb (string->symbol (send train-tab get-item-label (send train-tab get-selection))) (string->symbol (send destination get-string-selection))))
     
     (define destination-button (new button%
@@ -207,7 +207,6 @@
     (define (slider-logic! slider event) ;; Logic for slider
       (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
         (train-adjust-cb name (send slider get-value))))
-        
         
     (define slider ;; Slider itself
       (new slider%
