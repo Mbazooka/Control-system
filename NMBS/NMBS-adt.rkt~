@@ -12,6 +12,8 @@
 
 (define (make-nmbs-adt)
   (let ((railway (make-railway-adt))
+        (trains-trajectory (make-hash))
+        (new-trajectories (make-hash))
         (gui '()))
 
     (define (update-component-abstraction operation) ;; Abstraction for reoccuring update operation
@@ -41,8 +43,134 @@
 
     (define retrieve-all-trains (retrieve-all-abstraction 'get-all-trains))
 
+    ;; The following is an abstraction of a reoccuring pattern for updating Hardware
+    (define (update-all-abstraction message)
+      (lambda (data)
+        (for-each
+         (lambda (pair)
+           (let ((name (car pair))
+                 (state (cdr pair)))
+             ((railway message) name state)))
+         data)))
+
+    (define update-switches! (update-all-abstraction 'change-switch-state!))
+
+    ;; Procedure to update the trains
+    (define (update-trains! trains) ;; Updates the trains
+      (for-each
+       (lambda (train)
+         (let ((train-name (car train))
+               (init-track (cadr train))
+               (beh-track (caddr train))
+               (speed (cadddr train)))
+           ((railway 'add-train!) train-name init-track beh-track)
+           ((railway 'change-train-speed!) train-name speed)))
+       trains))
+
+    ;; Helper procedure to determine the destination a trajectory
+    (define (get-destination trajectory)
+      (if (null? trajectory)
+          trajectory
+          (if (null? (cdr trajectory))
+              (car trajectory)
+              (get-destination (cdr trajectory)))))
+
+    ;; Helper procedures to adjust the trajectory taken to a correct trajectory
+    (define (environment-component? preceded component followed component-list)
+      (and (eq? (car component-list) preceded)
+           (eq? (cadr component-list) component)
+           (eq? (caddr component-list) followed)))
+
+    (define (adjust-single-trajectory component-list)
+      (define (adjustment-traj lst . new-elements)
+        (cons (car lst) (append new-elements (cddr lst))))
+        
+      (define (adjust-single-trajec-rec lst)
+        (cond
+          ((null? lst) '())
+          ((null? (cdr lst)) lst)
+          ((null? (cddr lst)) lst)
+          ((or (environment-component? 'S-2 'S-7 'S-25 lst)
+               (environment-component? 'S-25 'S-7 'S-2 lst))
+           (adjustment-traj lst 'S-1))
+          ((or (environment-component? 'S-1 'S-25 'S-7 lst)
+               (environment-component? 'S-7 'S-25 'S-1 lst))
+           (adjustment-traj lst 'S-2))
+          (else
+           (cons (car lst)
+                 (adjust-single-trajec-rec (cdr lst))))))
+      (adjust-single-trajec-rec component-list))
+
+    (define (adjust-full-trajectory trajectory)
+      (map adjust-single-trajectory trajectory))
+
+    ;; Helper procedure for optimization procedure
+    (define (common-elements? lst1 lst2)
+      (define member-boolean #f)
+      (for-each (lambda (element)
+                  (if (not (eq? (member element lst2) #f))
+                      (set! member-boolean #t)
+                      '()))
+                lst1)
+      member-boolean)
+
+    ;; Procedure to optimize the path so that it doesn't stop and then continue riding in the same direction (might have duplicates, but that's not a problem)
+    (define (optimize-trajectory full-trajectory) ;; Determines if the trajectory can be optimized, i.e. completed in one chunk
+      (define (optimize-trajectory-iter current-traj rest-traj acc)
+        (if (null? rest-traj)
+            (append acc (list current-traj))
+            (if (common-elements? current-traj (cdar rest-traj))
+                (optimize-trajectory-iter (car rest-traj) (cdr rest-traj) (append acc (list current-traj)))
+                (optimize-trajectory-iter (append current-traj (car rest-traj)) (cdr rest-traj) acc))))
+      (optimize-trajectory-iter (car full-trajectory) (cdr full-trajectory) '()))     
+
+    ;; Compute the trajectory that must be taken to get to the desired destination
+    (define (compute-trajectory start destination) ;; ADDED (ADD TO TESTS)
+      (let ((path ((railway 'compute-path-simplified) start destination)))
+        (define (compute-individual-trajectory start current-path)
+          (if (null? current-path)
+              '()
+              (let ((individual-path ((railway 'compute-path-complex) start (car current-path))))
+                (cons individual-path
+                      (compute-individual-trajectory (get-destination individual-path) (cdr current-path))))))
+        (optimize-trajectory (adjust-full-trajectory (compute-individual-trajectory start path))))) ;; Sticker to make sure it is the first
+
+    ;; Abstractions
+    (define first-traj car)
+    (define rest-traj cdr)
+    (define destination car)
+
+    ;; Procedure to adjust trajectory to be followed
+    (define (adjust-trajectory! train-name trajectory)
+      (hash-set! new-trajectories train-name (cons (get-destination (first-traj trajectory)) trajectory)))
+    
+    ;; Procedure that will add a trajectory for a specific train (to be changed later (current destination), ADDED)
+    (define (add-trajectory! train-name destination)
+      (cond
+        ((hash-ref new-trajectories train-name #f)
+         (adjust-trajectory! train-name (compute-trajectory (car (hash-ref new-trajectories train-name)) destination))) ;; CHANGE HERE TO SPECIFIC START
+        ((hash-ref trains-trajectory train-name #f)
+         (adjust-trajectory! train-name (compute-trajectory (car (hash-ref trains-trajectory train-name)) destination)))))
+
+    ;; Helper procedure to get destination of trajectory
+    (define (get-final-destination trajectories)
+      (if (null? (cdr trajectories))
+          (get-destination (car trajectories))
+          (get-final-destination (cdr trajectories))))
+
+    ;; Procedure that will retrieve the trajectories
+    (define (retrieve-trajectories)
+      (let ((return-val (hash->list new-trajectories)))
+        (hash-for-each new-trajectories
+                       (lambda (train data)
+                         (hash-set! trains-trajectory train data)))
+        (hash-clear! new-trajectories)
+        return-val))
+
     (define (apply-train! train-name track track-behind) ;; Adds a train to the track
-      ((railway 'add-train!) train-name track track-behind))     
+      (if ((railway 'add-train!) train-name track track-behind)
+          (hash-set! new-trajectories train-name (cons track '()))
+          '())) 
 
     (define update-detection-blocks! ;; Updates the detection-blocks their states
       (lambda (data-pair)
@@ -54,9 +182,8 @@
                             update-barrier! retrieve-all-barriers
                             update-light! retrieve-all-lights
                             retrieve-all-detection-blocks update-train!
-                            apply-train! retrieve-all-trains))
+                            apply-train! retrieve-all-trains add-trajectory!)) 
       
-
     (define (dispatch msg)
       (cond
         ((eq? msg 'retrieve-all-switches) retrieve-all-switches)
@@ -64,6 +191,11 @@
         ((eq? msg 'retrieve-all-barriers) retrieve-all-barriers)
         ((eq? msg 'retrieve-all-lights) retrieve-all-lights)
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
+        ((eq? msg 'compute-trajectory) compute-trajectory)
+        ((eq? msg 'add-trajectory!) add-trajectory!) ;; ADDED
+        ((eq? msg 'retrieve-trajectories) retrieve-trajectories) ;; ADDED
+        ((eq? msg 'update-trains!) update-trains!)
+        ((eq? msg 'update-switches!) update-switches!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else
          "NMBS-ADT: Illegal message")))

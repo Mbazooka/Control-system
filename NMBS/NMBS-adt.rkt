@@ -56,15 +56,17 @@
     (define update-switches! (update-all-abstraction 'change-switch-state!))
 
     ;; Procedure to update the trains
-    (define (update-trains! trains) ;; Updates the trains
+    (define (update-trains! trains) 
       (for-each
        (lambda (train)
          (let ((train-name (car train))
                (init-track (cadr train))
                (beh-track (caddr train))
-               (speed (cadddr train)))
+               (speed (cadddr train))
+               (current-track (car (cddddr train))))
            ((railway 'add-train!) train-name init-track beh-track)
-           ((railway 'change-train-speed!) train-name speed)))
+           ((railway 'change-train-speed!) train-name speed)
+           ((railway 'change-train-track!) train-name current-track)))
        trains))
 
     ;; Helper procedure to determine the destination a trajectory

@@ -87,15 +87,18 @@
     (define (change-switch! switch state)
       (set-switch-position-HARDWARE! switch state))
 
-    (define (update-trains! trains) ;; Updates the trains
+    ;; Procedure for updating the trains
+    (define (update-trains! trains) 
       (for-each
        (lambda (train)
          (let ((train-name (car train))
                (init-track (cadr train))
                (beh-track (caddr train))
-               (speed (cadddr train)))
+               (speed (cadddr train))
+               (current-track (car (cddddr train))))
            (add-train-HARDWARE! train-name init-track beh-track)
-           (change-speed! train-name speed)))
+           (change-speed! train-name speed)
+           ((railway 'change-train-track!) train-name current-track)))
        trains))
 
     ;; Abstractions
@@ -223,7 +226,6 @@
                                      ((railway 'change-train-track!) train-name track)
                                      '()))
                                possible-tracks))))
-
                            ))))
     
     (define (dispatch msg)

@@ -184,7 +184,9 @@
              (let ((actual-train (hash-ref riding-trains train-name)))
                (cons train-name (list ((actual-train 'get-initial-track))
                                       ((actual-train 'get-initial-track-behind))
-                                      ((actual-train 'get-current-speed))))))
+                                      ((actual-train 'get-current-speed))
+                                      ((actual-train 'get-current-track))
+                                      ))))
            (hash-keys riding-trains)))
 
     ;; Procedure that gets the train trajectory state
