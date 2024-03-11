@@ -161,7 +161,7 @@
                            (begin
                              (change-speed! train-name 200) ;; To be changed (more variable speed)
                              (process-trajectory (cadr data))
-                             ((railway 'change-train-trajectory-state!) train-name #t)
+                             ((railway 'change-train-trajectory-state!) train-name (cadr data))
                              (hash-set! trains-trajectory train-name (cons (get-destination (cadr data))
                                                                            (cddr data))))
                            (hash-set! trains-trajectory train-name data)))))
@@ -193,6 +193,25 @@
                           (change-speed! train 0))
                          ))
                      ))
+
+    ;; Procedure that will update the train positions
+    (define (update-train-positions) 
+      (hash-for-each trains-trajectory
+                     (lambda (train-name data)
+                       (let* ((current-traj ((railway 'get-train-trajectory-state) train-name))
+                             (current-traj-no-switch  '()))
+                         (cond
+                           ((and current-traj (not (null? current-traj)))
+                            (set! current-traj-no-switch (filter (lambda (x)
+                                                               (not (switch? x))) current-traj))
+                            (for-each
+                             (lambda (DB)
+                               (if ((railway 'get-detection-block-state) DB)
+                                   ((railway 'change-train-track!) train-name DB)
+                                   '()) ;)
+                               (display ((railway 'get-train-track) train-name))
+                               (newline))
+                             current-traj-no-switch)))))))
     
     (define (dispatch msg)
       (cond
@@ -202,9 +221,10 @@
         ((eq? msg 'update-barriers!) update-barriers!)
         ((eq? msg 'add-trajectories!) add-trajectories!) ;; ADDED
         ((eq? msg 'update-trajectories!) update-trajectories!) ;; ADDED
+        ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains) ;; ADDED
-        ((eq? msg 'bla) trains-trajectory)
+        ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         (else
          "INFRABEL-ADT: Incorrect message")))

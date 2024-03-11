@@ -88,7 +88,7 @@
      "Change-speed!: incorrect action"))
    ))
 
-;; Tests the get-trajectory-state and change-trajectory-state!
+;; Tests the get-trajectory-state and change-trajectory-state! operations
 (define train-get-trajectory-state/change-trajectory-state!-tests
   (test-suite
    "TRAIN-ADT: GET-TRAJECTORY-STATE/CHANGE-TRAJECTORY-STATE! TESTS"
@@ -102,14 +102,14 @@
 
    (test-case
     "Test if 'change-trajectory-state' changes the states properly"
-    (check-eq?
+    (check-equal?
      (begin
-       ((test-train 'change-trajectory-state!) #t)
+       ((test-train 'change-trajectory-state!) '(1-1 1-2))
        ((test-train 'get-trajectory-state)))
-     #t
+     '(1-1 1-2)
      "change-trajectory-state!: incorect action"))
 
-   (test-case
+   (test-case 
     "Test if 'change-trajectory-state' can't accept bogus input"
     (check-equal?
      ((test-train 'change-trajectory-state!) 'bogus)
@@ -117,6 +117,36 @@
      "change-trajectory-state!: incorrect input"))
 
    ))
+
+;; Tests the get-current-track and change-current-track! operations
+(define train-get-current-track/get-track-behind/change-current-track!-tests
+  (test-suite
+   "TRAIN-ADT: GET-CURRENT-TRACK/GET-TRACK-BEHIND/CHANGE-CURRENT-TRACK! TESTS"
+
+   (test-case
+    "Test if 'get-current-track' gets the correct track"
+    (check-eq?
+     ((test-train 'get-current-track))
+     '1-1
+     "get-current-track: Incorrect output"))
+
+   (test-case
+    "Test if 'get-track-behind' gets the correct track"
+    (check-eq?
+     ((test-train 'get-track-behind))
+     'S-10
+     "get-track-behind!: Incorrect output"))
+
+   (test-case
+    "Test if 'change-current-track!' works properly"
+    (check-eq?
+     (begin
+       ((test-train 'change-current-track!) '2-3)
+       (and (eq? ((test-train 'get-current-track)) '2-3)
+            (eq? ((test-train 'get-track-behind)) '1-1)))
+     #t
+     "change-current-track!: incorrect operation"))))
+     
 
 ;; Bringing all test-suites together
 (define all-tests (test-suite "TRAIN-Module"
@@ -126,6 +156,7 @@
                               train-initial-track-behind-tests
                               train-get-current-speed/change-speed!-tests
                               train-get-trajectory-state/change-trajectory-state!-tests
+                              train-get-current-track/get-track-behind/change-current-track!-tests
                               ))
 
 (test/gui all-tests)

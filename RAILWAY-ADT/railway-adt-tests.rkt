@@ -51,9 +51,9 @@
 
 
 ;; Test the change-train-speed!/get-train-speed operation of the railway
-(define railway-change-train-speed!/get-train-speed/get-all-trains-tests
+(define railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/get-all-trains-tests
   (test-suite
-   "RAILWAY-ADT: CHANGE-TRAIN-SPEED!/GET-TRAIN-SPEED/GET-ALL-TRAINS TESTS"
+   "RAILWAY-ADT: CHANGE-TRAIN-SPEED!/GET-TRAIN-SPEED/GET-TRAIN-TRACK/CHANGE-TRAIN-TRACK!/GET-ALL-TRAINS TESTS"
 
    (test-case
     "Test if 'change-train-speed!' exists"
@@ -92,6 +92,35 @@
      (length ((test-railway 'get-all-trains)))
      1
      "get-all-trains: incorrect output"))
+
+   (test-case
+    "Test if 'get-train-track' works properly"
+    (check-eq?
+     (begin
+       ((test-railway 'add-train!) 'TEST-TRAIN-2 '1-8 'S-10)
+       ((test-railway 'get-train-track) 'TEST-TRAIN-2))
+     '1-8
+     "get-train-track: incorrect operation"))
+
+   (test-case
+    "Test if 'get-train-track-behind' works properly"
+    (check-eq?
+     (begin
+       ((test-railway 'add-train!) 'TEST-TRAIN-19 '1-1 '1-2)
+       ((test-railway 'get-train-track-behind) 'TEST-TRAIN-19))
+     '1-2
+     "get-train-track-behind: incorrect operation"))
+
+   (test-case
+    "Test if 'change-train-track!' works properly"
+    (check-eq?
+     (begin
+       ((test-railway 'add-train!) 'TEST-TRAIN-3 '2-3 'S-10)
+       ((test-railway 'change-train-track!) 'TEST-TRAIN-3 '1-2)
+       (and (eq? ((test-railway 'get-train-track) 'TEST-TRAIN-3) '1-2)
+            (eq? ((test-railway 'get-train-track-behind) 'TEST-TRAIN-3) '2-3)))
+     #t
+     "change-train-track!: incorrect operation"))
 
    ))
 
@@ -387,9 +416,9 @@
     "Test if 'change-train-trajectory-state!' works properly"
     (check-equal?
      (begin
-     ((test-railway 'change-train-trajectory-state!) 'TEST-TRAIN-1 #t)
-     ((test-railway 'get-train-trajectory) 'TEST-TRAIN-1))
-     #t
+       ((test-railway 'change-train-trajectory-state!) 'TEST-TRAIN-1 '(1-2 2-3))
+       ((test-railway 'get-train-trajectory) 'TEST-TRAIN-1))
+     '(1-2 2-3)
      "change-trajectory-state!: incorrect action"))
 
    ))
@@ -410,7 +439,7 @@
 (define all-tests (test-suite "Railway-Module"
                               railway-make-test
                               railway-add-train-tests
-                              railway-change-train-speed!/get-train-speed/get-all-trains-tests
+                              railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/get-all-trains-tests
                               railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
                               railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests

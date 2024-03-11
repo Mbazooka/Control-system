@@ -96,9 +96,9 @@
    ))
 
 ;; Test the change-switch-state!/get-switch-state operation of the railway
-(define railway-change-switch-state!/get-switch-state-tests
+(define railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
   (test-suite
-   "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE TESTS"
+   "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE/GET-SWITCH-COMP-STATE TESTS"
 
    (test-case
     "Test if 'change-switch-state!' exists"
@@ -108,20 +108,28 @@
      "Change-switch-state!: operation does not exist"))
 
    (test-case
-    "Test if 'get-switch-state' does not exist"
+    "Test if 'get-switch-state' exists"
     (check-not-equal?
      (test-railway 'get-switch-state)
      "RAILWAY-ADT: Incorrect message"
      "Get-switch-state: operation does not exist"))
 
    (test-case
-    "Test if 'change-switch-state!/get-switch-state' works properly"
+    "Test if 'get-switch-comp-state' exists"
+    (check-not-equal?
+     (test-railway 'get-switch-comp-state)
+     "RAILWAY-ADT: Incorrect message"
+     "Get-switch-comp-state; operation does not exist"))
+
+   (test-case
+    "Test if 'change-switch-state!/get-switch-state/get-comp-state' works properly"
     (check-eq?
      (begin
        ((test-railway 'change-switch-state!) 'S-1 2)
-       ((test-railway 'get-switch-state) 'S-1))
-     2
-     "change-switch-state!/get-switch-state: Incorrect operation"))))
+       (and (eq? ((test-railway 'get-switch-state) 'S-1) 2)
+            (eq? ((test-railway 'get-switch-comp-state) 'S-1) 'S-25)))
+     #t
+     "change-switch-state!/get-switch-state/get-switch-comp-state: Incorrect operation"))))
 
 (define railway-get-all-switches-tests
   (test-suite
@@ -140,6 +148,18 @@
      (length ((test-railway 'get-all-switches)))
      20
      "get-all-switches: Incorrect-operation"))))
+
+(define railway-get-switch-possible-comp-states-tests
+  (test-suite
+   "RAILWAY-ADT: GET-SWITCH-POSSIBLE-COMP-STATES TESTS"
+
+   (test-case
+    "Test if 'get-switch-possible-comp-states' works properly"
+    (check-eq?
+     (let ((states ((test-railway 'get-switch-possible-comp-states))))
+       (and (eq? (car states) '2-1) (eq? (cadr states) 'S-25)))
+     #t
+     "get-switch-possible-comp-states: incorrect output"))))
 
 ;; Test the check-barrier-open?/change-barrier-state! operation of the railway
 (define railway-check-barrier-open?/change-barrier-state!-tests
@@ -305,6 +325,75 @@
 
    ))
 
+(define railway-compute-path-complex/compute-path-simplified-tests
+
+  (test-suite
+   "RAILWAY-ADT: COMPUTE-PATH-COMPLEX/COMPUTE-PATH-SIMPLIFIED TESTS"
+
+   (test-case
+    "Test if 'compute-path-complex' exists"
+    (check-not-equal?
+     (test-railway 'compute-path-complex)
+     "RAILWAY-ADT: Incorrect message"
+     "Compute-path-complex: operation does not exist"))
+
+   (test-case
+    "Test if 'compute-path-simplified' exists"
+    (check-not-equal?
+     (test-railway 'compute-path-simplified)
+     "RAILWAY-ADT: Incorrect message"
+     "Compute-path-simplified: operation does not exist"))
+
+   (test-case
+    "Test if 'compute-path-complex' works properly"
+    (check-equal?
+     ((test-railway 'compute-path-complex) '1-3 '1-2)
+     '(S-27 1-2)
+     "Compute-path-complex: incorrect operation"))
+
+   (test-case
+    "Test if 'compute-path-simplified' works properly"
+    (check-equal?
+     ((test-railway 'compute-path-simplified) '1-3 '1-2)
+     '(1-4 1-2)
+     "Compute-path-simplified: incorrect operation"))))
+
+(define railway-change-train-trajectory-state!/get-train-trajectory-state-tests
+  (test-suite
+   "RAILWAY-ADT: CHANGE-TRAIN-TRAJECTORY-STATE!/GET-TRAIN-TRAJECTORY TESTS"
+
+   (test-case
+    "Test if 'change-train-trajectory-state!' exists"
+    (check-not-equal?
+     (test-railway 'change-train-trajectory-state!)
+     "RAILWAY-ADT: Incorrect message"
+     "change-train-trajectory-state!: operation does not exist"))
+
+   (test-case
+    "Test if 'get-train-trajectory-state' exists"
+    (check-not-equal?
+     (test-railway 'get-train-trajectory-state)
+     "RAILWAY-ADT: Incorrect message"
+     "get-train-trajectory-state: operation does not exist"))
+
+   (test-case
+    "Test if 'get-train-trajectory-state' works properply"
+    (check-equal?
+     ((test-railway 'get-train-trajectory-state) 'TEST-TRAIN-1)
+     #f
+     "get-train-trajectory-state: incorrect output"))
+
+   (test-case
+    "Test if 'change-train-trajectory-state!' works properly"
+    (check-equal?
+     (begin
+     ((test-railway 'change-train-trajectory-state!) 'TEST-TRAIN-1 #t)
+     ((test-railway 'get-train-trajectory) 'TEST-TRAIN-1))
+     #t
+     "change-trajectory-state!: incorrect action"))
+
+   ))
+
 (define railway-message-sending-tests
   (test-suite
    "RAILWAY-ADT: MESSAGE SENDING TESTS"
@@ -315,7 +404,6 @@
      (test-railway 'illegal-message)
      "RAILWAY-ADT: Incorrect message"
      "module allows illegal message to be sent without warning"))))
-     
     
 
 ;; Bringing all test-suites together
@@ -323,7 +411,7 @@
                               railway-make-test
                               railway-add-train-tests
                               railway-change-train-speed!/get-train-speed/get-all-trains-tests
-                              railway-change-switch-state!/get-switch-state-tests
+                              railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
                               railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
