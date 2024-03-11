@@ -223,8 +223,6 @@
                                      ((railway 'change-train-track!) train-name track)
                                      '()))
                                possible-tracks))))
-                         (display ((railway 'get-train-track) train-name))
-                         (display " ")
 
                            ))))
     
