@@ -19,7 +19,7 @@
   ((INFRABEL 'update-barriers!) ((NMBS 'retrieve-all-barriers)))
   ((INFRABEL 'update-trains!) ((NMBS 'retrieve-all-trains)))
   ((NMBS 'update-detection-blocks!) ((INFRABEL 'update-detection-blocks!)))
-  (sleep 1)
+  (sleep 0.70)
   ((INFRABEL 'update-trains!) ((NMBS 'retrieve-all-trains)))
   ((INFRABEL 'add-trajectories!) ((NMBS 'retrieve-trajectories)))
   ((INFRABEL 'update-train-positions))

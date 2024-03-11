@@ -170,7 +170,7 @@
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
         (change-speed! train 200)
-        (sleep 0.75)
+        (sleep 0.70)
         (change-speed! train current-speed)))         
 
     ;; Procedure that will update the trains their trajectories
@@ -194,6 +194,11 @@
                          ))
                      ))
 
+    ;; Procedure that determines the possible next tracks
+    (define (determine-possible-next-tracks current-track)
+      ((railway 'get-track-neighbour) current-track))
+      
+
     ;; Procedure that will update the train positions
     (define (update-train-positions) 
       (hash-for-each trains-trajectory
@@ -208,10 +213,20 @@
                              (lambda (DB)
                                (if ((railway 'get-detection-block-state) DB)
                                    ((railway 'change-train-track!) train-name DB)
-                                   '()) ;)
-                               (display ((railway 'get-train-track) train-name))
-                               (newline))
-                             current-traj-no-switch)))))))
+                                   '()))
+                             current-traj-no-switch))
+                           (else
+                            (let ((possible-tracks (determine-possible-next-tracks ((railway 'get-train-track) train-name))))
+                              (for-each
+                               (lambda (track)
+                                 (if ((railway 'get-detection-block-state) track)
+                                     ((railway 'change-train-track!) train-name track)
+                                     '()))
+                               possible-tracks))))
+                         (display ((railway 'get-train-track) train-name))
+                         (display " ")
+
+                           ))))
     
     (define (dispatch msg)
       (cond

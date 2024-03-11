@@ -260,6 +260,7 @@
         ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks)
         ((eq? msg 'compute-path-complex) compute-path-complex) ;; ADDED
         ((eq? msg 'compute-path-simplified) compute-path-simplified) ;; ADDED
+        ((eq? msg 'get-track-neighbour) (lambda (component) (get-neighbors railway-DB-graph component))) ;; ADDED 
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))
