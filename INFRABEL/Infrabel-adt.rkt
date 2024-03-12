@@ -128,33 +128,39 @@
               (car trajectory)
               (get-destination (cdr trajectory)))))
 
+    ;; Abstractions 
+    (define first-comp car)
+    (define rest-comp cdr)
+    (define one-ahead cdr)
+    (define two-ahead cddr)
+
     ;; Procedure to process the trajectory and adjust elements
     (define (process-trajectory trajectory)
       (define (process-trajectory-iter current-component)
         (cond
-          ((null? (cdr current-component)) '())
-          ((null? (cddr current-component)) '())
-          ((not (switch? (cadr current-component))) (newline) (process-trajectory-iter (cdr current-component))) 
+          ((null? (one-ahead current-component)) '())
+          ((null? (two-ahead current-component)) '())
+          ((not (switch? (cadr current-component))) (process-trajectory-iter (rest-comp current-component))) 
           (else
            (let ((components (get-switch-surrounding current-component))
                  (possible-states ((railway 'get-switch-possible-comp-states) (get-switch current-component)))
                  (current-state ((railway 'get-switch-state) (get-switch current-component)))
                  (current-comp-state ((railway 'get-switch-comp-state) (get-switch current-component))))
              (cond
-               ((member (car components) possible-states)
-                (adjust-switch-traj (get-switch current-component) current-state  current-comp-state (car components))
-                (process-trajectory-iter (cdr current-component)))
-               ((member (cdr components) possible-states)
-                (adjust-switch-traj (get-switch current-component) current-state  current-comp-state (cdr components))
-                (process-trajectory-iter (cdr current-component))))))))
+               ((member (first-comp components) possible-states)
+                (adjust-switch-traj (get-switch current-component) current-state  current-comp-state (first-comp components))
+                (process-trajectory-iter (rest-comp current-component)))
+               ((member (rest-comp components) possible-states)
+                (adjust-switch-traj (get-switch current-component) current-state  current-comp-state (rest-comp components))
+                (process-trajectory-iter (rest-comp current-component))))))))
       (process-trajectory-iter trajectory))
 
     ;; Helper procedures
     (define (actual-trajectory? trajectory-data)
-      (not (null? (cdr trajectory-data))))
+      (not (null? trajectory-data)))
 
-    (define train-destination car)
-    (define actual-trajectory cdr)
+    ;; Procedure that determines the sign of the speed
+    (define (determine-speed-sign) '())
 
     ;; Procedure for adding trajectories that need to be processed
     (define (add-trajectories! trajectories)
@@ -163,35 +169,39 @@
                        (if (actual-trajectory? data)
                            (begin
                              (change-speed! train-name 200) ;; To be changed (more variable speed)
-                             (process-trajectory (cadr data))
-                             ((railway 'change-train-trajectory-state!) train-name (cadr data))
-                             (hash-set! trains-trajectory train-name (cons (get-destination (cadr data))
-                                                                           (cddr data))))
-                           (hash-set! trains-trajectory train-name data)))))
+                             ((railway 'change-train-destination!) train-name (get-destination (first-traj data)))
+                             (process-trajectory (first-traj data))
+                             ((railway 'change-train-trajectory-state!) train-name (first-traj data))
+                             (hash-set! trains-trajectory train-name (rest-traj data)))
+                           (begin
+                             ((railway 'change-train-destination!) train-name #f) ;; To ensure false if there is no trajectory
+                             (hash-set! trains-trajectory train-name data)
+                           )))))
 
     ;; Procedure to delay and make sure the train is fully on the detection-block
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
         (change-speed! train 200)
         (sleep 0.70)
-        (change-speed! train current-speed)))         
+        (change-speed! train current-speed)))
 
     ;; Procedure that will update the trains their trajectories
     (define (update-trajectories!)
       (hash-for-each trains-trajectory
-                     (lambda (train cc)                       
+                     (lambda (train cc)
                        (cond
-                         ((and (not (null? (actual-traj cc))) ;; Something left to do
-                               ((railway 'get-detection-block-state) (destination cc))) ;; Reached destination
+                         ((and (not (null? cc)) ;; Something left to do
+                               ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))) ;; Reached destination
                           (train-delay train)
-                          (process-trajectory (first-traj (actual-traj cc)))
-                          (change-speed! train (* -1 ((railway 'get-train-speed) train)))                        
-                          (hash-set! trains-trajectory train
-                                     (cons (get-destination (first-traj (actual-traj cc)))
-                                           (rest-traj (actual-traj cc)))))
-                         ((and ((railway 'get-detection-block-state) (destination cc))
-                               ((railway 'get-train-trajectory-state) train))
+                          ((railway 'change-train-destination!) (get-destination (first-traj cc)))
+                          (process-trajectory (first-traj cc))
+                          (change-speed! train (* -1 ((railway 'get-train-speed) train)))
+                          (hash-set! trains-trajectory train (rest-traj cc)))
+                         ((and ((railway 'get-train-destination) train)
+                               ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))
+                               ((railway 'get-train-trajectory-state) train)) ;; Split or something
                           ((railway 'change-train-trajectory-state!) train #f)
+                          ((railway 'change-train-destination!) train #f)
                           (train-delay train)
                           (change-speed! train 0))
                          ))
@@ -207,11 +217,11 @@
       (hash-for-each trains-trajectory
                      (lambda (train-name data)
                        (let* ((current-traj ((railway 'get-train-trajectory-state) train-name))
-                             (current-traj-no-switch  '()))
+                              (current-traj-no-switch  '()))
                          (cond
                            ((and current-traj (not (null? current-traj)))
                             (set! current-traj-no-switch (filter (lambda (x)
-                                                               (not (switch? x))) current-traj))
+                                                                   (not (switch? x))) current-traj))
                             (for-each
                              (lambda (DB)
                                (if ((railway 'get-detection-block-state) DB)
@@ -226,7 +236,7 @@
                                      ((railway 'change-train-track!) train-name track)
                                      '()))
                                possible-tracks))))
-                           ))))
+                         ))))
     
     (define (dispatch msg)
       (cond

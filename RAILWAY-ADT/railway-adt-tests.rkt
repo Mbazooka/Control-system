@@ -242,8 +242,6 @@
      "change-barrier-state!: Incorrect output"))
    ))
 
-;(define railway-get-all-barriers-tests
-
 (define railway-get-light-state/change-light-state!-tests
   (test-suite
    "RAILWAY-ADT: GET-LIGHT-STATE/CHANGE-LIGHT-STATE! TESTS"
@@ -423,6 +421,27 @@
 
    ))
 
+(define railway-get-train-destination/change-train-destination!-tests
+
+  (test-suite
+   "RAILWAY-ADT: GET-TRAIN-DESTINATION/CHANGE-TRAIN-DESTINATION! TESTS"
+
+   (test-case
+    "Test if 'get-train-destination' works properly"
+    (check-eq?
+     ((test-railway 'get-train-destination) 'TEST-TRAIN-1)
+     #f
+     "get-train-destination: incorrect output"))
+
+   (test-case
+    "Test if 'change-train-destination' works properly"
+    (check-eq?
+     (begin 
+       ((test-railway 'change-train-destination!) 'TEST-TRAIN-1 '1-2)
+       ((test-railway 'get-train-destination) 'TEST-TRAIN-1))
+     '1-2
+     "change-train-destination: incorrect operation"))))
+
 (define railway-message-sending-tests
   (test-suite
    "RAILWAY-ADT: MESSAGE SENDING TESTS"
@@ -446,6 +465,7 @@
                               railway-get-light-state/change-light-state!-tests
                               railway-get-all-lights-tests
                               railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks-tests
+                              railway-get-train-destination/change-train-destination!-tests
                               railway-message-sending-tests))
 
 (test/gui all-tests)

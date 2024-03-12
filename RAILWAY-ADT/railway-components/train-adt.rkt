@@ -10,7 +10,9 @@
   (let ((speed 0)
         (trajectory #f)
         (current-track initial-track)
-        (track-behind initial-track-behind))
+        (track-behind initial-track-behind)
+        (destination #f)
+        )
     
     (define (get-name) name)
 
@@ -48,6 +50,8 @@
         ((eq? msg 'get-current-track) (lambda () current-track)) ;; ADDED
         ((eq? msg 'get-track-behind) (lambda () track-behind)) ;; ADDED
         ((eq? msg 'change-current-track!) change-current-track!) ;; ADDED
+        ((eq? msg 'get-destination) (lambda () destination)) ;; ADDED
+        ((eq? msg 'change-destination!) (lambda (input-destination) (set! destination input-destination))) ;; ADDED
         (else
          "TRAIN-ADT: Incorrect message")))
     dispatch))

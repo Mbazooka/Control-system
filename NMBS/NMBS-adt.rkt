@@ -144,15 +144,15 @@
 
     ;; Procedure to adjust trajectory to be followed
     (define (adjust-trajectory! train-name trajectory)
-      (hash-set! new-trajectories train-name (cons (get-destination (first-traj trajectory)) trajectory)))
+      (hash-set! new-trajectories train-name trajectory))
     
     ;; Procedure that will add a trajectory for a specific train (to be changed later (current destination), ADDED)
     (define (add-trajectory! train-name destination)
       (cond
         ((hash-ref new-trajectories train-name #f)
-         (adjust-trajectory! train-name (compute-trajectory (car (hash-ref new-trajectories train-name)) destination))) ;; CHANGE HERE TO SPECIFIC START
+         (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))) ;; CHANGE HERE TO SPECIFIC START
         ((hash-ref trains-trajectory train-name #f)
-         (adjust-trajectory! train-name (compute-trajectory (car (hash-ref trains-trajectory train-name)) destination)))))
+         (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination)))))
 
     ;; Helper procedure to get destination of trajectory
     (define (get-final-destination trajectories)
@@ -171,7 +171,7 @@
 
     (define (apply-train! train-name track track-behind) ;; Adds a train to the track
       (if ((railway 'add-train!) train-name track track-behind)
-          (hash-set! new-trajectories train-name (cons track '()))
+          (hash-set! new-trajectories train-name '())
           '())) 
 
     (define update-detection-blocks! ;; Updates the detection-blocks their states
@@ -193,7 +193,6 @@
         ((eq? msg 'retrieve-all-barriers) retrieve-all-barriers)
         ((eq? msg 'retrieve-all-lights) retrieve-all-lights)
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
-        ((eq? msg 'compute-trajectory) compute-trajectory)
         ((eq? msg 'add-trajectory!) add-trajectory!) ;; ADDED
         ((eq? msg 'retrieve-trajectories) retrieve-trajectories) ;; ADDED
         ((eq? msg 'update-trains!) update-trains!)

@@ -121,6 +121,9 @@
     ;; Procedure that changes the train speed to a certain value
     (define change-train-speed! (change-operation-abstraction riding-trains 'change-speed!))
 
+    ;; Procedure that changes the train destination to a certain component
+    (define change-train-destination! (change-operation-abstraction riding-trains 'change-destination!))
+
     ;; Procedure that the changes the train track to a certain track
     (define change-train-track! (change-operation-abstraction riding-trains 'change-current-track!))
                                                                                                                           
@@ -192,6 +195,9 @@
     ;; Procedure that gets the train trajectory state
     (define get-train-trajectory-state (get-operation-abstraction riding-trains 'get-trajectory-state))
 
+    ;; Procedure that gets the train destination
+    (define get-train-destination (get-operation-abstraction riding-trains 'get-destination))
+
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
 
@@ -245,7 +251,9 @@
         ((eq? msg 'get-train-trajectory-state) get-train-trajectory-state) ;; ADDED
         ((eq? msg 'get-train-track) get-train-track) ;; ADDED
         ((eq? msg 'get-train-track-behind) get-train-track-behind) ;; ADDED
-        ((eq? msg 'change-train-track!) change-train-track!) ;; ADDED 
+        ((eq? msg 'change-train-track!) change-train-track!) ;; ADDED
+        ((eq? msg 'get-train-destination) get-train-destination) ;; ADDED
+        ((eq? msg 'change-train-destination!) change-train-destination!) ;; ADDED 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
         ((eq? msg 'get-switch-comp-state) get-switch-comp-state) ;; ADDED

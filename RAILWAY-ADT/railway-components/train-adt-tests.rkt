@@ -146,6 +146,30 @@
             (eq? ((test-train 'get-track-behind)) '1-1)))
      #t
      "change-current-track!: incorrect operation"))))
+
+;; Tests the get-destination/change-destination! operations
+(define train-get-destination/change-destination!-tests
+  (test-suite
+   "TRAIN-ADT: GET-DESTINATION/CHANGE-DESTINATION! TESTS"
+
+   (test-case
+    "Test if 'get-destination' works properply"
+    (check-eq?
+     ((test-train 'get-destination))
+     #f
+     "get-destination: incorrect operation"))
+
+  (test-case
+   "Test if 'change-destination' works properly"
+   (check-eq?
+    (begin
+      ((test-train 'change-destination!) '1-2)
+      ((test-train 'get-destination)))
+    '1-2
+    "change-destination: incorrect operation"))
+    
+
+   ))
      
 
 ;; Bringing all test-suites together
@@ -157,6 +181,7 @@
                               train-get-current-speed/change-speed!-tests
                               train-get-trajectory-state/change-trajectory-state!-tests
                               train-get-current-track/get-track-behind/change-current-track!-tests
+                              train-get-destination/change-destination!-tests
                               ))
 
 (test/gui all-tests)
