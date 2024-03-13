@@ -193,6 +193,7 @@
                                       ((actual-train 'get-current-speed))
                                       ((actual-train 'get-current-track))
                                       ((actual-train 'get-track-behind))
+                                      ((actual-train 'get-trajectory-state))
                                       ))))
            (hash-keys riding-trains)))
 

@@ -12,7 +12,8 @@
 
 (define (make-infrabel-adt)
   (let ((railway (make-railway-adt))
-        (trains-trajectory (make-hash)))
+        (trains-trajectory (make-hash))
+        (train-previous-speed (make-hash)))
 
     (setup-hardware) ;; Setup the track
 
@@ -81,7 +82,8 @@
 
     ;; Abstraction for synchronous speed changing
     (define (change-speed! train-name speed)
-      (set-speed-train-HARDWARE! train-name speed))
+      (set-speed-train-HARDWARE! train-name speed)
+      (hash-set! train-previous-speed train-name ((railway 'get-train-speed) train-name)))
 
     ;; Abstractions for synchronous switch changing
     (define (change-switch! switch state)
@@ -96,11 +98,13 @@
                (beh-track (caddr train))
                (speed (cadddr train))
                (current-track (car (cddddr train)))
-               (current-track-behind (cadr (cddddr train))))
+               (current-track-behind (cadr (cddddr train)))
+               (traj-state (caddr (cddddr train))))
            (add-train-HARDWARE! train-name init-track beh-track)
            (change-speed! train-name speed)
            ((railway 'change-train-track!) train-name current-track)
            ((railway 'change-train-track-behind!) train-name current-track-behind)
+           ((railway 'change-train-trajectory-state!) train-name traj-state)
            ))
        trains))
 
@@ -167,12 +171,49 @@
           '()
           (append (car data) (flatten-trajectory (cdr data)))))
 
+    (define (inversion-track? track)
+      (or (eq? track '1-8) (eq? track '2-1)
+          (eq? track '2-7) (eq? track '2-6)
+          (eq? track '2-5) (eq? track '2-2)))
+
+    (define (special-track? track track-behind) ;; Due to representation a small change must be made here
+      (or (and (eq? track '2-3) (or (eq? track-behind '1-1) (eq? track-behind '1-2) (eq? track-behind '1-3)))
+          (and (eq? track '2-4) (or (eq? track-behind '1-1) (eq? track-behind '1-2) (eq? track-behind '1-3)))))
+
+    (define (track-behind? track track-1 track-2)
+      (or (eq? track track-1) (eq? track track-2)))
+
+    (define (determine-sign track-1 track-2 data) ;; Determine the individual sign
+      (if (or (member track-1 data)
+              (member track-2 data))
+          -1
+          1))
+
     ;; Procedure that determines the sign of the speed
     (define (determine-speed-sign train-name data)
-      (if (member ((railway 'get-train-track-behind) train-name) (flatten-trajectory data))
-          -1
-          1
-      ))
+      (let ((track-behind ((railway 'get-train-track-behind) train-name))
+            (traj (flatten-trajectory data)))
+        (cond
+          ((inversion-track? ((railway 'get-train-track) train-name))
+           (if (not (inversion-track? track-behind))
+               1
+               (if (negative? (hash-ref train-previous-speed train-name))
+                   +1
+                   -1)))          
+          ((special-track? ((railway 'get-train-track) train-name) track-behind)
+           (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
+               1
+               -1))
+          ((track-behind? track-behind '2-3 '2-4)
+           (determine-sign '2-3 '2-4 traj))
+          ((track-behind? track-behind '1-6 '1-5)
+           (determine-sign '1-5 '1-6 traj))
+          ((track-behind? track-behind '1-4 '1-7)
+           (determine-sign '1-4 '1-7 traj))
+          ((or (track-behind? track-behind '1-1 '1-2) (track-behind? track-behind '1-2 '1-3))
+           (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
+               -1
+               1)))))
 
     ;; Procedure for adding trajectories that need to be processed
     (define (add-trajectories! trajectories)
@@ -182,20 +223,19 @@
                            (begin
                              ((railway 'change-train-destination!) train-name (get-destination (first-traj data)))
                              (process-trajectory (first-traj data))
-                             (display (determine-speed-sign train-name data)) (newline)
-                             (change-speed! train-name (* (determine-speed-sign train-name data) 1)) ;; Determines direction implicitly
+                             (change-speed! train-name (* (determine-speed-sign train-name data) 200)) ;; Determines direction implicitly
                              ((railway 'change-train-trajectory-state!) train-name (first-traj data))
                              (hash-set! trains-trajectory train-name (rest-traj data)))
                            (begin
                              ((railway 'change-train-destination!) train-name #f) ;; To ensure false if there is no trajectory
                              (hash-set! trains-trajectory train-name data)
-                           )))))
+                             )))))
 
     ;; Procedure to delay and make sure the train is fully on the detection-block
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
-        (change-speed! train 200)
-        (sleep 0.70)
+        (change-speed! train (if (negative? current-speed) -200 200))
+        (sleep 1)
         (change-speed! train current-speed)))
 
     ;; Procedure that will update the trains their trajectories
@@ -206,14 +246,14 @@
                          ((and (not (null? cc)) ;; Something left to do
                                ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))) ;; Reached destination
                           (train-delay train)
-                          ((railway 'change-train-destination!) (get-destination (first-traj cc)))
+                          ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
                           (process-trajectory (first-traj cc))
                           (change-speed! train (* -1 ((railway 'get-train-speed) train)))
                           (hash-set! trains-trajectory train (rest-traj cc)))
                          ((and ((railway 'get-train-destination) train)
                                ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))
-                               ((railway 'get-train-trajectory-state) train)) ;; Split or something
-                          ((railway 'change-train-trajectory-state!) train #f)
+                               ((railway 'get-train-trajectory-state) train))
+                          ((railway 'change-train-trajectory-state!) train '())
                           ((railway 'change-train-destination!) train #f)
                           (train-delay train)
                           (change-speed! train 0))
@@ -263,7 +303,6 @@
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains) ;; ADDED
         ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
-        ((eq? msg 'bla) (retrieve-all-trains))
         (else
          "INFRABEL-ADT: Incorrect message")))
     dispatch))

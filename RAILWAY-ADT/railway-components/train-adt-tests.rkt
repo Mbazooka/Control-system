@@ -97,7 +97,7 @@
     "Test if 'get-trajectory-state' gets the correct state"
     (check-eq?
      ((test-train 'get-trajectory-state))
-     #f
+     '()
      "get-trajectory-state: incorrect output"))
 
    (test-case

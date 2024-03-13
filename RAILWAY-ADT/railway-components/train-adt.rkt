@@ -8,7 +8,7 @@
 
 (define (make-train-adt name initial-track initial-track-behind)  
   (let ((speed 0)
-        (trajectory #f)
+        (trajectory '())
         (current-track initial-track)
         (track-behind initial-track-behind)
         (destination #f)

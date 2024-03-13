@@ -64,11 +64,13 @@
                (beh-track (caddr train))
                (speed (cadddr train))
                (current-track (car (cddddr train)))
-               (current-track-behind (cadr (cddddr train))))
+               (current-track-behind (cadr (cddddr train)))
+               (traj-state (caddr (cddddr train))))
            ((railway 'add-train!) train-name init-track beh-track)
            ((railway 'change-train-speed!) train-name speed)
            ((railway 'change-train-track!) train-name current-track)
            ((railway 'change-train-track-behind!) train-name current-track-behind)
+           ((railway 'change-train-trajectory-state!) train-name traj-state)
            ))
        trains))
 
@@ -127,7 +129,9 @@
             (if (common-elements? current-traj (cdar rest-traj))
                 (optimize-trajectory-iter (car rest-traj) (cdr rest-traj) (append acc (list current-traj)))
                 (optimize-trajectory-iter (append current-traj (car rest-traj)) (cdr rest-traj) acc))))
-      (optimize-trajectory-iter (car full-trajectory) (cdr full-trajectory) '()))     
+      (if (not (null? full-trajectory))
+          (optimize-trajectory-iter (car full-trajectory) (cdr full-trajectory) '())
+          '()))
 
     ;; Compute the trajectory that must be taken to get to the desired destination
     (define (compute-trajectory start destination) ;; ADDED (ADD TO TESTS)
@@ -152,14 +156,14 @@
     ;; Procedure that will add a trajectory for a specific train (to be changed later (current destination), ADDED)
     (define (add-trajectory! train-name destination)
       (cond
-        ((hash-ref new-trajectories train-name #f)
-         (if ((railway 'get-train-trajectory-state) train-name) ;; AVOIDS SPAMMING THE DESTINATION BUTTON
-             '()
-             (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))))
+        ((hash-ref new-trajectories train-name #f)         
+         (if (null? ((railway 'get-train-trajectory-state) train-name)) ;; AVOIDS SPAMMING THE DESTINATION BUTTON
+             (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))
+             '()))
         ((hash-ref trains-trajectory train-name #f)
-         (if ((railway 'get-train-trajectory-state) train-name)
-             '()
-             (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))))))
+         (if (null? ((railway 'get-train-trajectory-state) train-name))
+             (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))
+             '()))))
 
     ;; Helper procedure to get destination of trajectory
     (define (get-final-destination trajectories)
@@ -205,6 +209,7 @@
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'update-switches!) update-switches!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
+        ((eq? msg 'bla) (retrieve-all-trains))
         (else
          "NMBS-ADT: Illegal message")))
     dispatch))
