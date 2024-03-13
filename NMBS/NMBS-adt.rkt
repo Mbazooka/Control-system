@@ -63,10 +63,13 @@
                (init-track (cadr train))
                (beh-track (caddr train))
                (speed (cadddr train))
-               (current-track (car (cddddr train))))
+               (current-track (car (cddddr train)))
+               (current-track-behind (cadr (cddddr train))))
            ((railway 'add-train!) train-name init-track beh-track)
            ((railway 'change-train-speed!) train-name speed)
-           ((railway 'change-train-track!) train-name current-track)))
+           ((railway 'change-train-track!) train-name current-track)
+           ((railway 'change-train-track-behind!) train-name current-track-behind)
+           ))
        trains))
 
     ;; Helper procedure to determine the destination a trajectory
@@ -150,9 +153,13 @@
     (define (add-trajectory! train-name destination)
       (cond
         ((hash-ref new-trajectories train-name #f)
-         (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))) ;; CHANGE HERE TO SPECIFIC START
+         (if ((railway 'get-train-trajectory-state) train-name) ;; AVOIDS SPAMMING THE DESTINATION BUTTON
+             '()
+             (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))))
         ((hash-ref trains-trajectory train-name #f)
-         (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination)))))
+         (if ((railway 'get-train-trajectory-state) train-name)
+             '()
+             (adjust-trajectory! train-name (compute-trajectory ((railway 'get-train-track) train-name) destination))))))
 
     ;; Helper procedure to get destination of trajectory
     (define (get-final-destination trajectories)

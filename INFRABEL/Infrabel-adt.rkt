@@ -95,10 +95,13 @@
                (init-track (cadr train))
                (beh-track (caddr train))
                (speed (cadddr train))
-               (current-track (car (cddddr train))))
+               (current-track (car (cddddr train)))
+               (current-track-behind (cadr (cddddr train))))
            (add-train-HARDWARE! train-name init-track beh-track)
            (change-speed! train-name speed)
-           ((railway 'change-train-track!) train-name current-track)))
+           ((railway 'change-train-track!) train-name current-track)
+           ((railway 'change-train-track-behind!) train-name current-track-behind)
+           ))
        trains))
 
     ;; Abstractions
@@ -159,8 +162,20 @@
     (define (actual-trajectory? trajectory-data)
       (not (null? trajectory-data)))
 
+    (define (flatten-trajectory data)
+      (if (null? data)
+          '()
+          (append (car data) (flatten-trajectory (cdr data)))))
+
     ;; Procedure that determines the sign of the speed
-    (define (determine-speed-sign) '())
+    (define (determine-speed-sign train-name data)
+      (display ((railway 'get-train-track) train-name)) (newline)
+      (display ((railway 'get-train-track-behind) train-name)) (newline)
+      (display data) (newline)
+      (if (member ((railway 'get-train-track-behind) train-name) (flatten-trajectory data))
+          -1
+          1
+      ))
 
     ;; Procedure for adding trajectories that need to be processed
     (define (add-trajectories! trajectories)
@@ -168,9 +183,10 @@
                      (lambda (train-name data)
                        (if (actual-trajectory? data)
                            (begin
-                             (change-speed! train-name 200) ;; To be changed (more variable speed)
                              ((railway 'change-train-destination!) train-name (get-destination (first-traj data)))
                              (process-trajectory (first-traj data))
+                             (display (determine-speed-sign train-name data)) (newline)
+                             (change-speed! train-name (* (determine-speed-sign train-name data) 1)) ;; Determines direction implicitly
                              ((railway 'change-train-trajectory-state!) train-name (first-traj data))
                              (hash-set! trains-trajectory train-name (rest-traj data)))
                            (begin
@@ -210,7 +226,6 @@
     ;; Procedure that determines the possible next tracks
     (define (determine-possible-next-tracks current-track)
       ((railway 'get-track-neighbour) current-track))
-      
 
     ;; Procedure that will update the train positions
     (define (update-train-positions) 

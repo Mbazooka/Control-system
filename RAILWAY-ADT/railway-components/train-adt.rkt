@@ -50,6 +50,7 @@
         ((eq? msg 'get-current-track) (lambda () current-track)) ;; ADDED
         ((eq? msg 'get-track-behind) (lambda () track-behind)) ;; ADDED
         ((eq? msg 'change-current-track!) change-current-track!) ;; ADDED
+        ((eq? msg 'change-current-track-behind!) (lambda (input) (set! track-behind input))) ;; ADDED
         ((eq? msg 'get-destination) (lambda () destination)) ;; ADDED
         ((eq? msg 'change-destination!) (lambda (input-destination) (set! destination input-destination))) ;; ADDED
         (else

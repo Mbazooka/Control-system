@@ -51,9 +51,9 @@
 
 
 ;; Test the change-train-speed!/get-train-speed operation of the railway
-(define railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/get-all-trains-tests
+(define railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/change-train-track-behind!/get-all-trains-tests
   (test-suite
-   "RAILWAY-ADT: CHANGE-TRAIN-SPEED!/GET-TRAIN-SPEED/GET-TRAIN-TRACK/CHANGE-TRAIN-TRACK!/GET-ALL-TRAINS TESTS"
+   "RAILWAY-ADT: CHANGE-TRAIN-SPEED!/GET-TRAIN-SPEED/GET-TRAIN-TRACK/CHANGE-TRAIN-TRACK!/CHANGE-TRAIN-TRACK-BEHIND!/GET-ALL-TRAINS TESTS"
 
    (test-case
     "Test if 'change-train-speed!' exists"
@@ -117,8 +117,9 @@
      (begin
        ((test-railway 'add-train!) 'TEST-TRAIN-3 '2-3 'S-10)
        ((test-railway 'change-train-track!) 'TEST-TRAIN-3 '1-2)
+       ((test-railway 'change-train-track-behind!) 'TEST-TRAIN-3 '2-1)
        (and (eq? ((test-railway 'get-train-track) 'TEST-TRAIN-3) '1-2)
-            (eq? ((test-railway 'get-train-track-behind) 'TEST-TRAIN-3) '2-3)))
+            (eq? ((test-railway 'get-train-track-behind) 'TEST-TRAIN-3) '2-1)))
      #t
      "change-train-track!: incorrect operation"))
 
@@ -458,7 +459,7 @@
 (define all-tests (test-suite "Railway-Module"
                               railway-make-test
                               railway-add-train-tests
-                              railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/get-all-trains-tests
+                              railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/change-train-track-behind!/get-all-trains-tests
                               railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
                               railway-get-all-switches-tests
                               railway-check-barrier-open?/change-barrier-state!-tests

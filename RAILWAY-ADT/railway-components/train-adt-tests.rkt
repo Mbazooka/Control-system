@@ -119,9 +119,9 @@
    ))
 
 ;; Tests the get-current-track and change-current-track! operations
-(define train-get-current-track/get-track-behind/change-current-track!-tests
+(define train-get-current-track/get-track-behind/change-current-track!/change-current-track-behind!-tests
   (test-suite
-   "TRAIN-ADT: GET-CURRENT-TRACK/GET-TRACK-BEHIND/CHANGE-CURRENT-TRACK! TESTS"
+   "TRAIN-ADT: GET-CURRENT-TRACK/GET-TRACK-BEHIND/CHANGE-CURRENT-TRACK!/CHANGE-CURRENT-TRACK-BEHIND! TESTS"
 
    (test-case
     "Test if 'get-current-track' gets the correct track"
@@ -145,7 +145,18 @@
        (and (eq? ((test-train 'get-current-track)) '2-3)
             (eq? ((test-train 'get-track-behind)) '1-1)))
      #t
-     "change-current-track!: incorrect operation"))))
+     "change-current-track!: incorrect operation"))
+
+   (test-case
+    "Test if 'change-current-track-behind!' works properly"
+    (check-eq?
+     (begin
+       ((test-train 'change-current-track-behind!) '1-7)
+       ((test-train 'get-track-behind)))
+     '1-7
+     "change-current-track-behind!: incorrect operation"))
+
+   ))
 
 ;; Tests the get-destination/change-destination! operations
 (define train-get-destination/change-destination!-tests
@@ -180,7 +191,7 @@
                               train-initial-track-behind-tests
                               train-get-current-speed/change-speed!-tests
                               train-get-trajectory-state/change-trajectory-state!-tests
-                              train-get-current-track/get-track-behind/change-current-track!-tests
+                              train-get-current-track/get-track-behind/change-current-track!/change-current-track-behind!-tests
                               train-get-destination/change-destination!-tests
                               ))
 
