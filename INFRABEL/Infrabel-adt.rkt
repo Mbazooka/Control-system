@@ -169,9 +169,6 @@
 
     ;; Procedure that determines the sign of the speed
     (define (determine-speed-sign train-name data)
-      (display ((railway 'get-train-track) train-name)) (newline)
-      (display ((railway 'get-train-track-behind) train-name)) (newline)
-      (display data) (newline)
       (if (member ((railway 'get-train-track-behind) train-name) (flatten-trajectory data))
           -1
           1
@@ -266,6 +263,7 @@
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains) ;; ADDED
         ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
+        ((eq? msg 'bla) (retrieve-all-trains))
         (else
          "INFRABEL-ADT: Incorrect message")))
     dispatch))

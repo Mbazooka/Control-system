@@ -26,6 +26,8 @@
   ((INFRABEL 'update-trajectories!))
   ((NMBS 'update-trains!) ((INFRABEL 'retrieve-all-trains)))
   ((NMBS 'update-switches!) ((INFRABEL 'retrieve-all-switches)))
+  (display (INFRABEL 'bla))
+  (newline)
   (main-loop))
 
 (thread main-loop)
