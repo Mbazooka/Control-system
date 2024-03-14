@@ -33,7 +33,7 @@
 ;; Test the get-presence/change-presence! operation of the class
 (define detection-block-get-presence/change-presence!-tests
   (test-suite
-   "DETECTION-BLOCK-ADT: GET-PRESENCE/CHANGE-PRESENCE! TESTS"
+   "DETECTION-BLOCK-ADT: GET-PRESENCE/change-presence! TESTS"
 
    (test-case
     "Test if 'get-presence' works properly"
@@ -56,27 +56,6 @@
      "change-presence!: illegal value"
      "change-presence!: Incorrect change"))))
 
-;; Test the reserve!/reserved? operation of the class
-(define detection-block-reserve!/reserved?-tests
-  (test-suite
-   "DETECTION-BLOCK-ADT: RESERVE!/RESERVED? TESTS"
-
-   (test-case
-    "Test if 'reserved?' works properly"
-    (check-eq?
-     ((test-detection-block 'get-reservation))
-     #f
-     "reserved?: Incorrect change"))
-
-   (test-case
-    "Test if 'reserve' works properly"
-    (check-eq?
-     (begin
-       ((test-detection-block 'reserve!) 'TRAIN-1)
-       ((test-detection-block 'get-reservation)))
-     'TRAIN-1
-     "reserve!: incorrect output"))))
-
 ;; Test the illegal message sending action
 (define detection-block-message-sending-tests
   (test-suite
@@ -94,7 +73,6 @@
                               detection-block-make-db-tests
                               detection-block-name-tests
                               detection-block-get-presence/change-presence!-tests
-                              detection-block-message-sending-tests
-                              detection-block-reserve!/reserved?-tests))
+                              detection-block-message-sending-tests))
 
 (test/gui all-tests)

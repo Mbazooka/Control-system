@@ -308,7 +308,7 @@
 
    ))
 
-(define railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks-tests
+(define railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks/detection-block-reserve!/get-detection-block-reservation-tests
 
   (test-suite
    "RAILWAY-ADT: UPDATE-DETECTION-BLOCKS!/GET-DTECTION-BLOCK-STATE/GET-ALL-DETECTION-BLOCKS TESTS"
@@ -351,6 +351,22 @@
      16
      "get-all-detection-blocks: incorrect operation"))
 
+   (test-case
+    "Test if 'get-detection-block-reservation' works properly"
+    (check-eq?
+     ((test-railway 'get-detection-block-reservation) '1-1)
+     #f
+     "get-detection-block-reservation: incorrect output"))
+
+   (test-case
+    "Test if 'detection-block-reserve!' works properly"
+    (check-eq?
+     (begin
+     ((test-railway 'detection-block-reserve!) '1-1 'TRAIN)
+     ((test-railway 'get-detection-block-reservation) '1-1))
+     'TRAIN
+     "detection-block-reserve!: incorrect operation"))
+     
    ))
 
 (define railway-compute-path-complex/compute-path-simplified-tests
@@ -419,7 +435,6 @@
        ((test-railway 'get-train-trajectory) 'TEST-TRAIN-1))
      '(1-2 2-3)
      "change-trajectory-state!: incorrect action"))
-
    ))
 
 (define railway-get-train-destination/change-train-destination!-tests
@@ -465,7 +480,7 @@
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
                               railway-get-all-lights-tests
-                              railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks-tests
+                              railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks/detection-block-reserve!/get-detection-block-reservation-tests
                               railway-get-train-destination/change-train-destination!-tests
                               railway-message-sending-tests))
 

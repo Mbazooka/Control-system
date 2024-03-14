@@ -143,6 +143,9 @@
     ;; Procedure that changes the detection-block state to a certain state
     (define change-detection-block-state! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'change-presence!))
 
+    ;; Procedure that changes the detection-blokc reservation state
+    (define detection-block-reserve! (change-operation-abstraction HARDWARE-DETECTION-BLOCKS 'reserve!))
+
     ;; Procedure that changes the barrier state to a certain state (cannot be generalized)
     (define (change-barrier-state! barrier-name state)
       (let ((barrier-object (hash-ref HARDWARE-BARRIERS barrier-name #f)))
@@ -231,6 +234,9 @@
     ;; Procedure that gets the detection-block-state
     (define get-detection-block-state (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-presence))
 
+    ;; Procedure that gets the detection-block reservation state
+    (define get-detection-block-reservation (get-operation-abstraction HARDWARE-DETECTION-BLOCKS 'get-reservation))
+
     ;; Procedure that gets the detection-block states for all detection-blocks
     (define (get-all-detection-blocks)
       (map
@@ -274,6 +280,8 @@
         ((eq? msg 'change-light-state!) change-light-state!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
+        ((eq? msg 'detection-block-reserve!) detection-block-reserve!) ;; ADDED
+        ((eq? msg 'get-detection-block-reservation) get-detection-block-reservation) ;; ADDED
         ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks)
         ((eq? msg 'compute-path-complex) compute-path-complex) ;; ADDED
         ((eq? msg 'compute-path-simplified) compute-path-simplified) ;; ADDED
