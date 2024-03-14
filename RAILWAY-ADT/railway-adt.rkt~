@@ -121,6 +121,15 @@
     ;; Procedure that changes the train speed to a certain value
     (define change-train-speed! (change-operation-abstraction riding-trains 'change-speed!))
 
+    ;; Procedure that changes the train destination to a certain component
+    (define change-train-destination! (change-operation-abstraction riding-trains 'change-destination!))
+
+    ;; Procedure that changes the train track to a certain track
+    (define change-train-track! (change-operation-abstraction riding-trains 'change-current-track!))
+
+    ;; Procedure that changes the train traick behind to a certain track (for update purposes)
+    (define change-train-track-behind! (change-operation-abstraction riding-trains 'change-current-track-behind!))
+                                                                                                                          
     ;; Procedure that changes the trajectory state
     (define change-train-trajectory-state! (change-operation-abstraction riding-trains 'change-trajectory-state!))
 
@@ -171,16 +180,28 @@
     ;; Procedure that gets the speed of the train
     (define get-train-speed (get-operation-abstraction riding-trains 'get-current-speed))
 
+    ;; Procedure that gets the current-track of/track behind the train
+    (define get-train-track (get-operation-abstraction riding-trains 'get-current-track))
+
+    (define get-train-track-behind (get-operation-abstraction riding-trains 'get-track-behind))
+
     (define (get-all-trains)
       (map (lambda (train-name)
              (let ((actual-train (hash-ref riding-trains train-name)))
                (cons train-name (list ((actual-train 'get-initial-track))
                                       ((actual-train 'get-initial-track-behind))
-                                      ((actual-train 'get-current-speed))))))
+                                      ((actual-train 'get-current-speed))
+                                      ((actual-train 'get-current-track))
+                                      ((actual-train 'get-track-behind))
+                                      ((actual-train 'get-trajectory-state))
+                                      ))))
            (hash-keys riding-trains)))
 
     ;; Procedure that gets the train trajectory state
     (define get-train-trajectory-state (get-operation-abstraction riding-trains 'get-trajectory-state))
+
+    ;; Procedure that gets the train destination
+    (define get-train-destination (get-operation-abstraction riding-trains 'get-destination))
 
     ;; Procedure that gets the switch state
     (define get-switch-state (get-operation-abstraction HARDWARE-SWITCHES 'current-position))
@@ -233,6 +254,12 @@
         ((eq? msg 'get-train-speed) get-train-speed)
         ((eq? msg 'change-train-trajectory-state!) change-train-trajectory-state!) ;; ADDED
         ((eq? msg 'get-train-trajectory-state) get-train-trajectory-state) ;; ADDED
+        ((eq? msg 'get-train-track) get-train-track) ;; ADDED
+        ((eq? msg 'get-train-track-behind) get-train-track-behind) ;; ADDED
+        ((eq? msg 'change-train-track!) change-train-track!) ;; ADDED
+        ((eq? msg 'change-train-track-behind!) change-train-track-behind!) ;; ADDED
+        ((eq? msg 'get-train-destination) get-train-destination) ;; ADDED
+        ((eq? msg 'change-train-destination!) change-train-destination!) ;; ADDED 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
         ((eq? msg 'get-switch-comp-state) get-switch-comp-state) ;; ADDED
@@ -249,6 +276,7 @@
         ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks)
         ((eq? msg 'compute-path-complex) compute-path-complex) ;; ADDED
         ((eq? msg 'compute-path-simplified) compute-path-simplified) ;; ADDED
+        ((eq? msg 'get-track-neighbour) (lambda (component) (get-neighbors railway-DB-graph component))) ;; ADDED 
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))

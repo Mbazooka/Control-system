@@ -191,11 +191,23 @@
               (all-db (cdr data-pair)))
           ((railway 'update-detection-blocks!) oc-db all-db))))
 
+    ;; Abstraction to retrieve train specific data
+    (define (retrieve-train-abstraction operation)
+      (lambda (train-name) ((railway operation) train-name)))
+
+    (define retrieve-train-destination (retrieve-train-abstraction 'get-train-destination))
+
+    (define retrieve-train-current-position (retrieve-train-abstraction 'get-train-track))
+
+    (define retrieve-train-current-behind (retrieve-train-abstraction 'get-train-track-behind))
+
     (set! gui (make-gui-adt update-switch! retrieve-all-switches
                             update-barrier! retrieve-all-barriers
                             update-light! retrieve-all-lights
                             retrieve-all-detection-blocks update-train!
-                            apply-train! retrieve-all-trains add-trajectory!)) 
+                            apply-train! retrieve-all-trains add-trajectory!
+                            retrieve-train-destination retrieve-train-current-position
+                            retrieve-train-current-behind)) 
       
     (define (dispatch msg)
       (cond

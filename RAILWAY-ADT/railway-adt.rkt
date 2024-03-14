@@ -113,6 +113,7 @@
     ;; Abstraction allowing more general code for change operations (avoiding code duplication)
     (define (change-operation-abstraction HARDWARE operation)
       (lambda (object-name data)
+        (newline)
         (let ((object (hash-ref HARDWARE object-name #f)))
           (if object
               ((object operation) data)

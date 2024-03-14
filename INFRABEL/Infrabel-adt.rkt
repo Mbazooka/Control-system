@@ -100,11 +100,11 @@
                (current-track (car (cddddr train)))
                (current-track-behind (cadr (cddddr train)))
                (traj-state (caddr (cddddr train))))
-           (add-train-HARDWARE! train-name init-track beh-track)
-           (change-speed! train-name speed)
+           (add-train-HARDWARE! train-name init-track beh-track)           
            ((railway 'change-train-track!) train-name current-track)
            ((railway 'change-train-track-behind!) train-name current-track-behind)
            ((railway 'change-train-trajectory-state!) train-name traj-state)
+           (change-speed! train-name speed)
            ))
        trains))
 
@@ -303,6 +303,7 @@
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains) ;; ADDED
         ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
+        ((eq? msg 'bla) (retrieve-all-trains))
         (else
          "INFRABEL-ADT: Incorrect message")))
     dispatch))

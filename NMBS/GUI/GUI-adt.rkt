@@ -58,6 +58,7 @@
 
 ;; Used for the right offset of the add-train button
 (define ADD-TRAIN-BUTTON-HOR-MARGIN 330)
+(define ADD-TRAIN-UPDATE-BUTTON-HOR-MARGIN 20)
 (define SLIDER-VERT-MARGIN 50)
 (define DETECTION-BLOCK-DATA-VERT-MARGIN 50)
 (define GROUP-BARRIER/LIGHT-PANEL-VERT-MARGIN 100)
@@ -70,7 +71,8 @@
                       barrier-adjust-cb barrier-retrieve-cb
                       light-adjust-cb light-retrieve-cb
                       db-retrieve-cb train-adjust-cb
-                      train-make-cb train-retrieve-cb add-trajectory-cb)
+                      train-make-cb train-retrieve-cb add-trajectory-cb
+                      train-dest-cb train-current-cb train-behind-cb)
 
   ;; Used for the message placed on train tabs
   (define current-train-tab-message "Set train speed")
@@ -95,7 +97,6 @@
       ((= tab DETECTION-BLOCKS-TAB) (adjust-tab! draw-detection-block-panel!))
       ((= tab SWITCHES-TAB) (adjust-tab! draw-switch-panel!))
       ((= tab BARRIERS/LIGHTS-TAB) (adjust-tab! draw-barrier/light-panel!))))
-
 
   ;; The main tabs for adjusting the Hardware components
   (define main-tab-panel
@@ -173,10 +174,9 @@
       (add-trajectory-cb (string->symbol (send train-tab get-item-label (send train-tab get-selection))) (string->symbol (send destination get-string-selection))))
     
     (define destination-button (new button%
-                             [label "Go to destination"]
-                             [parent train-panel]
-                             [callback destination-button-logic!]))
-    
+                                    [label "Go to destination"]
+                                    [parent train-panel]
+                                    [callback destination-button-logic!]))
 
     ;; Button to be added to the train-tab and it's logic
     (define (tab-name-generator) ;; Generates name for a tab
@@ -189,14 +189,35 @@
             (track-behind-sel (string->symbol (send track-behind get-string-selection))))
         (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
         (send train-tab append name)
-        (cond ((= (length (train-retrieve-cb)) 1) (show-current-train-elements!))))) ;; Might need to be changed because not accessible
+        (cond ((= (length (train-retrieve-cb)) 1) (show-current-train-elements!)))))
 
     (define add-train-button
       (new button%
            [label "Add train"]
-           [parent second-panel]
+           [parent train-panel]
            [callback add-train-button-logic!]
            [horiz-margin ADD-TRAIN-BUTTON-HOR-MARGIN]
+           ))
+
+    (define (add-update-button-logic! panel event) ;; Logic behind the update button
+      (let* ((train-name (string->symbol (send train-tab get-item-label (send train-tab get-selection))))            
+             (current (train-current-cb train-name))
+             (current-behind (train-behind-cb train-name))
+             (dest (train-dest-cb train-name)))
+        (if (send train-tab get-selection)
+            (begin
+              (send initial-track set-string-selection (symbol->string current))
+              (send track-behind set-string-selection (symbol->string current-behind))
+              (if dest (send destination set-string-selection (symbol->string dest)) '()))
+            '())
+        ))    
+      
+    (define add-update-button
+      (new button%
+           [label "Update"]
+           [parent train-panel]
+           [callback add-update-button-logic!]
+           [horiz-margin ADD-TRAIN-UPDATE-BUTTON-HOR-MARGIN]
            ))
 
     ;; All the elements for the running-train-tab
@@ -205,7 +226,7 @@
                                  [parent top-tab-panel]))
 
     (define (slider-logic! slider event) ;; Logic for slider
-      (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
+      (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))     
         (train-adjust-cb name (send slider get-value))))
         
     (define slider ;; Slider itself
