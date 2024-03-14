@@ -148,25 +148,25 @@
            [parent train-panel]
            ))
 
+    ;; Abstraction
+    (define processed-db (data-converter (filter (lambda (element) (not (eq? (car element) '2-8))) (db-retrieve-cb))))
+
     ;; dropdown menu to determine right place to put train
     (define initial-track (new choice%
                                [label "Initial-track:"]
                                [parent train-panel]
-                               [choices (data-converter (filter (lambda (element) (not (eq? element '2-8)))
-                                                              (db-retrieve-cb)))]))
+                               [choices processed-db]))
 
     (define track-behind (new choice% 
                               [label "Component-behind:"]
                               [parent train-panel]
-                              [choices (append (data-converter (db-retrieve-cb))
-                                               (data-converter (switch-retrieve-cb)))]))
+                              [choices processed-db]))
     
     ;; Dropdown menu to go to a certain destination
     (define destination (new choice%
                              [label "Destination:"]
                              [parent train-panel]
-                             [choices (data-converter (filter (lambda (element) (not (eq? element '2-8)))
-                                                              (db-retrieve-cb)))]))
+                             [choices processed-db]))
 
     ;; Button to go to destination
     (define (destination-button-logic! button event)
