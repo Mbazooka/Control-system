@@ -181,7 +181,7 @@
         return-val))
 
     (define (apply-train! train-name track track-behind) ;; Adds a train to the track
-      (if (and ((railway 'get-detection-block-state) track) ((railway 'add-train!) train-name track track-behind)) ;; Avoids adding when there is a train
+      (if ((railway 'add-train!) train-name track track-behind) ;; Avoids adding when there is a train
           (hash-set! new-trajectories train-name '())
           '())) 
 

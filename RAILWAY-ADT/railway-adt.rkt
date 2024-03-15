@@ -277,7 +277,7 @@
         ((eq? msg 'change-train-track!) change-train-track!) ;; ADDED
         ((eq? msg 'change-train-track-behind!) change-train-track-behind!) ;; ADDED
         ((eq? msg 'get-train-destination) get-train-destination) ;; ADDED
-        ((eq? msg 'change-train-destination!) change-train-destination!) ;; ADDED 
+        ((eq? msg 'change-train-destination!) change-train-destination!) ;; ADDED
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
         ((eq? msg 'get-switch-comp-state) get-switch-comp-state) ;; ADDED

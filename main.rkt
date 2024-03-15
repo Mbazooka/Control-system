@@ -22,6 +22,7 @@
   ((INFRABEL 'add-trajectories!) ((NMBS 'retrieve-trajectories)))
   (sleep 0.2)
   ((INFRABEL 'update-train-positions))
+  (newline)
   ((INFRABEL 'update-trajectories!))
   ((NMBS 'update-trains!) ((INFRABEL 'retrieve-all-trains)))
   ((NMBS 'update-switches!) ((INFRABEL 'retrieve-all-switches)))

@@ -41,7 +41,9 @@
     (define (add-train-HARDWARE! train-name initial-track initial-track-behind)
       (cond
         (((railway 'add-train!) train-name initial-track initial-track-behind)
-         (add-loco train-name initial-track-behind initial-track))))
+         (add-loco train-name initial-track-behind initial-track)
+         ((railway 'detection-block-reserve!) initial-track train-name)
+         )))
 
     ;; Changing the train speed to a given speed
     (define (set-speed-train-HARDWARE! train-name speed)
@@ -73,7 +75,7 @@
     (define (update-detection-blocks!)
       (let ((db-oc-ids (get-occupied-detection-blocks)) ;; Occupied detection-block ids
             (db-ids (get-detection-block-ids)))
-        ((railway 'update-detection-blocks!) db-oc-ids db-ids)
+        ((railway 'update-detection-blocks!) db-oc-ids db-ids (retrieve-DB-reservations))
         (cons db-oc-ids db-ids)))
 
     ;; The following is an abstraction of a reoccuring pattern for updating Hardware
@@ -93,8 +95,7 @@
 
     ;; Abstraction for synchronous speed changing
     (define (change-speed! train-name speed)
-      (set-speed-train-HARDWARE! train-name speed)
-      (hash-set! train-previous-speed train-name ((railway 'get-train-speed) train-name)))
+      (set-speed-train-HARDWARE! train-name speed))
 
     ;; Abstractions for synchronous switch changing
     (define (change-switch! switch state)
@@ -193,24 +194,42 @@
           1))
 
     ;; Procedure that determines the sign of the speed
-    (define (determine-speed-sign train-name data)
+    (define (determine-speed-sign train-name data) ;; Rewrite code to be more beautiful, this is very hard coded
       (let ((track-behind ((railway 'get-train-track-behind) train-name))
             (traj (flatten-trajectory data)))
         (cond
           ((inversion-track? ((railway 'get-train-track) train-name))
            (if (not (inversion-track? track-behind))
                1
-               (if (negative? (hash-ref train-previous-speed train-name))
+               (if (negative? (hash-ref train-previous-speed train-name)) 
                    +1
-                   -1)))          
+                   -1)))           
           ((special-track? ((railway 'get-train-track) train-name) track-behind)
-           (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
-               1
-               -1))
+           (if (eq? (hash-ref train-previous-speed train-name) 0) ;; Ever started?
+               (begin
+                 (display "SPEED HERE: ")
+                 (display (hash-ref train-previous-speed train-name))
+                 (newline)
+                 (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj)) ;; Never started
+                     1
+                     -1))
+               (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
+                   (if (negative? (hash-ref train-previous-speed train-name))
+                       +1
+                       -1)
+                   (if (negative? (hash-ref train-previous-speed train-name))
+                       -1
+                       +1))                      
+               ))
           ((track-behind? track-behind '2-3 '2-4)
            (determine-sign '2-3 '2-4 traj))
           ((track-behind? track-behind '1-6 '1-5)
-           (determine-sign '1-5 '1-6 traj))
+           (let ((train-track ((railway 'get-train-track) train-name)))
+             (if (or (eq? train-track '2-3) (eq? train-track '2-4))
+                 (if (inversion-track? (get-destination traj)) -1 (if (or (member '1-5 traj) (member '1-6 traj))
+                                                                      (if (negative? (hash-ref train-previous-speed train-name)) 1 -1)
+                                                                      (if (negative? (hash-ref train-previous-speed train-name)) -1 1)))
+                 (determine-sign '1-5 '1-6 traj))))
           ((track-behind? track-behind '1-4 '1-7)
            (determine-sign '1-4 '1-7 traj))
           ((or (track-behind? track-behind '1-1 '1-2) (track-behind? track-behind '1-2 '1-3))
@@ -229,10 +248,16 @@
           (operator (car list) (accumulate operator null-val (cdr list)))))
 
     ;; Procedure that determines whether a train has reserved all components
-    (define (reserved-everything? train-name trajectories)
-      (accumulate
-       (lambda (x y) (and x y))
-       (map (lambda (comp) (eq? ((railway 'get-detection-block-state)) train-name)) trajectories)))
+    (define (reserved-everything? train-name components-necessary)
+      (define truth #t)
+      (for-each
+       (lambda (comp)
+         (if (eq? ((railway 'get-detection-block-reservation) comp) train-name)
+             '()
+             (set! truth #f))
+         )
+       components-necessary)
+      truth)
        
     ;; Procedure that attempts to reserve
     (define (attempt-reservation train-name trajectories)
@@ -240,10 +265,10 @@
              (detection-blocks (filter detection-block? all-components-nec)))
         (for-each
          (lambda (comp)
-           (if ((railway 'get-detection-block-reservation))
+           (if ((railway 'get-detection-block-reservation) comp)
                '()
                ((railway 'detection-block-reserve!) comp train-name)))
-         all-components-nec)
+         detection-blocks)
         (reserved-everything? train-name detection-blocks)
         ))      
 
@@ -251,17 +276,18 @@
     (define (add-trajectories! trajectories)
       (hash-for-each (make-hash trajectories)
                      (lambda (train-name data)
-                       (if (actual-trajectory? data)
-                           (begin
-                             ((railway 'change-train-destination!) train-name (get-destination (first-traj data)))
-                             (process-trajectory (first-traj data))
-                             (change-speed! train-name (* (determine-speed-sign train-name data) 200)) ;; Determines direction implicitly
-                             ((railway 'change-train-trajectory-state!) train-name (first-traj data))
-                             (hash-set! trains-trajectory train-name (rest-traj data)))
-                           (begin
-                             ((railway 'change-train-destination!) train-name #f) ;; To ensure false if there is no trajectory
-                             (hash-set! trains-trajectory train-name data)
-                             )))))
+                       (hash-set! trains-trajectory train-name data))))
+    ;                           (if (actual-trajectory? data)
+    ;                               (begin
+    ;                                 ((railway 'change-train-destination!) train-name (get-destination (first-traj data)))
+    ;                                 (process-trajectory (first-traj data))
+    ;                                 (change-speed! train-name (* (determine-speed-sign train-name data) 200)) ;; Determines direction implicitly
+    ;                                 ((railway 'change-train-trajectory-state!) train-name (first-traj data))
+    ;                                 (hash-set! trains-trajectory train-name (rest-traj data)))
+    ;                               (begin
+    ;                                 ((railway 'change-train-destination!) train-name #f) ;; To ensure false if there is no trajectory
+    ;                                 (hash-set! trains-trajectory train-name data)
+    ;                                 )))))
 
     ;; Procedure to delay and make sure the train is fully on the detection-block
     (define (train-delay train)
@@ -275,6 +301,17 @@
       (hash-for-each trains-trajectory
                      (lambda (train cc)
                        (cond
+                         ((and (eq? ((railway 'get-train-destination) train) #f) ;; Standing idle with no destination
+                               (not (null? cc)) ;; But it has a trajectory computed, then you have to start it
+                               ;(attempt-reservation train cc);; Only if it's allowed though
+                               ) 
+                          ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
+                          (process-trajectory (first-traj cc))
+                          (display (determine-speed-sign train cc))
+                          (newline)
+                          (change-speed! train (* (determine-speed-sign train cc) 200)) ;; Determines direction implicitly
+                          ((railway 'change-train-trajectory-state!) train (first-traj cc))
+                          (hash-set! trains-trajectory train (rest-traj cc)))                              
                          ((and (not (null? cc)) ;; Something left to do
                                ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))) ;; Reached destination
                           (train-delay train)
@@ -288,6 +325,7 @@
                           ((railway 'change-train-trajectory-state!) train '())
                           ((railway 'change-train-destination!) train #f)
                           (train-delay train)
+                          (hash-set! train-previous-speed train ((railway 'get-train-speed) train))
                           (change-speed! train 0))
                          ))
                      ))
@@ -317,7 +355,11 @@
                               (for-each
                                (lambda (track)
                                  (if ((railway 'get-detection-block-state) track)
-                                     ((railway 'change-train-track!) train-name track)
+                                     (begin
+                                       ;((railway 'detection-block-reserve!) ((railway 'get-train-track) train-name) #f)
+                                       (if (> (- (abs ((railway 'get-train-speed) train-name)) 20) 0) (hash-set! train-previous-speed train-name ((railway 'get-train-speed) train-name)) '())
+                                       ((railway 'change-train-track!) train-name track)
+                                       )
                                      '()))
                                possible-tracks))))
                          ))))
