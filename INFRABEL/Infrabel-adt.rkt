@@ -43,6 +43,7 @@
         (((railway 'add-train!) train-name initial-track initial-track-behind)
          (add-loco train-name initial-track-behind initial-track)
          ((railway 'detection-block-reserve!) initial-track train-name)
+         (hash-set! train-previous-speed train-name 0)
          )))
 
     ;; Changing the train speed to a given speed
@@ -187,55 +188,96 @@
     (define (track-behind? track track-1 track-2)
       (or (eq? track track-1) (eq? track track-2)))
 
+    (define (inversion-track-behind? track)
+      (or (eq? track '1-8) (eq? track '2-1) (eq? track '2-7)
+          (eq? track '2-6) (eq? track '2-5) (eq? track '2-1)
+          (eq? track '2-2)))
+
     (define (determine-sign track-1 track-2 data) ;; Determine the individual sign
       (if (or (member track-1 data)
               (member track-2 data))
           -1
           1))
 
+    (define (determine-sign-after-direction train-name track-behind traj)
+      (if (member track-behind traj)
+          (hash-ref train-previous-speed train-name)
+          '()))
+
+    (define (opposite-speed-sign train-name)
+      (if (negative? (hash-ref train-previous-speed train-name)) 1 -1))
+
+    (define (identical-speed-sign train-name)
+      (if (negative? (hash-ref train-previous-speed train-name)) -1 1))
+
+    (define (speed-untouched? train-name)
+      (= (hash-ref train-previous-speed train-name) 0))
+
+    (define (determine-sign-after-manipulation train-name traj track-1 track-2)
+      (if (or (member track-1 traj) (member track-2 traj))
+          (opposite-speed-sign train-name)
+          (identical-speed-sign train-name)))
+          
+
+    ;; WELCOME TO THE UGLIEST PART OF THE CODE. PLEASE NOT THAT
+    ;; THIS WAS EXPERIMENTAL CODE TO CONSIDER ALL CASES AND TO MAKE SURE
+    ;; THE SPEED DETERMINATION IS ALWAYS CORRECT. HOWEVER THIS STILL NEEDS TO BE CLEANED UP
+    ;; I HAVE NO INTENTION OF LEAVING IT LIKE THIS BUT HAD NO CHOICE
+    ;; BUT I KEPT IT LIKE THAT BECAUSE I NOTICED LAST MINUTE BUGS DIRECTION DETERMINATION :D
+
     ;; Procedure that determines the sign of the speed
-    (define (determine-speed-sign train-name data) ;; Rewrite code to be more beautiful, this is very hard coded
+    (define (determine-speed-sign train-name data)
       (let ((track-behind ((railway 'get-train-track-behind) train-name))
             (traj (flatten-trajectory data)))
         (cond
           ((inversion-track? ((railway 'get-train-track) train-name))
            (if (not (inversion-track? track-behind))
                1
-               (if (negative? (hash-ref train-previous-speed train-name)) 
-                   +1
-                   -1)))           
+               (opposite-speed-sign train-name)))
           ((special-track? ((railway 'get-train-track) train-name) track-behind)
            (if (eq? (hash-ref train-previous-speed train-name) 0) ;; Ever started?
                (begin
-                 (display "SPEED HERE: ")
-                 (display (hash-ref train-previous-speed train-name))
-                 (newline)
                  (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj)) ;; Never started
                      1
                      -1))
                (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
-                   (if (negative? (hash-ref train-previous-speed train-name))
-                       +1
-                       -1)
-                   (if (negative? (hash-ref train-previous-speed train-name))
-                       -1
-                       +1))                      
-               ))
+                   (opposite-speed-sign train-name)
+                   (identical-speed-sign train-name)                      
+                   )))
+          ((inversion-track-behind? track-behind)
+           (cond
+             ((or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
+              (identical-speed-sign train-name))
+             (else
+              (opposite-speed-sign train-name))))         
           ((track-behind? track-behind '2-3 '2-4)
-           (determine-sign '2-3 '2-4 traj))
+           (if (speed-untouched? train-name)
+               (determine-sign '2-3 '2-4 traj)
+               (determine-sign-after-manipulation train-name traj '2-3 '2-4)))
           ((track-behind? track-behind '1-6 '1-5)
            (let ((train-track ((railway 'get-train-track) train-name)))
              (if (or (eq? train-track '2-3) (eq? train-track '2-4))
                  (if (inversion-track? (get-destination traj)) -1 (if (or (member '1-5 traj) (member '1-6 traj))
-                                                                      (if (negative? (hash-ref train-previous-speed train-name)) 1 -1)
-                                                                      (if (negative? (hash-ref train-previous-speed train-name)) -1 1)))
-                 (determine-sign '1-5 '1-6 traj))))
+                                                                      (opposite-speed-sign train-name)
+                                                                      (identical-speed-sign train-name)))
+                 (if (speed-untouched? train-name)
+                     (determine-sign '1-5 '1-6 traj)
+                     (determine-sign-after-manipulation train-name traj '1-5 '1-6)))))
           ((track-behind? track-behind '1-4 '1-7)
-           (determine-sign '1-4 '1-7 traj))
+           (if (speed-untouched? train-name)
+               (determine-sign '1-4 '1-7 traj)
+               (determine-sign-after-manipulation train-name traj '1-4 '1-7)))
           ((or (track-behind? track-behind '1-1 '1-2) (track-behind? track-behind '1-2 '1-3))
-           (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
-               -1
-               1)))))
+           (if (speed-untouched? train-name)
+               (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
+                   -1
+                   1)
+               (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
+                   (opposite-speed-sign train-name)
+                   (identical-speed-sign train-name)))))          
+
+        ))
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ;; Procedure that determines if it's a detection block or not
     (define (detection-block? comp)
@@ -293,7 +335,7 @@
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
         (change-speed! train (if (negative? current-speed) -200 200))
-        (sleep 1)
+        (sleep 0.9)
         (change-speed! train current-speed)))
 
     ;; Procedure that will update the trains their trajectories
@@ -303,7 +345,7 @@
                        (cond
                          ((and (eq? ((railway 'get-train-destination) train) #f) ;; Standing idle with no destination
                                (not (null? cc)) ;; But it has a trajectory computed, then you have to start it
-                               ;(attempt-reservation train cc);; Only if it's allowed though
+                               (attempt-reservation train cc);; Only if it's allowed
                                ) 
                           ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
                           (process-trajectory (first-traj cc))
