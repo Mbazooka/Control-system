@@ -181,15 +181,15 @@
         return-val))
 
     (define (apply-train! train-name track track-behind) ;; Adds a train to the track
-      (if ((railway 'add-train!) train-name track track-behind)
+      (if (and ((railway 'get-detection-block-state) track) ((railway 'add-train!) train-name track track-behind)) ;; Avoids adding when there is a train
           (hash-set! new-trajectories train-name '())
           '())) 
 
     (define update-detection-blocks! ;; Updates the detection-blocks their states
-      (lambda (data-pair)
+      (lambda (data-pair reservations)
         (let ((oc-db (car data-pair))
               (all-db (cdr data-pair)))
-          ((railway 'update-detection-blocks!) oc-db all-db))))
+          ((railway 'update-detection-blocks!) oc-db all-db reservations))))
 
     ;; Abstraction to retrieve train specific data
     (define (retrieve-train-abstraction operation)
@@ -221,7 +221,6 @@
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'update-switches!) update-switches!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
-        ((eq? msg 'bla) (retrieve-all-trains))
         (else
          "NMBS-ADT: Illegal message")))
     dispatch))

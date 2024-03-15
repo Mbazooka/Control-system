@@ -19,12 +19,23 @@
 
     (start) ;; To start the simulator
 
+    ;; Helper procedure
+    (define (flatten-trajectory data)
+      (if (null? data)
+          '()
+          (append (car data) (flatten-trajectory (cdr data)))))
+
+    (define (switch? element)
+      (eq? (string-ref (symbol->string element) 0) #\S))
+
     (define (retrieve-all-abstraction operation) ;; abstraction for reoccuring retrieve-all operation
       (lambda () ((railway operation))))
 
     (define retrieve-all-switches (retrieve-all-abstraction 'get-all-switches))
 
     (define retrieve-all-trains (retrieve-all-abstraction 'get-all-trains))
+
+    (define retrieve-DB-reservations (retrieve-all-abstraction 'get-all-detection-block-reservation-states))
 
     ;; Adds a train to the hardware if the train-name has not been used
     (define (add-train-HARDWARE! train-name initial-track initial-track-behind)
@@ -115,9 +126,6 @@
     (define actual-traj cdr)
 
     ;; Helper procedures to process trajectory
-    (define (switch? element)
-      (eq? (string-ref (symbol->string element) 0) #\S))
-
     (define (get-switch-surrounding lst)
       (cons (car lst) (caddr lst)))
 
@@ -166,11 +174,6 @@
     (define (actual-trajectory? trajectory-data)
       (not (null? trajectory-data)))
 
-    (define (flatten-trajectory data)
-      (if (null? data)
-          '()
-          (append (car data) (flatten-trajectory (cdr data)))))
-
     (define (inversion-track? track)
       (or (eq? track '1-8) (eq? track '2-1)
           (eq? track '2-7) (eq? track '2-6)
@@ -214,6 +217,35 @@
            (if (or (member '1-1 traj) (member '1-2 traj) (member '1-3 traj))
                -1
                1)))))
+
+    ;; Procedure that determines if it's a detection block or not
+    (define (detection-block? comp)
+      (not (switch? comp)))
+
+    ;; Procedure that accumalates everything
+    (define (accumulate operator null-val list)
+      (if (null? list)
+          null-val
+          (operator (car list) (accumulate operator null-val (cdr list)))))
+
+    ;; Procedure that determines whether a train has reserved all components
+    (define (reserved-everything? train-name trajectories)
+      (accumulate
+       (lambda (x y) (and x y))
+       (map (lambda (comp) (eq? ((railway 'get-detection-block-state)) train-name)) trajectories)))
+       
+    ;; Procedure that attempts to reserve
+    (define (attempt-reservation train-name trajectories)
+      (let* ((all-components-nec (flatten trajectories))
+             (detection-blocks (filter detection-block? all-components-nec)))
+        (for-each
+         (lambda (comp)
+           (if ((railway 'get-detection-block-reservation))
+               '()
+               ((railway 'detection-block-reserve!) comp train-name)))
+         all-components-nec)
+        (reserved-everything? train-name detection-blocks)
+        ))      
 
     ;; Procedure for adding trajectories that need to be processed
     (define (add-trajectories! trajectories)
@@ -303,7 +335,7 @@
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains) ;; ADDED
         ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
-        ((eq? msg 'bla) (retrieve-all-trains))
+        ((eq? msg 'retrieve-DB-reservations) retrieve-DB-reservations) ;; ADDED
         (else
          "INFRABEL-ADT: Incorrect message")))
     dispatch))

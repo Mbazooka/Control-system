@@ -85,13 +85,13 @@
 
 ;; The detection blocks connected with each other in a list (simplified version of before)
 (define simplified-railway-connections '((1-3 1-4) (1-4 1-2) (1-4 1-1) (1-4 1-5) (1-5 2-4)
-                                                     (2-4 1-1) (2-4 1-2) (2-4 1-3) (2-4 1-6) (2-4 2-1) (2-4 1-8)
-                                                     (2-3 1-1) (2-3 1-2) (2-3 1-6) (2-3 2-1) (2-3 1-8)
-                                                     (2-1 2-2) (2-1 2-5) (2-1 2-6) (2-1 2-7)
-                                                     (1-8 2-2) (1-8 2-5) (1-8 2-6)
-                                                     (1-1 1-7) 
-                                                     (1-6 2-3) (1-6 2-4) (1-6 1-7)
-                                                     (1-8 2-4)))
+                                                   (2-4 1-1) (2-4 1-2) (2-4 1-3) (2-4 1-6) (2-4 2-1) (2-4 1-8)
+                                                   (2-3 1-1) (2-3 1-2) (2-3 1-6) (2-3 2-1) (2-3 1-8)
+                                                   (2-1 2-2) (2-1 2-5) (2-1 2-6) (2-1 2-7)
+                                                   (1-8 2-2) (1-8 2-5) (1-8 2-6)
+                                                   (1-1 1-7) 
+                                                   (1-6 2-3) (1-6 2-4) (1-6 1-7)
+                                                   (1-8 2-4)))
 
 (define (make-railway-adt) 
   (let* ((HARDWARE-SWITCHES possible-switches)
@@ -158,7 +158,7 @@
             #f)))
 
     ;; Updates the detection block (only that can be put here to make sure the dependency diagram does not become a mess)
-    (define (update-detection-blocks! occupied-dbs all-dbs)
+    (define (update-detection-blocks! occupied-dbs all-dbs reservations)
       (for-each (lambda (db-id)
                   (change-detection-block-state! db-id #t))
                 occupied-dbs)
@@ -166,7 +166,11 @@
                   (cond
                     ((not (member db-id occupied-dbs))
                      (change-detection-block-state! db-id #f))))
-                all-dbs))
+                all-dbs)
+      (for-each (lambda (db-reserve)
+                  (detection-block-reserve! (car db-reserve) (cdr db-reserve)))
+                reservations)
+      )
     
     ;; Another abstraction allowing more general code for get-operations
     (define (get-operation-abstraction HARDWARE operation)
@@ -244,6 +248,13 @@
          (cons key (get-detection-block-state key)))
        (hash-keys HARDWARE-DETECTION-BLOCKS)))
 
+    ;; Procedrue that gets the detection blocks and their reservation state
+    (define (get-all-detection-block-reservation-states)
+      (map
+       (lambda (key)
+         (cons key (get-detection-block-reservation key)))
+       (hash-keys HARDWARE-DETECTION-BLOCKS)))
+
     ;; Procedures to compute paths in complex (with switches) and simplified (without switches)
     (define (compute-path-complex start destination)
       (fewest-vertices-path railway-graph start destination))
@@ -282,6 +293,7 @@
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
         ((eq? msg 'detection-block-reserve!) detection-block-reserve!) ;; ADDED
         ((eq? msg 'get-detection-block-reservation) get-detection-block-reservation) ;; ADDED
+        ((eq? msg 'get-all-detection-block-reservation-states) get-all-detection-block-reservation-states) ;; ADDED
         ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks)
         ((eq? msg 'compute-path-complex) compute-path-complex) ;; ADDED
         ((eq? msg 'compute-path-simplified) compute-path-simplified) ;; ADDED

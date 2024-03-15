@@ -308,10 +308,10 @@
 
    ))
 
-(define railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks/detection-block-reserve!/get-detection-block-reservation-tests
+(define railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks/detection-block-reserve!/get-detection-block-reservation/get-all-detection-block-reservation-states-tests
 
   (test-suite
-   "RAILWAY-ADT: UPDATE-DETECTION-BLOCKS!/GET-DTECTION-BLOCK-STATE/GET-ALL-DETECTION-BLOCKS TESTS"
+   "RAILWAY-ADT: UPDATE-DETECTION-BLOCKS!/GET-DTECTION-BLOCK-STATE/GET-ALL-DETECTION-BLOCKS/DETECTION-BLOCK-RESERVE!/GET-DETECTION-BLOCK-RESERVATION/GET-ALL-DETECTION-BLOCK-RESERVATION-STATES TESTS"
 
 
    (test-case
@@ -339,8 +339,11 @@
     "Test if 'update-detection-blocks!' works properly"
     (check-equal?
      (begin
-       ((test-railway 'update-detection-blocks!) '(1-1) '(1-1 1-2 1-3 1-4 1-5 1-6 1-7 1-8 2-1 2-2 2-3 2-4 2-5 2-6 2-7 2-8))
-       ((test-railway 'get-detection-block-state) '1-1))
+       ((test-railway 'update-detection-blocks!) '(1-1) '(1-1 1-2 1-3 1-4 1-5 1-6 1-7 1-8 2-1 2-2 2-3 2-4 2-5 2-6 2-7 2-8) (list (cons '1-1 #f) (cons '1-2 #f) (cons '1-3 #f) (cons '1-4 #f)
+                                                                                                                                 (cons '1-5 #f) (cons '1-6 #f) (cons '1-7 #f) (cons '1-8 #f)
+                                                                                                                                 (cons '2-1 #f) (cons '2-2 #f) (cons '2-3 #f) (cons '2-4 #f)
+                                                                                                                                 (cons '2-5 #f) (cons '2-6 #f) (cons '2-7 #f) (cons '2-8 #f)))
+       (and ((test-railway 'get-detection-block-state) '1-1) (eq? ((test-railway 'get-detection-block-reservation) '1-1) #f)))
      #t
      "update-detection-blocks!: Incorrect operation"))
 
@@ -366,6 +369,14 @@
      ((test-railway 'get-detection-block-reservation) '1-1))
      'TRAIN
      "detection-block-reserve!: incorrect operation"))
+
+   (test-case
+    "Test if 'get-all-detection-block-reservation-states' works properly"
+    (check-eq?
+     (length ((test-railway 'get-all-detection-block-reservation-states)))
+     16
+     "get-all-detection-block-reservation-states: Incorrect operation"))
+     
      
    ))
 
@@ -480,7 +491,7 @@
                               railway-check-barrier-open?/change-barrier-state!-tests
                               railway-get-light-state/change-light-state!-tests
                               railway-get-all-lights-tests
-                              railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks/detection-block-reserve!/get-detection-block-reservation-tests
+                              railway-update-detection-blocks!/get-detection-block-state/get-all-detection-blocks/detection-block-reserve!/get-detection-block-reservation/get-all-detection-block-reservation-states-tests
                               railway-get-train-destination/change-train-destination!-tests
                               railway-message-sending-tests))
 
