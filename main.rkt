@@ -27,7 +27,6 @@
   (sleep 0.2)
   ((NMBS 'update-trains!) ((INFRABEL 'retrieve-all-trains)))
   ((NMBS 'update-switches!) ((INFRABEL 'retrieve-all-switches)))
-  (sleep 0.2)
   ((INFRABEL 'update-trains!) ((NMBS 'retrieve-all-trains)))
   (main-loop))
 
