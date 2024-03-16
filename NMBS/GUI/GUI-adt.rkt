@@ -42,6 +42,8 @@
 (define tab-drawing '()) ;; To be initialized later
 (define current-tab 0)
 
+(define train-speed (make-hash))
+
 ;; The trains on the railway
 (define all-train-tabs (make-hash)) 
 
@@ -134,8 +136,8 @@
       (new tab-panel%
            [parent train-panel]
            [choices (data-converter (train-retrieve-cb))]
-           [callback train-tab-change-logic!]))
-                     
+           [callback train-tab-change-logic!]
+           ))                    
 
     ;; Draws a panel on top of the tab, in a vertical manner
     (define top-tab-panel
@@ -189,6 +191,7 @@
             (track-behind-sel (string->symbol (send track-behind get-string-selection))))
         (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
         (send train-tab append name)
+        (hash-set! train-speed (string->symbol name) 0)
         (cond ((= (length (train-retrieve-cb)) 1) (show-current-train-elements!)))))
 
     (define add-train-button
@@ -208,7 +211,12 @@
             (begin
               (send initial-track set-string-selection (symbol->string current))
               (send track-behind set-string-selection (symbol->string current-behind))
-              (if dest (send destination set-string-selection (symbol->string dest)) '()))
+              (if dest (send destination set-string-selection (symbol->string dest)) '())
+              (let* ((name-train (string->symbol (send train-tab get-item-label (send train-tab get-selection))))
+                     (train-data  (assoc name-train (train-retrieve-cb)))
+                     (value-to-set (cadddr train-data)))
+                (send slider set-value value-to-set))
+              )
             '())
         ))    
       
@@ -226,7 +234,8 @@
                                  [parent top-tab-panel]))
 
     (define (slider-logic! slider event) ;; Logic for slider
-      (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))     
+      (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
+        (hash-set! train-speed name (send slider get-value))
         (train-adjust-cb name (send slider get-value))))
         
     (define slider ;; Slider itself
@@ -238,6 +247,17 @@
            [max-value max-train-speed]
            [init-value 0]
            [vert-margin SLIDER-VERT-MARGIN]))
+
+    ;; Timer to update certain part of GUI at regular intervals 
+    (define train-slider-timer (new timer%
+                                    [notify-callback
+                                     (lambda ()
+                                       (if (>  (hash-count train-speed) 0)
+                                           (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
+                                             (train-adjust-cb name (hash-ref train-speed name)))
+                                           '()))
+                                     ]
+                                    [interval 5000]))
   
     (define (remove-current-train-elements!) ;; Removes the message and slider from the screen 
       (send display-message show #f)

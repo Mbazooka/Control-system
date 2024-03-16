@@ -218,12 +218,12 @@
           (opposite-speed-sign train-name)
           (identical-speed-sign train-name)))
           
-
-    ;; WELCOME TO THE UGLIEST PART OF THE CODE. PLEASE NOT THAT
+    ;; WELCOME TO THE UGLIEST PART OF THE CODE. FEEL FREE TO CLOSE YOUR EYES.
+    ;; THIS WILL BE FIXED FIRST THING IN PHASE 3. PLEASE NOTE THAT
     ;; THIS WAS EXPERIMENTAL CODE TO CONSIDER ALL CASES AND TO MAKE SURE
     ;; THE SPEED DETERMINATION IS ALWAYS CORRECT. HOWEVER THIS STILL NEEDS TO BE CLEANED UP
     ;; I HAVE NO INTENTION OF LEAVING IT LIKE THIS BUT HAD NO CHOICE
-    ;; BUT I KEPT IT LIKE THAT BECAUSE I NOTICED LAST MINUTE BUGS DIRECTION DETERMINATION :D
+    ;; BUT I KEPT IT LIKE THAT BECAUSE I FIGURED IT OUT LAST MINUTE :D
 
     ;; Procedure that determines the sign of the speed
     (define (determine-speed-sign train-name data)
@@ -355,6 +355,7 @@
                           ((railway 'change-train-trajectory-state!) train (first-traj cc))
                           (hash-set! trains-trajectory train (rest-traj cc)))                              
                          ((and (not (null? cc)) ;; Something left to do
+                               ((railway 'get-train-destination) train) ;; Already in process
                                ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))) ;; Reached destination
                           (train-delay train)
                           ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
