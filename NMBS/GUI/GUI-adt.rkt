@@ -189,9 +189,10 @@
       (let ((name (tab-name-generator))
             (initial-track-sel (string->symbol (send initial-track get-string-selection)))
             (track-behind-sel (string->symbol (send track-behind get-string-selection))))
-        (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
-        (send train-tab append name)
-        (hash-set! train-speed (string->symbol name) 0)
+        (if (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
+            (send train-tab append name)
+            '())
+        ;(hash-set! train-speed (string->symbol name) 0)
         (cond ((= (length (train-retrieve-cb)) 1) (show-current-train-elements!)))))
 
     (define add-train-button
@@ -235,7 +236,7 @@
 
     (define (slider-logic! slider event) ;; Logic for slider
       (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
-        (hash-set! train-speed name (send slider get-value))
+        ;(hash-set! train-speed name (send slider get-value))
         (train-adjust-cb name (send slider get-value))))
         
     (define slider ;; Slider itself
@@ -249,15 +250,15 @@
            [vert-margin SLIDER-VERT-MARGIN]))
 
     ;; Timer to update certain part of GUI at regular intervals 
-    (define train-slider-timer (new timer%
-                                    [notify-callback
-                                     (lambda ()
-                                       (if (>  (hash-count train-speed) 0)
-                                           (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
-                                             (train-adjust-cb name (hash-ref train-speed name)))
-                                           '()))
-                                     ]
-                                    [interval 5000]))
+;    (define train-slider-timer (new timer%
+;                                    [notify-callback
+;                                     (lambda ()
+;                                       (if (>  (hash-count train-speed) 0)
+;                                           (let ((name (string->symbol (send train-tab get-item-label (send train-tab get-selection)))))
+;                                             (train-adjust-cb name (hash-ref train-speed name)))
+;                                           '()))
+;                                     ]
+;                                    [interval 5000]))
   
     (define (remove-current-train-elements!) ;; Removes the message and slider from the screen 
       (send display-message show #f)
