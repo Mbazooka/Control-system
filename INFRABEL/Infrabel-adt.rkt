@@ -232,7 +232,7 @@
         (cond
           ((inversion-track? ((railway 'get-train-track) train-name))
            (if (not (inversion-track? track-behind))
-               1
+               (if (eq? (hash-ref train-previous-speed train-name) 0) 1 (opposite-speed-sign train-name))
                (opposite-speed-sign train-name)))
           ((special-track? ((railway 'get-train-track) train-name) track-behind)
            (if (eq? (hash-ref train-previous-speed train-name) 0) ;; Ever started?
@@ -393,13 +393,21 @@
                                    ((railway 'change-train-track!) train-name DB)
                                    '()))
                              current-traj-no-switch))
-                           (else
-                            (let ((possible-tracks (determine-possible-next-tracks ((railway 'get-train-track) train-name))))
+                           (else 
+                            (let* ((current-track ((railway 'get-train-track) train-name))
+                                   (used-tracks (map (lambda (train)
+                                                       ((railway 'get-train-track) train))
+                                                       (hash-keys trains-trajectory)))
+                                   (possible-tracks (filter (lambda (track)
+                                                              (not (member track used-tracks)))
+                                                              (determine-possible-next-tracks current-track))))
                               (for-each
                                (lambda (track)
-                                 (if ((railway 'get-detection-block-state) track)
+                                 (if (and
+                                      (not ((railway 'get-detection-block-state) current-track))
+                                      ((railway 'get-detection-block-state) track))
                                      (begin
-                                       ;((railway 'detection-block-reserve!) ((railway 'get-train-track) train-name) #f)
+                                       ((railway 'detection-block-reserve!) current-track #f)
                                        (if (> (- (abs ((railway 'get-train-speed) train-name)) 20) 0) (hash-set! train-previous-speed train-name ((railway 'get-train-speed) train-name)) '())
                                        ((railway 'change-train-track!) train-name track)
                                        )
