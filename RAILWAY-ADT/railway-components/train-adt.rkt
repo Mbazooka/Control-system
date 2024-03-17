@@ -45,14 +45,14 @@
         ((eq? msg 'get-initial-track-behind) get-initial-track-behind)
         ((eq? msg 'get-current-speed) get-current-speed)
         ((eq? msg 'change-speed!) change-speed!)
-        ((eq? msg 'get-trajectory-state) get-trajectory-state) ;; ADDED
-        ((eq? msg 'change-trajectory-state!) change-trajectory-state!) ;; ADDED
-        ((eq? msg 'get-current-track) (lambda () current-track)) ;; ADDED
-        ((eq? msg 'get-track-behind) (lambda () track-behind)) ;; ADDED
-        ((eq? msg 'change-current-track!) change-current-track!) ;; ADDED
-        ((eq? msg 'change-current-track-behind!) (lambda (input) (set! track-behind input))) ;; ADDED
-        ((eq? msg 'get-destination) (lambda () destination)) ;; ADDED
-        ((eq? msg 'change-destination!) (lambda (input-destination) (set! destination input-destination))) ;; ADDED
+        ((eq? msg 'get-trajectory-state) get-trajectory-state)
+        ((eq? msg 'change-trajectory-state!) change-trajectory-state!) 
+        ((eq? msg 'get-current-track) (lambda () current-track)) 
+        ((eq? msg 'get-track-behind) (lambda () track-behind)) 
+        ((eq? msg 'change-current-track!) change-current-track!) 
+        ((eq? msg 'change-current-track-behind!) (lambda (input) (set! track-behind input))) 
+        ((eq? msg 'get-destination) (lambda () destination)) 
+        ((eq? msg 'change-destination!) (lambda (input-destination) (set! destination input-destination)))
         (else
          "TRAIN-ADT: Incorrect message")))
     dispatch))

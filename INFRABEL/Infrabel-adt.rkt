@@ -471,7 +471,7 @@
         (change-speed! train 0)))
 
     ;; Procedure that will update the train positions
-    (define (update-train-positions) 
+    (define (update-train-positions!) 
       (hash-for-each trains-trajectory
                      (lambda (train-name data)
                        (cond
@@ -515,15 +515,14 @@
     (define (dispatch msg)
       (cond
         ((eq? msg 'update-switches!) update-switches!)
-        ((eq? msg 'retrieve-all-switches) retrieve-all-switches) ;; ADDED
+        ((eq? msg 'retrieve-all-switches) retrieve-all-switches)
         ((eq? msg 'update-lights!) update-lights!)
         ((eq? msg 'update-barriers!) update-barriers!)
-        ((eq? msg 'add-trajectories!) add-trajectories!) ;; ADDED
-        ((eq? msg 'update-trajectories!) update-trajectories!) ;; ADDED
-        ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
+        ((eq? msg 'add-trajectories!) add-trajectories!) 
+        ((eq? msg 'update-trajectories!) update-trajectories!) 
+        ((eq? msg 'update-train-positions!) update-train-positions!) 
         ((eq? msg 'update-trains!) update-trains!)
-        ((eq? msg 'retrieve-all-trains) retrieve-all-trains) ;; ADDED
-        ((eq? msg 'update-train-positions) update-train-positions) ;; ADDED
+        ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'retrieve-DB-reservations) retrieve-DB-reservations) ;; ADDED
         (else

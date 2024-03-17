@@ -9,7 +9,6 @@
          rackunit/gui
          "railway-adt.rkt")
 
-;; Tests the constructor
 (define railway-make-test
   (test-suite
    "RAILWAY-ADT: MAKE-RAILWAY-ADT TESTS"
@@ -19,13 +18,12 @@
     (check-not-exn (lambda () make-railway-adt)))
 
    (test-case
-    "Test if constructor does not give error"
+    "Test if constructor does not give an error"
     (check-not-exn (lambda () (make-railway-adt))))))
 
 ;; Dummy railway necessary for testing
 (define test-railway (make-railway-adt))
 
-;; Test the add-train! operation of the railway
 (define railway-add-train-tests
   (test-suite
    "RAILWAY-ADT: ADD-TRAIN TESTS"
@@ -49,8 +47,6 @@
      #f
      "Add-train!: Train already exists"))))
 
-
-;; Test the change-train-speed!/get-train-speed operation of the railway
 (define railway-change-train-speed!/get-train-speed/get-train-track/get-train-track-behind/change-train-track!/change-train-track-behind!/get-all-trains-tests
   (test-suite
    "RAILWAY-ADT: CHANGE-TRAIN-SPEED!/GET-TRAIN-SPEED/GET-TRAIN-TRACK/CHANGE-TRAIN-TRACK!/CHANGE-TRAIN-TRACK-BEHIND!/GET-ALL-TRAINS TESTS"
@@ -125,7 +121,6 @@
 
    ))
 
-;; Test the change-switch-state!/get-switch-state operation of the railway
 (define railway-change-switch-state!/get-switch-state/get-switch-comp-state-tests
   (test-suite
    "RAILWAY-ADT: CHANGE-SWITCH-STATE!/GET-SWITCH-STATE/GET-SWITCH-COMP-STATE TESTS"
@@ -191,7 +186,6 @@
      #t
      "get-switch-possible-comp-states: incorrect output"))))
 
-;; Test the check-barrier-open?/change-barrier-state! operation of the railway
 (define railway-check-barrier-open?/change-barrier-state!-tests
   (test-suite
    "RAILWAY-ADT: CHECK-BARRIER-OPEN?/CHANGE-BARRRIER-STATE! TESTS"

@@ -268,18 +268,18 @@
         ((eq? msg 'change-train-speed!) change-train-speed!)
         ((eq? msg 'get-all-trains) get-all-trains)
         ((eq? msg 'get-train-speed) get-train-speed)
-        ((eq? msg 'change-train-trajectory-state!) change-train-trajectory-state!) ;; ADDED
-        ((eq? msg 'get-train-trajectory-state) get-train-trajectory-state) ;; ADDED
-        ((eq? msg 'get-train-track) get-train-track) ;; ADDED
-        ((eq? msg 'get-train-track-behind) get-train-track-behind) ;; ADDED
-        ((eq? msg 'change-train-track!) change-train-track!) ;; ADDED
-        ((eq? msg 'change-train-track-behind!) change-train-track-behind!) ;; ADDED
-        ((eq? msg 'get-train-destination) get-train-destination) ;; ADDED
-        ((eq? msg 'change-train-destination!) change-train-destination!) ;; ADDED
+        ((eq? msg 'change-train-trajectory-state!) change-train-trajectory-state!) 
+        ((eq? msg 'get-train-trajectory-state) get-train-trajectory-state)
+        ((eq? msg 'get-train-track) get-train-track)
+        ((eq? msg 'get-train-track-behind) get-train-track-behind) 
+        ((eq? msg 'change-train-track!) change-train-track!) 
+        ((eq? msg 'change-train-track-behind!) change-train-track-behind!)
+        ((eq? msg 'get-train-destination) get-train-destination)
+        ((eq? msg 'change-train-destination!) change-train-destination!) 
         ((eq? msg 'change-switch-state!) change-switch-state!) 
         ((eq? msg 'get-switch-state) get-switch-state)
-        ((eq? msg 'get-switch-comp-state) get-switch-comp-state) ;; ADDED
-        ((eq? msg 'get-switch-possible-comp-states) get-switch-possible-comp-states) ;; ADDED
+        ((eq? msg 'get-switch-comp-state) get-switch-comp-state) 
+        ((eq? msg 'get-switch-possible-comp-states) get-switch-possible-comp-states) 
         ((eq? msg 'get-all-switches) get-all-switches)
         ((eq? msg 'check-barrier-open?) check-barrier-open?)
         ((eq? msg 'get-all-barriers) get-all-barriers)
@@ -289,13 +289,13 @@
         ((eq? msg 'change-light-state!) change-light-state!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
         ((eq? msg 'get-detection-block-state) get-detection-block-state)
-        ((eq? msg 'detection-block-reserve!) detection-block-reserve!) ;; ADDED
-        ((eq? msg 'get-detection-block-reservation) get-detection-block-reservation) ;; ADDED
-        ((eq? msg 'get-all-detection-block-reservation-states) get-all-detection-block-reservation-states) ;; ADDED
+        ((eq? msg 'detection-block-reserve!) detection-block-reserve!)
+        ((eq? msg 'get-detection-block-reservation) get-detection-block-reservation) 
+        ((eq? msg 'get-all-detection-block-reservation-states) get-all-detection-block-reservation-states) 
         ((eq? msg 'get-all-detection-blocks) get-all-detection-blocks)
-        ((eq? msg 'compute-path-complex) compute-path-complex) ;; ADDED
-        ((eq? msg 'compute-path-simplified) compute-path-simplified) ;; ADDED
-        ((eq? msg 'get-track-neighbour) (lambda (component) (get-neighbors railway-DB-graph component))) ;; ADDED 
+        ((eq? msg 'compute-path-complex) compute-path-complex) 
+        ((eq? msg 'compute-path-simplified) compute-path-simplified)
+        ((eq? msg 'get-track-neighbour) (lambda (component) (get-neighbors railway-DB-graph component)))
         (else
          "RAILWAY-ADT: Incorrect message")))
     dispatch))

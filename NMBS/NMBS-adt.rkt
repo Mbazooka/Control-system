@@ -218,8 +218,9 @@
         ((eq? msg 'retrieve-all-barriers) retrieve-all-barriers)
         ((eq? msg 'retrieve-all-lights) retrieve-all-lights)
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
-        ((eq? msg 'add-trajectory!) add-trajectory!) ;; ADDED
-        ((eq? msg 'retrieve-trajectories) retrieve-trajectories) ;; ADDED
+        ((eq? msg 'add-trajectory!) add-trajectory!) 
+        ((eq? msg 'retrieve-trajectories) retrieve-trajectories)
+        ((eq? msg 'compute-trajectory) compute-trajectory)
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'update-switches!) update-switches!)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)

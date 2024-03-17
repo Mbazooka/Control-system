@@ -30,8 +30,8 @@
       (cond
         ((eq? msg 'get-name) get-name)
         ((eq? msg 'current-position) current-position)
-        ((eq? msg 'current-comp) current-comp) ;; ADDED
-        ((eq? msg 'possible-comp-states) possible-comp-states) ;; ADDED
+        ((eq? msg 'current-comp) current-comp) 
+        ((eq? msg 'possible-comp-states) possible-comp-states) 
         ((eq? msg 'change-position!) change-position!)
         (else
          "SWITCH-ADT: Incorrect message")))

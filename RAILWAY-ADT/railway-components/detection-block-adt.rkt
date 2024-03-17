@@ -30,7 +30,7 @@
         ((eq? msg 'get-name) get-name)
         ((eq? msg 'get-presence) get-presence)
         ((eq? msg 'change-presence!) change-presence!)
-        ((eq? msg 'reserve!) reserve!)
+        ((eq? msg 'reserve!) reserve!) 
         ((eq? msg 'get-reservation) get-reservation)
         (else
          "DETECTION-BLOCK-ADT: Incorrect message")))

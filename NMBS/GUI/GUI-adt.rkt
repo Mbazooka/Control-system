@@ -161,7 +161,7 @@
                                [choices processed-db]))
 
     (define track-behind (new choice% 
-                              [label "Component-behind:"]
+                              [label "Track-behind:"]
                               [parent train-panel]
                               [choices processed-db]))
     
