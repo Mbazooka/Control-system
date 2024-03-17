@@ -10,11 +10,14 @@
 
 (provide make-infrabel-adt)
 
+(define train-input-treshold 20)
+
 (define (make-infrabel-adt)
   (let ((railway (make-railway-adt))
         (trains-trajectory (make-hash))
         (train-full-traj (make-hash))
-        (train-previous-speed (make-hash)))
+        (train-previous-speed (make-hash))
+        (train-manual-movement (make-hash)))
 
     (setup-hardware) ;; Setup the track
 
@@ -103,6 +106,52 @@
     (define (change-switch! switch state)
       (set-switch-position-HARDWARE! switch state))
 
+    ;; Free unused neighbouring tracks their reservation
+    (define (free-reservation-manual-movement! train-name)
+      (let* ((track-behind ((railway 'get-train-track-behind) train-name))
+             (current-track ((railway 'get-train-track) train-name))
+             (prev-neighbour ((railway 'get-track-neighbour) track-behind)))
+        (for-each
+         (lambda (track)
+           ((railway 'detection-block-reserve!) track #f))
+         (filter (lambda (db) (not (eq? db current-track))) prev-neighbour))
+        ((railway 'detection-block-reserve!) track-behind #f)        
+        ))
+
+    ;; Procedure that will free the reservations it has made
+    (define (free-reservation-manual-movement-failed! train-name)
+      (let* ((current-track ((railway 'get-train-track) train-name))
+             (neighbours ((railway 'get-track-neighbour) current-track)))
+        (for-each
+         (lambda (track)
+           (if (eq? ((railway 'get-detection-block-reservation) track) train-name) ;; Leave reservations not of your own alone
+               ((railway 'detection-block-reserve!) track #f)
+               '()))
+         (filter (lambda (db) (not (eq? db current-track))) neighbours))))
+
+    ;; Determine if train can go to the next detection-block (by reserving all surrounding blocks)
+    (define (allow-train-manual-movement? train-name)
+      (let* ((train-track ((railway 'get-train-track) train-name))
+             (neighbouring-track ((railway 'get-track-neighbour) train-track)))
+        (for-each
+         (lambda (track)
+           (if ((railway 'get-detection-block-reservation) track)
+               '()
+               ((railway 'detection-block-reserve!) track train-name)))
+         neighbouring-track)
+        (define movement-allowed? #t)
+        (for-each
+         (lambda (track)
+           (if (eq? ((railway 'get-detection-block-reservation) track) train-name)
+               '()
+               (set! movement-allowed? #f)))
+         neighbouring-track)
+        (if movement-allowed?
+            '()
+            (free-reservation-manual-movement-failed! train-name)) ;; In case not succesful, release reserve tracks
+        movement-allowed?
+        ))
+
     ;; Procedure for updating the trains
     (define (update-trains! trains) 
       (for-each
@@ -118,7 +167,18 @@
            ((railway 'change-train-track!) train-name current-track)
            ((railway 'change-train-track-behind!) train-name current-track-behind)
            ((railway 'change-train-trajectory-state!) train-name traj-state)
-           (change-speed! train-name speed)
+           ;(change-speed! train-name speed)
+           (if (and (hash-has-key? train-full-traj train-name)
+                    (not (null? (hash-ref train-full-traj train-name)))) ;; Undergoing trajectory?
+               '() ;; Cannot change speed (to ensure safety)
+                 (if (and (hash-has-key? train-manual-movement train-name) ;; Maybe undergoing manual movement
+                          (hash-ref train-manual-movement train-name))
+                     '()
+                     (if (and (> (abs speed) 5) (allow-train-manual-movement? train-name)) ;; Only when allowed can the train ride if there is attempt to make it ride
+                         (begin
+                           (change-speed! train-name speed)
+                           (hash-set! train-manual-movement train-name #t))                         
+                         '())))
            ))
        trains))
 
@@ -150,7 +210,7 @@
     (define first-comp car)
     (define rest-comp cdr)
     (define one-ahead cdr)
-    (define two-ahead cddr)
+    (define two-ahead cddr)               
 
     ;; Procedure to process the trajectory and adjust elements
     (define (process-trajectory trajectory)
@@ -259,9 +319,11 @@
           ((track-behind? track-behind '1-6 '1-5)
            (let ((train-track ((railway 'get-train-track) train-name)))
              (if (or (eq? train-track '2-3) (eq? train-track '2-4))
-                 (if (inversion-track? (get-destination traj)) -1 (if (or (member '1-5 traj) (member '1-6 traj))
-                                                                      (opposite-speed-sign train-name)
-                                                                      (identical-speed-sign train-name)))
+                 (if (inversion-track? (get-destination traj))
+                     (if (speed-untouched? train-name) -1 (opposite-speed-sign train-name))
+                     (if (or (member '1-5 traj) (member '1-6 traj))
+                         (opposite-speed-sign train-name)
+                         (identical-speed-sign train-name)))
                  (if (speed-untouched? train-name)
                      (determine-sign '1-5 '1-6 traj)
                      (determine-sign-after-manipulation train-name traj '1-5 '1-6)))))
@@ -306,7 +368,7 @@
       truth)
 
     ;; Procedure that checks if switches necessary are already in use by another train's trajectory
-    (define (switch-readyness? train-name full-traj)
+    (define (switch-readiness? train-name full-traj)
       (let ((switches (filter switch? full-traj)))
         (define readiness #t)
         (hash-for-each
@@ -314,11 +376,6 @@
          (lambda (current-train-name traj)
            (for-each
             (lambda (switch)
-              (display "TO BE PROCESSED")
-              (display switches)
-              (display "::")
-              (display traj)
-              (newline)
               (if (eq? current-train-name train-name) '() (if (member switch traj) (set! readiness #f) '())))
             switches)))
         readiness))
@@ -334,13 +391,13 @@
                ((railway 'detection-block-reserve!) comp train-name)))
          detection-blocks)
         (let ((bool (and (reserved-everything? train-name detection-blocks)
-                         (switch-readyness? train-name all-components-nec))
+                         (switch-readiness? train-name all-components-nec))
                     ))
           (if bool
               (hash-set! train-full-traj train-name all-components-nec)
               '())
           bool)
-        )) 
+        ))
 
     ;; Procedure that will free the previous reservations
     (define (free-reservation! train-name) ;; KEEP TRAJECTORY BEFORE AND THEN RELEASE IT EXCEPT LAST ELEMENT
@@ -351,6 +408,7 @@
            ((railway 'detection-block-reserve!) db #f))
          (filter (lambda (db) (not (eq? last-db db))) detection-blocks))
         (hash-set! train-full-traj train-name '())
+        ((railway 'detection-block-reserve!) last-db train-name)
         ))
 
     ;; Procedure for adding trajectories that need to be processed
@@ -363,7 +421,7 @@
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
         (change-speed! train (if (negative? current-speed) -200 200))
-        (sleep 0.9)
+        (sleep 0.8)
         (change-speed! train current-speed)))
 
     ;; Procedure that will update the trains their trajectories
@@ -375,9 +433,6 @@
                                (not (null? cc)) ;; But it has a trajectory computed, then you have to start it
                                (attempt-reservation train cc);; Only if it's allowed
                                )
-                          (display "Displaying the full trajectory of the train: ")
-                          (display train-full-traj)
-                          (newline)
                           ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
                           (process-trajectory (first-traj cc))
                           (change-speed! train (* (determine-speed-sign train cc) 200)) ;; Determines direction implicitly
@@ -397,9 +452,9 @@
                           ((railway 'change-train-trajectory-state!) train '())
                           ((railway 'change-train-destination!) train #f)
                           (train-delay train)
-                          (hash-set! train-previous-speed train ((railway 'get-train-speed) train))
                           (change-speed! train 0)
-                          (free-reservation! train)
+                          ;(hash-set! train-previous-speed train ((railway 'get-train-speed) train))
+                          (free-reservation! train) ;; Free everything when arrived
                           )
                          ))
                      ))
@@ -408,42 +463,53 @@
     (define (determine-possible-next-tracks current-track)
       ((railway 'get-track-neighbour) current-track))
 
+    ;; Train delay to fully reach detection-block and then end it
+    (define (train-special-delay train)
+      (let ((current-speed ((railway 'get-train-speed) train)))
+        (change-speed! train (if (negative? current-speed) -200 200))
+        (sleep 1)
+        (change-speed! train 0)))
+
     ;; Procedure that will update the train positions
     (define (update-train-positions) 
       (hash-for-each trains-trajectory
                      (lambda (train-name data)
-                       (let* ((current-traj ((railway 'get-train-trajectory-state) train-name))
-                              (current-traj-no-switch  '()))
-                         (cond
-                           ((and current-traj (not (null? current-traj)))
-                            (set! current-traj-no-switch (filter (lambda (x)
-                                                                   (not (switch? x))) current-traj))
+                       (cond
+                         ((and (hash-has-key? train-full-traj train-name)
+                               (hash-ref train-full-traj train-name))
+                          (let ((current-traj-no-switch (filter (lambda (comp) (not (switch? comp))) (hash-ref train-full-traj train-name))))
                             (for-each
                              (lambda (DB)
                                (if ((railway 'get-detection-block-state) DB)
                                    ((railway 'change-train-track!) train-name DB)
                                    '()))
-                             current-traj-no-switch))
-                           (else 
-                            (let* ((current-track ((railway 'get-train-track) train-name))
-                                   (used-tracks (map (lambda (train)
-                                                       ((railway 'get-train-track) train))
-                                                     (hash-keys trains-trajectory)))
-                                   (possible-tracks (filter (lambda (track)
-                                                              (not (member track used-tracks)))
-                                                            (determine-possible-next-tracks current-track))))
-                              (for-each
-                               (lambda (track)
-                                 (if (and
-                                      (not ((railway 'get-detection-block-state) current-track))
-                                      ((railway 'get-detection-block-state) track))
+                             current-traj-no-switch)))                          
+                           
+                         ((and (hash-has-key? train-manual-movement train-name)
+                               (hash-ref train-manual-movement train-name))                            
+                          (let* ((current-track ((railway 'get-train-track) train-name))
+                                 (used-tracks (map (lambda (train)
+                                                     ((railway 'get-train-track) train))
+                                                   (hash-keys trains-trajectory)))
+                                 (possible-tracks (filter (lambda (track)
+                                                            (not (member track used-tracks)))
+                                                          (determine-possible-next-tracks current-track))))
+                            (for-each
+                             (lambda (track)
+                               (if (and
+                                    (not ((railway 'get-detection-block-state) current-track))
+                                    ((railway 'get-detection-block-state) track))
+                                   (begin
+                                     (if (> (- (abs ((railway 'get-train-speed) train-name)) train-input-treshold) 0) (hash-set! train-previous-speed train-name ((railway 'get-train-speed) train-name)) '())
+                                     ((railway 'change-train-track!) train-name track)
                                      (begin
-                                       ((railway 'detection-block-reserve!) current-track #f)
-                                       (if (> (- (abs ((railway 'get-train-speed) train-name)) 20) 0) (hash-set! train-previous-speed train-name ((railway 'get-train-speed) train-name)) '())
-                                       ((railway 'change-train-track!) train-name track)
+                                       (hash-set! train-manual-movement train-name #f)
+                                       (train-special-delay train-name)
+                                       (free-reservation-manual-movement! train-name)
                                        )
-                                     '()))
-                               possible-tracks))))
+                                     )
+                                   '()))
+                             possible-tracks)))
                          ))))
     
     (define (dispatch msg)

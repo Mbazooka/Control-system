@@ -182,7 +182,6 @@
 
     ;; Button to be added to the train-tab and it's logic
     (define (tab-name-generator) ;; Generates name for a tab
-      (train-counter 'increment!)
       (format "Train-~a" (train-counter 'get-value)))
 
     (define (add-train-button-logic! panel event) ;; Logic behind the button
@@ -190,9 +189,10 @@
             (initial-track-sel (string->symbol (send initial-track get-string-selection)))
             (track-behind-sel (string->symbol (send track-behind get-string-selection))))
         (if (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
+            (begin
             (send train-tab append name)
+            (train-counter 'increment!))
             '())
-        ;(hash-set! train-speed (string->symbol name) 0)
         (cond ((= (length (train-retrieve-cb)) 1) (show-current-train-elements!)))))
 
     (define add-train-button
