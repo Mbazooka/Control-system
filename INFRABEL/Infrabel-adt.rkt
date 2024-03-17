@@ -421,7 +421,7 @@
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
         (change-speed! train (if (negative? current-speed) -200 200))
-        (sleep 0.8)
+        (sleep 0.9)
         (change-speed! train current-speed)))
 
     ;; Procedure that will update the trains their trajectories
