@@ -156,7 +156,7 @@
 
     ;; dropdown menu to determine right place to put train
     (define initial-track (new choice%
-                               [label "Initial-track:"]
+                               [label "Current-track:"]
                                [parent train-panel]
                                [choices processed-db]))
 

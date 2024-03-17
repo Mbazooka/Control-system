@@ -9,7 +9,6 @@
          "./railway-components/detection-block-adt.rkt"
          "./railway-components/light-adt.rkt"
          "./railway-components/switch-adt.rkt"
-         "./railway-components/track-adt.rkt"
          "./railway-components/train-adt.rkt")
 
 (provide make-railway-adt)
