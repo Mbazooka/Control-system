@@ -26,7 +26,7 @@
 
     (setup-hardware HARDSIM-selection) ;; Setup the track
 
-    (start HARDSIM-selection) ;; To start the simulator
+    (start SIM-selected) ;; To start the simulator
 
     ;; Helper procedure
     (define (flatten-trajectory data)
@@ -400,9 +400,20 @@
                     ))
           (if bool
               (hash-set! train-full-traj train-name all-components-nec)
-              '())
+              free-reservation-after-failure!)
           bool)
         ))
+
+    ;; Procedure that will free reservations when failed
+    (define (free-reservation-after-failure! train-name)
+      (let* ((current-db ((railway 'get-train-track) train-name))
+             (detection-blocks (filter (lambda (comp) (or (not (switch? comp)) (eq? comp current-track))) (hash-ref train-full-traj train-name))))
+        (for-each
+         (lambda (track)
+           (if (eq? ((railway 'get-detection-block-reservation) track) train-name) ;; Leave reservations not of your own alone
+               ((railway 'detection-block-reserve!) track #f)
+               '()))
+         detection-blocks)))
 
     ;; Procedure that will free the previous reservations
     (define (free-reservation! train-name) ;; KEEP TRAJECTORY BEFORE AND THEN RELEASE IT EXCEPT LAST ELEMENT

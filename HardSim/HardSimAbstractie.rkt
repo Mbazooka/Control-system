@@ -23,7 +23,7 @@
     (else "HardSim: Incorrect selection")))
 
 (define (setup-hardware selection)
-  (pattern-abstraction selection SIM:setup-hardware (lambda (x) 1))) ;; Gives back one to indicate this procedure is just a dummy procedure that does nothing
+  (pattern-abstraction selection SIM:setup-hardware (lambda () 1))) ;; Gives back one to indicate this procedure is just a dummy procedure that does nothing
 
 (define (start selection)
   (pattern-abstraction selection SIM:start HARD:start))
