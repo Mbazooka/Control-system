@@ -407,7 +407,7 @@
     ;; Procedure that will free reservations when failed
     (define (free-reservation-after-failure! train-name)
       (let* ((current-db ((railway 'get-train-track) train-name))
-             (detection-blocks (filter (lambda (comp) (or (not (switch? comp)) (eq? comp current-track))) (hash-ref train-full-traj train-name))))
+             (detection-blocks (filter (lambda (comp) (or (not (switch? comp)) (eq? comp current-db))) (hash-ref train-full-traj train-name))))
         (for-each
          (lambda (track)
            (if (eq? ((railway 'get-detection-block-reservation) track) train-name) ;; Leave reservations not of your own alone
