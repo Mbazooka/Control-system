@@ -400,20 +400,22 @@
                     ))
           (if bool
               (hash-set! train-full-traj train-name all-components-nec)
-              free-reservation-after-failure!)
+              (free-reservation-after-failure! train-name detection-blocks))
           bool)
         ))
 
     ;; Procedure that will free reservations when failed
-    (define (free-reservation-after-failure! train-name)
-      (let* ((current-db ((railway 'get-train-track) train-name))
-             (detection-blocks (filter (lambda (comp) (or (not (switch? comp)) (eq? comp current-db))) (hash-ref train-full-traj train-name))))
+    (define (free-reservation-after-failure! train-name detection-blocks)
+      (let* ((train-bool (hash-ref trains-trajectory train-name ))
+             (current-db (if train-bool ((railway 'get-train-track) train-name) '9-9))) ;; Dummy DB
         (for-each
          (lambda (track)
            (if (eq? ((railway 'get-detection-block-reservation) track) train-name) ;; Leave reservations not of your own alone
                ((railway 'detection-block-reserve!) track #f)
                '()))
-         detection-blocks)))
+         (filter (lambda (comp) (not (eq? current-db comp))) detection-blocks))))
+
+    trains-trajectory
 
     ;; Procedure that will free the previous reservations
     (define (free-reservation! train-name) ;; KEEP TRAJECTORY BEFORE AND THEN RELEASE IT EXCEPT LAST ELEMENT
