@@ -78,34 +78,30 @@
                       train-make-cb train-retrieve-cb add-trajectory-cb
                       train-dest-cb train-current-cb train-behind-cb)
 
-  (define (make-choice-panel!)
-    (define choice-frame (new frame%
-                              [label "HardSim choice panel"]
-                              [width CHOICE-FRAME-HEIGHT]
-                              [height CHOICE-FRAME-HEIGHT]))
-
-    (send choice-frame show #t)
-
-    (define choice-panel (new vertical-panel%
-                              [parent choice-frame]
-                              ))
-
-    (define radio-choice (new radio-box%
-                              [label "Choose the medium:"]
-                              [parent choice-panel]
-                              [choices (list "Simulator" "Hardware")]
-                              [vert-margin 130]
-                              [horiz-margin 90]
-                              ))
-    
-
-    (define (dispatch msg)
-      "MAKE-CHOICE-PANEL!: Incorrect message")
-    dispatch)
-
-  (define test (make-choice-panel!))
-
-  (define (make-control-panel!)
+;  (define (make-choice-panel!)
+;    (define choice-frame (new frame%
+;                              [label "HardSim choice panel"]
+;                              [width CHOICE-FRAME-HEIGHT]
+;                              [height CHOICE-FRAME-HEIGHT]))
+;
+;    (send choice-frame show #t)
+;
+;    (define choice-panel (new vertical-panel%
+;                              [parent choice-frame]
+;                              ))
+;
+;    (define radio-choice (new radio-box%
+;                              [label "Choose the medium:"]
+;                              [parent choice-panel]
+;                              [choices (list "Simulator" "Hardware")]
+;                              [vert-margin 130]
+;                              [horiz-margin 90]
+;                              ))
+;    
+;
+;    (define (dispatch msg)
+;      "MAKE-CHOICE-PANEL!: Incorrect message")
+;    dispatch)
 
     ;; Used for the message placed on train tabs
     (define current-train-tab-message "Set train speed")
@@ -548,9 +544,7 @@
 
     (set! tab-drawing (draw-train-panel!))
 
-    (define (dispatch msg)
-      "MAKE-CONTROL-PANEL: Illegal message")
-    dispatch)
+
 
   (define (dispatch msg)
     "MAKE-GUI-ADT: Illegal message")

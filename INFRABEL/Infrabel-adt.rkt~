@@ -13,7 +13,7 @@
 ;; Abstraction to make the code more readable
 (define SIM-selected 0)
 (define HARD-selected 1)
-(define HARDSIM-selection HARD-selected)
+(define HARDSIM-selection SIM-selected)
 
 (define train-input-treshold 20)
 
