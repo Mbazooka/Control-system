@@ -6,9 +6,14 @@
 
 (require 
   "../RAILWAY-ADT/railway-adt.rkt"
-  "../simulator/interface.rkt")
+  "../HardSim/HardSimAbstractie.rkt")
 
 (provide make-infrabel-adt)
+
+;; Abstraction to make the code more readable
+(define SIM-selected 0)
+(define HARD-selected 1)
+(define HARDSIM-selection SIM-selected)
 
 (define train-input-treshold 20)
 
@@ -19,9 +24,9 @@
         (train-previous-speed (make-hash))
         (train-manual-movement (make-hash)))
 
-    (setup-hardware) ;; Setup the track
+    (setup-hardware HARDSIM-selection) ;; Setup the track
 
-    (start) ;; To start the simulator
+    (start HARDSIM-selection) ;; To start the simulator
 
     ;; Helper procedure
     (define (flatten-trajectory data)
@@ -45,7 +50,7 @@
     (define (add-train-HARDWARE! train-name initial-track initial-track-behind)
       (cond
         (((railway 'add-train!) train-name initial-track initial-track-behind)
-         (add-loco train-name initial-track-behind initial-track)
+         (add-loco HARDSIM-selection train-name initial-track-behind initial-track)
          ((railway 'detection-block-reserve!) initial-track train-name)
          (hash-set! train-previous-speed train-name 0)
          )))
@@ -54,32 +59,32 @@
     (define (set-speed-train-HARDWARE! train-name speed)
       (cond
         (((railway 'change-train-speed!) train-name speed)
-         (set-loco-speed! train-name speed))))
+         (set-loco-speed! HARDSIM-selection train-name speed))))
 
     ;; Changing the switch position to a given state
     (define (set-switch-position-HARDWARE! switch switch-position)
       (cond
         (((railway 'change-switch-state!) switch switch-position)
-         (set-switch-position! switch switch-position))))
+         (set-switch-position! HARDSIM-selection switch switch-position))))
 
     ;; Changing the barriers their state
     (define (set-barrier-state-HARDWARE! barrier barrier-state)
       (cond
         (((railway 'change-barrier-state!) barrier barrier-state)
          (if barrier-state
-             (open-crossing! barrier)
-             (close-crossing! barrier)))))
+             (open-crossing! HARDSIM-selection barrier)
+             (close-crossing! HARDSIM-selection barrier)))))
     
     ;; Changing the light their state
     (define (set-light-state-HARDWARE! light light-state)
       (cond
         (((railway 'change-light-state!) light light-state)
-         (set-sign-code! light light-state))))
+         (set-sign-code! HARDSIM-selection light light-state))))
     
     ;; Update the detection-blocks 
     (define (update-detection-blocks!)
-      (let ((db-oc-ids (get-occupied-detection-blocks)) ;; Occupied detection-block ids
-            (db-ids (get-detection-block-ids)))
+      (let ((db-oc-ids (get-occupied-detection-blocks HARDSIM-selection)) ;; Occupied detection-block ids
+            (db-ids (get-detection-block-ids HARDSIM-selection)))
         ((railway 'update-detection-blocks!) db-oc-ids db-ids (retrieve-DB-reservations))
         (cons db-oc-ids db-ids)))
 
@@ -524,7 +529,7 @@
         ((eq? msg 'update-trains!) update-trains!)
         ((eq? msg 'retrieve-all-trains) retrieve-all-trains)
         ((eq? msg 'update-detection-blocks!) update-detection-blocks!)
-        ((eq? msg 'retrieve-DB-reservations) retrieve-DB-reservations) ;; ADDED
+        ((eq? msg 'retrieve-DB-reservations) retrieve-DB-reservations) 
         (else
          "INFRABEL-ADT: Incorrect message")))
     dispatch))

@@ -75,6 +75,8 @@
                       db-retrieve-cb train-adjust-cb
                       train-make-cb train-retrieve-cb add-trajectory-cb
                       train-dest-cb train-current-cb train-behind-cb)
+  
+
 
   ;; Used for the message placed on train tabs
   (define current-train-tab-message "Set train speed")
@@ -283,8 +285,6 @@
         (else
          "DRAW-TRAIN-PANEL!: Illegal message")))
     dispatch)
-
-  (set! tab-drawing (draw-train-panel!))
 
   ;; Draws the switch tab of the mains tabs
   (define (draw-switch-panel!)
@@ -499,7 +499,7 @@
     (define (remove-blocks!) ;; Remove messages from the screen
       (send vertical-db-panel delete-child message-panel))
 
-    (define (draw-update-button!)
+    (define (draw-update-button!) 
       (new button%
            [label "Update"]
            [parent message-panel]
@@ -516,6 +516,8 @@
         (else
          "DRAW-DETECTION-BLOCK-PANEL!: Illegal message")))
     dispatch)
+
+    (set! tab-drawing (draw-train-panel!))
 
   (define (dispatch msg)
     "MAKE-GUI-ADT: Illegal message")
