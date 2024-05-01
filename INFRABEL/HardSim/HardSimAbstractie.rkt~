@@ -11,7 +11,7 @@
 (provide setup-hardware start stop get-loco-speed add-loco
          set-loco-speed! get-detection-block-ids
          get-occupied-detection-blocks get-switch-ids
-         get-switch-position set-switch-position!
+        get-switch-position set-switch-position!
          open-crossing! close-crossing! set-sign-code!)
 
 ;; Add hardware setup function

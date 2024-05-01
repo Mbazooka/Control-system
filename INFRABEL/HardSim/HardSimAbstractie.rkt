@@ -5,14 +5,21 @@
 #lang racket
 
 (require 
-    (prefix-in SIM: "./simulator/interface.rkt")
-    (prefix-in HARD: "./hardware-library/interface.rkt"))
+  (prefix-in SIM: "./simulator/interface.rkt")
+  (prefix-in HARD: "./hardware-library/interface.rkt"))
 
 (provide setup-hardware start stop get-loco-speed add-loco
          set-loco-speed! get-detection-block-ids
          get-occupied-detection-blocks get-switch-ids
          get-switch-position set-switch-position!
          open-crossing! close-crossing! set-sign-code!)
+
+;; Mapping physical trains to logical trains
+(define train-list '(T-3 T-5 T-7 T-9))
+(define train-mapping (make-hash))
+
+(define train-id car)
+(define update-train-list! (set! train-list (cdr train-list)))
 
 ;; Add hardware setup function
 
@@ -34,7 +41,14 @@
 (define (add-loco selection name initial behind)
   (pattern-abstraction selection
                        (lambda () (SIM:add-loco name initial behind))
-                       (lambda () (HARD:add-loco name initial behind))))
+                       (lambda ()
+                         (if (not (null? train-list))
+                             (begin
+                               (hash-set! train-mapping name (train-id train-list))
+                               (update-train-list!)
+                               (HARD:add-loco name initial behind))
+                             '()))
+                       ))
 
 (define (get-loco-speed selection train)
   (pattern-abstraction selection
