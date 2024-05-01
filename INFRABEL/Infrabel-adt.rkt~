@@ -13,7 +13,7 @@
 ;; Abstraction to make the code more readable
 (define SIM-selected 0)
 (define HARD-selected 1)
-(define HARDSIM-selection SIM-selected)
+(define HARDSIM-selection HARD-selected)
 
 (define train-input-treshold 20)
 
@@ -400,9 +400,22 @@
                     ))
           (if bool
               (hash-set! train-full-traj train-name all-components-nec)
-              '())
+              (free-reservation-after-failure! train-name detection-blocks))
           bool)
         ))
+
+    ;; Procedure that will free reservations when failed
+    (define (free-reservation-after-failure! train-name detection-blocks)
+      (let* ((train-bool (hash-ref trains-trajectory train-name ))
+             (current-db (if train-bool ((railway 'get-train-track) train-name) '9-9))) ;; Dummy DB
+        (for-each
+         (lambda (track)
+           (if (eq? ((railway 'get-detection-block-reservation) track) train-name) ;; Leave reservations not of your own alone
+               ((railway 'detection-block-reserve!) track #f)
+               '()))
+         (filter (lambda (comp) (not (eq? current-db comp))) detection-blocks))))
+
+    trains-trajectory
 
     ;; Procedure that will free the previous reservations
     (define (free-reservation! train-name) ;; KEEP TRAJECTORY BEFORE AND THEN RELEASE IT EXCEPT LAST ELEMENT

@@ -6,7 +6,7 @@
 
 (require 
   "../RAILWAY-ADT/railway-adt.rkt"
-  "../HardSim/HardSimAbstractie.rkt")
+  "./HardSim/HardSimAbstractie.rkt")
 
 (provide make-infrabel-adt)
 
