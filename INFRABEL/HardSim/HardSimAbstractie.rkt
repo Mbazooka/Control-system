@@ -15,11 +15,11 @@
          open-crossing! close-crossing! set-sign-code!)
 
 ;; Mapping physical trains to logical trains
-(define train-list '(T-3 T-5 T-7 T-9))
+(define train-list '(T-5 T-9 T-5 T-3))
 (define train-mapping (make-hash))
 
 (define train-id car)
-(define update-train-list! (set! train-list (cdr train-list)))
+(define (update-train-list!) (set! train-list (cdr train-list)))
 
 ;; Add hardware setup function
 
@@ -46,19 +46,19 @@
                              (begin
                                (hash-set! train-mapping name (train-id train-list))
                                (update-train-list!)
-                               (HARD:add-loco name initial behind))
+                               (HARD:add-loco (hash-ref train-mapping name) initial behind))
                              '()))
                        ))
 
 (define (get-loco-speed selection train)
   (pattern-abstraction selection
                        (lambda () (SIM:get-loco-speed train))
-                       (lambda () (HARD:get-loco-speed train))))
+                       (lambda () (HARD:get-loco-speed (hash-ref train-mapping train)))))
 
 (define (set-loco-speed! selection train speed)
   (pattern-abstraction selection
                        (lambda () (SIM:set-loco-speed! train speed))
-                       (lambda () (HARD:set-loco-speed! train speed))))
+                       (lambda () (HARD:set-loco-speed! (hash-ref train-mapping train) speed))))
 
 (define (get-detection-block-ids selection)
   (pattern-abstraction selection
