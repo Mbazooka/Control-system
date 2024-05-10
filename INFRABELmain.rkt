@@ -2,10 +2,10 @@
 
 (require (prefix-in infrabel: "./INFRABEL/Infrabel-adt.rkt"))
 
-(define the-listener (tcp-listen 9883 2 #t))
+(define the-listener (tcp-listen 29487 2 #t))
 (define-values (in out) (tcp-accept the-listener))
 (define end-connection #f)
-(display (read in))
+(displayln (read in))
 
 (define INFRABEL (infrabel:make-infrabel-adt))
 

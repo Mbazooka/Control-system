@@ -13,7 +13,15 @@
 ;; Abstraction to make the code more readable
 (define SIM-selected 0)
 (define HARD-selected 1)
-(define HARDSIM-selection SIM-selected)
+(define HARDSIM-selection HARD-selected)
+
+(define HARD-speed 30)
+(define SIM-speed 200)
+
+(define (determine-speed sign)
+  (cond
+    ((eq? HARDSIM-selection HARD-selected) (if sign HARD-speed (- HARD-speed)))
+    ((eq? HARDSIM-selection SIM-selected) (if sign SIM-speed (- SIM-speed)))))
 
 (define train-input-treshold 20)
 
@@ -438,7 +446,7 @@
     ;; Procedure to delay and make sure the train is fully on the detection-block
     (define (train-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
-        (change-speed! train (if (negative? current-speed) -200 200))
+        (change-speed! train (if (negative? current-speed) (determine-speed #f)  (determine-speed #t)))
         (sleep 0.9)
         (change-speed! train current-speed)))
 
@@ -453,13 +461,13 @@
                                )
                           ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
                           (process-trajectory (first-traj cc))
-                          (change-speed! train (* (determine-speed-sign train cc) 200)) ;; Determines direction implicitly
+                          (change-speed! train (* (determine-speed-sign train cc) (determine-speed #t))) ;; Determines direction implicitly
                           ((railway 'change-train-trajectory-state!) train (first-traj cc))
                           (hash-set! trains-trajectory train (rest-traj cc)))                              
                          ((and (not (null? cc)) ;; Something left to do
                                ((railway 'get-train-destination) train) ;; Already in process
                                ((railway 'get-detection-block-state) ((railway 'get-train-destination) train))) ;; Reached destination
-                          (train-delay train)
+                          (if (eq? HARDSIM-selection HARD-selected) '() (train-delay train))
                           ((railway 'change-train-destination!) train (get-destination (first-traj cc)))
                           (process-trajectory (first-traj cc))
                           (change-speed! train (* -1 ((railway 'get-train-speed) train)))
@@ -469,7 +477,7 @@
                                ((railway 'get-train-trajectory-state) train))
                           ((railway 'change-train-trajectory-state!) train '())
                           ((railway 'change-train-destination!) train #f)
-                          (train-delay train)
+                          (if (eq? HARDSIM-selection HARD-selected) '() (train-delay train))
                           (change-speed! train 0)
                           ;(hash-set! train-previous-speed train ((railway 'get-train-speed) train))
                           (free-reservation! train) ;; Free everything when arrived
@@ -484,7 +492,7 @@
     ;; Train delay to fully reach detection-block and then end it
     (define (train-special-delay train)
       (let ((current-speed ((railway 'get-train-speed) train)))
-        (change-speed! train (if (negative? current-speed) -200 200))
+        (change-speed! train (if (negative? current-speed) (determine-speed #f) (determine-speed #t)))
         (sleep 1)
         (change-speed! train 0)))
 
@@ -522,7 +530,7 @@
                                      ((railway 'change-train-track!) train-name track)
                                      (begin
                                        (hash-set! train-manual-movement train-name #f)
-                                       (train-special-delay train-name)
+                                       (if (eq? HARDSIM-selection HARD-selected) '() (train-special-delay train-name))
                                        (free-reservation-manual-movement! train-name)
                                        )
                                      )

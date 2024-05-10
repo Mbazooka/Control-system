@@ -3,7 +3,7 @@
 (require (prefix-in nmbs: "./NMBS/NMBS-adt.rkt"))
 
 ;; Message to confirm connection
-(define-values (in out) (tcp-connect "localhost" 9883))
+(define-values (in out) (tcp-connect "192.168.129.101" 29487))
 (define end-connection #f)
 (write "------Connection to client succesful------" out)
 (flush-output out)
