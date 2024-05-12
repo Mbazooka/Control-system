@@ -10,22 +10,9 @@
 
 (provide make-infrabel-adt)
 
-;; Abstraction to make the code more readable
-(define SIM-selected 0)
-(define HARD-selected 1)
-(define HARDSIM-selection SIM-selected)
-
-(define HARD-speed 30)
-(define SIM-speed 200)
-
-(define (determine-speed sign)
-  (cond
-    ((eq? HARDSIM-selection HARD-selected) (if sign HARD-speed (- HARD-speed)))
-    ((eq? HARDSIM-selection SIM-selected) (if sign SIM-speed (- SIM-speed)))))
-
 (define train-input-treshold 20)
 
-(define (make-infrabel-adt)
+(define (make-infrabel-adt HARDSIM-selection)
   (let ((railway (make-railway-adt))
         (trains-trajectory (make-hash))
         (train-full-traj (make-hash))
@@ -35,6 +22,18 @@
     (setup-hardware HARDSIM-selection) ;; Setup the track
 
     (start HARDSIM-selection) ;; To start the simulator
+
+    ;; Abstraction to make the code more readable
+    (define SIM-selected 0)
+    (define HARD-selected 1)
+
+    (define HARD-speed 30)
+    (define SIM-speed 200)
+
+    (define (determine-speed sign)
+      (cond
+        ((eq? HARDSIM-selection HARD-selected) (if sign HARD-speed (- HARD-speed)))
+        ((eq? HARDSIM-selection SIM-selected) (if sign SIM-speed (- SIM-speed)))))
 
     ;; Helper procedure
     (define (flatten-trajectory data)
@@ -184,14 +183,14 @@
            (if (and (hash-has-key? train-full-traj train-name)
                     (not (null? (hash-ref train-full-traj train-name)))) ;; Undergoing trajectory?
                '() ;; Cannot change speed (to ensure safety)
-                 (if (and (hash-has-key? train-manual-movement train-name) ;; Maybe undergoing manual movement
-                          (hash-ref train-manual-movement train-name))
-                     '()
-                     (if (and (> (abs speed) 5) (allow-train-manual-movement? train-name)) ;; Only when allowed can the train ride if there is attempt to make it ride
-                         (begin
-                           (change-speed! train-name speed)
-                           (hash-set! train-manual-movement train-name #t))                         
-                         '())))
+               (if (and (hash-has-key? train-manual-movement train-name) ;; Maybe undergoing manual movement
+                        (hash-ref train-manual-movement train-name))
+                   '()
+                   (if (and (> (abs speed) 5) (allow-train-manual-movement? train-name)) ;; Only when allowed can the train ride if there is attempt to make it ride
+                       (begin
+                         (change-speed! train-name speed)
+                         (hash-set! train-manual-movement train-name #t))                         
+                       '())))
            ))
        trains))
 

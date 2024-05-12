@@ -2,12 +2,25 @@
 
 (require (prefix-in infrabel: "./INFRABEL/Infrabel-adt.rkt"))
 
+(define SIM-selected 0)
+(define HARD-selected 1)
+
 (define the-listener (tcp-listen 29487 2 #t))
 (define-values (in out) (tcp-accept the-listener))
 (define end-connection #f)
 (displayln (read in))
 
-(define INFRABEL (infrabel:make-infrabel-adt))
+;; Processes whether it is hardware or simulator
+(define (hard-sim arg)
+  (let ((CL-arg (vector-ref arg 0)))
+    (cond
+      ((string=? CL-arg "hardware") HARD-selected)
+      ((string=? CL-arg "simulator") SIM-selected)
+      (else
+       (displayln "Incorrect selection -- end everything")
+       (exit)))))
+
+(define INFRABEL (infrabel:make-infrabel-adt (hard-sim (read in))))
 
 (define (close-server)
   (tcp-close the-listener)
@@ -47,6 +60,7 @@
   (flush-output out)
   (sleep 0.01))
 
+;; Main loop that updates everything as should be
 (define (INFRABEL-main-loop)
   (INFRABEL-update-components!)
   (INFRABEL-update-trains!)

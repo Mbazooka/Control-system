@@ -7,6 +7,8 @@
 (require racket/gui/base)
 (provide make-gui-adt) ;; API of GUI
 
+(define max-train-amount 3)
+
 ;; Counter class
 (define (make-counter)
   (let ((ctr 0)) ;; Actual counter
@@ -215,7 +217,8 @@
         (let ((name (tab-name-generator))
               (initial-track-sel (string->symbol (send initial-track get-string-selection)))
               (track-behind-sel (string->symbol (send track-behind get-string-selection))))
-          (if (train-make-cb (string->symbol name) initial-track-sel track-behind-sel)
+          (if (and (<= (train-counter 'get-value) max-train-amount)
+                   (train-make-cb (string->symbol name) initial-track-sel track-behind-sel))                  
               (begin
                 (send train-tab append name)
                 (train-counter 'increment!))

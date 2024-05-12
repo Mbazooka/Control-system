@@ -9,6 +9,7 @@
 
 (provide make-nmbs-adt)
 
+(define HARDSIM-selection '())
 
 (define (make-nmbs-adt)
   (let ((railway (make-railway-adt))

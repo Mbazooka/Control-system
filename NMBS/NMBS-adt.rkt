@@ -11,7 +11,7 @@
 
 (define HARDSIM-selection '())
 
-(define (make-nmbs-adt)
+(define (make-nmbs-adt CL-arg)
   (let ((railway (make-railway-adt))
         (trains-trajectory (make-hash))
         (new-trajectories (make-hash))
@@ -204,13 +204,15 @@
 
     (define retrieve-train-current-behind (retrieve-train-abstraction 'get-train-track-behind))
 
+    (define (retrieve-CL-arg) CL-arg)
+
     (set! gui (make-gui-adt update-switch! retrieve-all-switches
                             update-barrier! retrieve-all-barriers
                             update-light! retrieve-all-lights
                             retrieve-all-detection-blocks update-train!
                             apply-train! retrieve-all-trains add-trajectory!
                             retrieve-train-destination retrieve-train-current-position
-                            retrieve-train-current-behind)) 
+                            retrieve-train-current-behind retrieve-CL-arg)) 
       
     (define (dispatch msg)
       (cond
