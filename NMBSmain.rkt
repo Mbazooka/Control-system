@@ -3,7 +3,7 @@
 (require (prefix-in nmbs: "./NMBS/NMBS-adt.rkt"))
 
 ;; Message to confirm connection
-(define-values (in out) (tcp-connect "Mathiss-MacBook-Air-2.local" 29487))
+(define-values (in out) (tcp-connect "169.254.194.172" 29487))
 (define end-connection #f)
 (write "------Connection to client succesful------" out)
 (flush-output out)
