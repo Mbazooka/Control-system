@@ -26,7 +26,7 @@
 (define SCREEN-WIDTH 3000) 
 (define SCREEN-HEIGHT 1800)
 
-(define DESIRED-MAX-FPS 25) ;; Lower this value to get less CPU usage
+(define DESIRED-MAX-FPS 10) ;; Lower this value to get less CPU usage
 
 (define (draw-all-segments)
   (send the-railway draw-all-segments WINDOW 'segments))

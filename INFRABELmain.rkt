@@ -62,7 +62,6 @@
 
 ;; Main loop that updates everything as should be
 (define (INFRABEL-main-loop)
-  (display "Start here")
   (INFRABEL-update-components!)
   (INFRABEL-update-trains!)
   (INFRABEL-output-detection-blocks) ;; Works till here
@@ -73,7 +72,6 @@
   (INFRABEL-output-updated-switches)
   (INFRABEL-update-trains!)
   (sleep 0.5)
-  (display "Is it ending here?")
   (if end-connection (close-server) (INFRABEL-main-loop)))
 
 (thread INFRABEL-main-loop)
