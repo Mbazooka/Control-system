@@ -3,12 +3,10 @@
 (require (prefix-in nmbs: "./NMBS/NMBS-adt.rkt"))
 
 ;; Message to confirm connection
-(define-values (in out) (tcp-connect "Mathiss-MacBook-Air-2.local" 29487))
+(define-values (in out) (tcp-connect "Mathiss-MacBook-Air-2.local" 29488))
 (define end-connection #f)
 (write "------Connection to client succesful------" out)
 (flush-output out)
-
-;; INSERT HERE, PROCESS COMMAND LINE FOR GUI
 
 ;; To process command line arguments
 (define (process-cl)

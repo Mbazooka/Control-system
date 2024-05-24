@@ -15,7 +15,7 @@
          open-crossing! close-crossing! set-sign-code!)
 
 ;; Mapping physical trains to logical trains
-(define train-list '(T-5 T-9 T-5 T-3))
+(define train-list '(T-5 T-7 T-3 T-9))
 (define train-mapping (make-hash))
 
 (define train-id car)

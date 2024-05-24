@@ -5,8 +5,8 @@
 (define SIM-selected 0)
 (define HARD-selected 1)
 
-(define the-listener (tcp-listen 29487 2 #t))
-(define-values (in out) (tcp-accept the-listener))
+(define the-listener (tcp-listen 29488 2 #t))
+(define-values (in out)  (tcp-accept the-listener))
 (define end-connection #f)
 (displayln (read in))
 
@@ -62,6 +62,7 @@
 
 ;; Main loop that updates everything as should be
 (define (INFRABEL-main-loop)
+  (display "Start here")
   (INFRABEL-update-components!)
   (INFRABEL-update-trains!)
   (INFRABEL-output-detection-blocks) ;; Works till here
@@ -72,6 +73,7 @@
   (INFRABEL-output-updated-switches)
   (INFRABEL-update-trains!)
   (sleep 0.5)
+  (display "Is it ending here?")
   (if end-connection (close-server) (INFRABEL-main-loop)))
 
 (thread INFRABEL-main-loop)
